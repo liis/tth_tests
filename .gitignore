@@ -1,0 +1,16 @@
+*.pyc
+*~
+*#
+*.out
+*.pdf
+*.png
+*.root
+*__init__.py
+
+control_plots/out_stackplots/DL/*
+control_plots/out_stackplots/SL/*
+control_plots/test_trees/*
+control_plots/.*
+control_plots/*.pyc
+control_plots/*#
+control_plots/*~
