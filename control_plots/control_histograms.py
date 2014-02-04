@@ -1,15 +1,18 @@
 import ROOT, sys
 
 from tree_inputs import input_files
-from trlib import initialize_tree, var_list, pass_trigger_selection, pass_lepton_selection, pass_jet_selection
-from histlib import hist_variables, initialize_histograms, write_histograms_to_file
+from trlib import initialize_tree, var_list, pass_trigger_selection, pass_lepton_selection, pass_jet_selection, bjet_presel
+from histlib import hist_variables, initialize_histograms, fill_1D_histograms, fill_lepton_histograms, fill_jet_histograms, write_histograms_to_file
 
 import argparse
 parser = argparse.ArgumentParser()
 parser.add_argument('--mode', dest='DL_or_SL',  choices=["DL", "SL"], required=True, help="specify DL or SL analysis")
 parser.add_argument('--testRun', dest='is_test_run', action="store_true", default=False, required=False)
+parser.add_argument('--sel', dest="sel", choices=["pre","pre_2b"], default=False, required=False)
 args = parser.parse_args()
 mode = args.DL_or_SL
+
+
 
 if args.DL_or_SL == "DL":
     print "Starting dilepton analysis"
@@ -23,13 +26,12 @@ if args.DL_or_SL == "SL":
 f_all = {}
 t_all_mc = {}
 for sample in input_files:
-    if mode == "DL" and (sample[:6] == "single"):
-        continue
-    if mode == "SL" and (sample[:2] == "di"):
-        continue
+    if mode == "DL" and (sample[:6] == "single"): continue
+    if mode == "SL" and (sample[:2] == "di"): continue
     print "Opening sample: " + sample
     f_all[sample] = ROOT.TFile(indir + input_files[sample])
     t_all_mc[sample] = f_all[sample].Get("tree")
+            
 
 #f_all_data = {}
 #t_all_data = {}
@@ -48,8 +50,15 @@ else:
 hists = {} #histograms for each sample and variable
 for proc, tree in t_all_mc.iteritems():
     print "Processing: " + proc + " tree with " + str(tree.GetEntries()) + "events"
-    
+
+    isTTjets = False
     hists[proc] = initialize_histograms(proc, hist_variables) # dictionary of initialized histograms for each sample
+
+    if proc == "TTJets": # initialize extra histograms for ttJets, separating by gen level decay
+        isTTjets = True
+        for sub_proc in ["ttbb", "ttb", "ttjj"]:
+            hists[sub_proc] = initialize_histograms(sub_proc, hist_variables)
+    
     vd = initialize_tree(tree, var_list) # dictionary of variables
 
     nr_tot, nr_pass_lep, nr_is_lep, nr_pass_jet, nr_pass_trigger = 0, 0, 0, 0, 0
@@ -76,7 +85,7 @@ for proc, tree in t_all_mc.iteritems():
         if proc[-7:] == "El_data" and not( pass_trigger_selection(vd, mode, "el") ): continue
         nr_pass_trigger+=weight
 
-        if vd["nLep"][0] < 1:continue
+        if vd["nLep"][0] < 1: continue
         nr_is_lep+=weight
 
         sel_lep = pass_lepton_selection(vd, mode)
@@ -87,29 +96,22 @@ for proc, tree in t_all_mc.iteritems():
         if len(sel_jet) == 0: continue
         nr_pass_jet+=weight
 
-        hists[proc]["MET_pt"].Fill(vd["MET_pt"][0], weight)
-        hists[proc]["lepton_pt"].Fill(vd["lepton_pt"][0], weight)
- 
-        hists[proc]["MET_phi"].Fill(vd["MET_phi"][0], weight)
-        hists[proc]["jet_pt"].Fill(vd["jet_pt"][ sel_jet[0] ], weight)
-#        hists[proc]["numJets"].Fill( len(sel_jet), weight)
-        hists[proc]["numJets"].Fill( vd["numJets"][0], weight)
+        bjets_m = bjet_presel(vd, jet_list = sel_jet, WP = "M")
 
-        hists[proc]["btag_LR"].Fill(vd["btag_LR"][ sel_jet[0] ], weight)
-        
-        hists[proc]["numBTagL"].Fill(vd["numBTagL"][0], weight)
-        hists[proc]["numBTagM"].Fill(vd["numBTagM"][0], weight)
-        hists[proc]["numBTagT"].Fill(vd["numBTagT"][0], weight)
-        hists[proc]["nPVs"].Fill(vd["nPVs"][0], weight)
+#        fill_1D_histograms( vd, hists, proc, weight, mode )
+#        fill_lepton_histograms( vd, hists, proc, weight, mode, sel_lep )
+#        fill_jet_histograms(vd, hists, proc, weight, mode, sel_jet)
+#        hists[proc]["numBTagM_sel"].Fill(len(bjets_m), weight)
+#        hists[proc]["numJets_sel"].Fill(len(sel_jet), weight)
 
-        if vd["lepton_type"][sel_lep[0]] == 13 :
-            hists[proc]["muon_pt"].Fill(vd["lepton_pt"][sel_lep[0]], weight)
-            hists[proc]["muon_eta"].Fill(vd["lepton_eta"][sel_lep[0]], weight)
-            hists[proc]["muon_rIso"].Fill(vd["lepton_rIso"][sel_lep[0]], weight)
-        else: 
-            hists[proc]["electron_pt"].Fill(vd["lepton_pt"][sel_lep[0]], weight)
-            hists[proc]["electron_eta"].Fill(vd["lepton_eta"][sel_lep[0]], weight)
-            hists[proc]["electron_rIso"].Fill(vd["lepton_rIso"][sel_lep[0]], weight)
+        if len(bjets_m) < 2: continue
+
+        fill_1D_histograms( vd, hists, proc, weight, mode, isTTjets )
+        fill_lepton_histograms( vd, hists, proc, weight, mode, sel_lep, isTTjets)
+        fill_jet_histograms(vd, hists, proc, weight, mode, sel_jet, isTTjets)
+        hists[proc]["numBTagM_sel"].Fill(len(bjets_m), weight)
+        hists[proc]["numJets_sel"].Fill(len(sel_jet), weight)
+
         #---------------------------------------
 
     print "Nr tot = "+ str(nr_tot)
@@ -119,7 +121,10 @@ for proc, tree in t_all_mc.iteritems():
     print "Nr jet sel = " + str(nr_pass_jet)
 
 
-outfilename = "histograms_" + mode + ".root"
+sel = "presel_2b_"
+outfilename = "histograms_" + sel + mode + ".root"
+print "Write output to file: " + outfilename 
+
 write_histograms_to_file(outfilename, hists)
 
         

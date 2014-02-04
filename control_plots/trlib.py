@@ -3,12 +3,12 @@ from array import array
 import numpy as np
 
 lepton_vars_f = ["lepton_pt", "lepton_eta", "lepton_rIso", "lepton_charge"]
-jet_vars_f = ["jet_pt", "jet_eta", "btag_LR", "jet_csv"]
+jet_vars_f = ["jet_pt", "jet_eta", "jet_csv"]
 
 #----------------separate by type---------------------
-int_list = ["nLep", "numJets", "numBTagL", "numBTagM", "numBTagT", "nPVs"]
+int_list = ["nLep", "numJets", "numBTagL", "numBTagM", "numBTagT", "nPVs", "nSimBs", "nMatchSimBs"]
 int_array_list = ["lepton_type"]
-float_list = ["weight", "trigger", "PUweight", "MET_pt", "MET_phi"] 
+float_list = ["weight", "trigger", "PUweight", "MET_pt", "MET_phi", "btag_LR"] 
 float_array_list = lepton_vars_f  + jet_vars_f #lepton_vars_d + jet_vars_d
 trigger = ["triggerFlags"]
 
@@ -92,10 +92,6 @@ def pass_lepton_selection( vd, mode ):
             pass_lep_sel = True
 
     if mode == "DL" and n_lep > 1:
-#        lep_eta_1 = abs(vd["lepton_eta"][0])
-#        lep_eta_2 = abs(vd["lepton_eta"][1])
-#        lep_pt_1 = vd["lepton_pt"][0]
-#        lep_pt_2 = vd["lepton_pt"][1]
                    
         for ilep in range(n_lep):
             lep_eta = abs(vd["lepton_eta"][ilep])
@@ -108,10 +104,11 @@ def pass_lepton_selection( vd, mode ):
                 if abs( vd["lepton_type"][ilep] == 11 and lep_eta < 2.5 and (lep_eta < 1.442 or lep_eta > 1.566) ): # if electron
                     passlist.append(ilep)
 
+        
         if len(passlist) == 2 and vd["lepton_charge"][passlist[0]]*vd["lepton_charge"][passlist[1]] < 0:
-            if vd["lepton_pt"][0] > 20 and vd["lepton_rIso"][0] < 0.1:
+            if vd["lepton_pt"][passlist[0] ] > 20 and vd["lepton_rIso"][ passlist[0] ] < 0.1:
                 pass_lep_sel = True
-            elif vd["lepton_pt"][1] > 20 and vd["lepton_rIso"][1] < 0.1:
+            elif vd["lepton_pt"][ passlist[1] ] > 20 and vd["lepton_rIso"][ passlist[1] ] < 0.1:
                 passlist = passlist[::-1] #reverse order
                 pass_lep_sel = True
             
@@ -134,19 +131,34 @@ def pass_jet_selection(vd, mode ):
         if( jet_pt > 40 and jet_eta < 2.5):
             passlist_tight.append(ijet)
         
-        elif( jet_pt > 30 ):
+        elif( jet_pt > 30 and jet_eta < 2.5):
             passlist_loose.append(ijet)
 
-#    if mode == "SL" and len(passlist_tight) > 3 and len(passlist_tight) + len(passlist_loose) > 4 and len(passlist_tight) + len(passlist_loose) < 8:
-    if mode == "SL" and len(passlist_tight) > 3:
-       return passlist_tight #+ passlist_loose
-#    elif mode== "DL" and len(passlist_tight) > 2 and len(passlist_tight) + len(passlist_loose) > 3 and len(passlist_tight) + len(passlist_loose) < 5:
-    if mode == "DL" and len(passlist_tight) > 3:
-        return passlist_tight #+ passlist_loose
+    #if mode == "SL" and len(passlist_tight) > 3:
+    if mode == "SL" and len(passlist_tight) > 3 and len(passlist_tight) + len(passlist_loose) > 4:
+       return passlist_tight + passlist_loose
+    elif mode== "DL" and len(passlist_tight) > 3 and len(passlist_tight) + len(passlist_loose) > 3:
+        return passlist_tight + passlist_loose
         
 
     else:
         return []
 
-    
+def bjet_presel(vd, jet_list = [], WP = "M" ):
+    """
+    jet_list -- default value is all jets in the event, modify to selected list, if preselection has been applied
+    wp -- L, T, M (loose, tight, medium)
+    """
+    if len(jet_list) == 0:
+        jet_list = range(vd["numJets"][0]) # consider all jets in the event
+
+    passlist = []
+    for ijet in jet_list:
+        if WP == "M" and vd["jet_csv"][ijet] > 0.679:
+            passlist.append(ijet)
+
+
+    return passlist
+
+
 
