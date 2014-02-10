@@ -20,29 +20,9 @@ hist_variables = {
     "trail_muon_pt": (50, 0, 250),
     "trail_muon_eta":(50, -2.5, 2.5),
 
-    "lead_jet0_pt": (50, 0, 250),
-    "lead_jet0_eta": (50, -3, 3),
-    "lead_jet0_phi": (50, -3.15, 3.15),
-
-    "lead_jet1_pt": (50, 0, 250),
-    "lead_jet1_eta": (50, -3, 3),
-    "lead_jet1_phi": (50, -3.15, 3.15),
-
-    "lead_jet2_pt": (50, 0, 250),
-    "lead_jet2_eta": (50, -3, 3),
-    "lead_jet2_phi": (50, -3.15, 3.15),
-
-    "lead_jet3_pt": (50, 0, 250),
-    "lead_jet3_eta": (50, -3, 3),
-    "lead_jet3_phi": (50, -3.15, 3.15),
-
-    "lead_jet4_pt": (50, 0, 250),
-    "lead_jet4_eta": (50, -3, 3),
-    "lead_jet4_phi": (50, -3.15, 3.15),
-
-    "lead_jet5_pt": (50, 0, 250),
-    "lead_jet5_eta": (50, -3, 3),
-    "lead_jet5_phi": (50, -3.15, 3.15),
+    "lead_jet_pt": (50, 0, 250),
+    "lead_jet_eta": (50, -3, 3),
+    "lead_jet_phi": (50, -3.15, 3.15),
 
     "jet_pt": (50, 0, 250),
     "jet_eta": (200, -3, 3),
@@ -81,29 +61,9 @@ map_hist_variables = { # if histogram name is different from the tree entry name
     "trail_muon_eta": "lepton_eta",
     "trail_muon_rIso": "lepton_rIso",
 
-    "lead_jet0_pt": "jet_pt",
-    "lead_jet0_eta": "jet_eta",
-    "lead_jet0_phi": "jet_phi",
-
-    "lead_jet1_pt": "jet_pt",
-    "lead_jet1_eta": "jet_eta",
-    "lead_jet1_phi": "jet_phi",
-
-    "lead_jet2_pt": "jet_pt",
-    "lead_jet2_eta": "jet_eta",
-    "lead_jet2_phi": "jet_phi",
-
-    "lead_jet3_pt": "jet_pt",
-    "lead_jet3_eta": "jet_eta",
-    "lead_jet3_phi": "jet_phi",
-
-    "lead_jet4_pt": "jet_pt",
-    "lead_jet4_eta": "jet_eta",
-    "lead_jet4_phi": "jet_phi",
-
-    "lead_jet5_pt": "jet_pt",
-    "lead_jet5_eta": "jet_eta",
-    "lead_jet5_phi": "jet_phi",
+    "lead_jet_pt": "jet_pt",
+    "lead_jet_eta": "jet_eta",
+    "lead_jet_phi": "jet_phi",
 
     "numBTagM_sel": "numBTagM",
     "numJets_sel": "numJets"
@@ -136,29 +96,9 @@ variable_names = {"MET_pt": "MET",
                   "jet_eta": "jet #eta",
                   "jet_phi": "jet #phi",
 
-                  "lead_jet0_pt": "leading jet p_{T}",
-                  "lead_jet0_eta": "leading jet #eta",
-                  "lead_jet0_phi": "leading jet #phi",
-
-                  "lead_jet1_pt": "leading jet p_{T}",
-                  "lead_jet1_eta": "leading jet #eta",
-                  "lead_jet1_phi": "leading jet #phi",
-
-                  "lead_jet2_pt": "leading jet p_{T}",
-                  "lead_jet2_eta": "leading jet #eta",
-                  "lead_jet2_phi": "leading jet #phi",
-
-                  "lead_jet3_pt": "leading jet p_{T}",
-                  "lead_jet3_eta": "leading jet #eta",
-                  "lead_jet3_phi": "leading jet #phi",
-
-                  "lead_jet4_pt": "leading jet p_{T}",
-                  "lead_jet4_eta": "leading jet #eta",
-                  "lead_jet4_phi": "leading jet #phi",
-
-                  "lead_jet5_pt": "leading jet p_{T}",
-                  "lead_jet5_eta": "leading jet #eta",
-                  "lead_jet5_phi": "leading jet #phi",
+                  "lead_jet_pt": "leading jet p_{T}",
+                  "lead_jet_eta": "leading jet #eta",
+                  "lead_jet_phi": "leading jet #phi",
 
                   "numJets": "Number of jets",
                   "numJets_sel": "Number of sel. jets",
@@ -230,10 +170,12 @@ def fill_ttjets_histograms( vd, hists, varname, var, weight ):
 def fill_1D_histograms( vd, hists, sample, weight, mode, isTTjets = False):
     
     for var in hists[sample]: # loop over dictionary of histograms for a specific datasample
-        try: var_size = len(vd[var])
+        try:
+            var_tree = var
+            var_size = len(vd[var])
         except KeyError:
             var_tree = map_hist_variables[var]
-            var_size = len(vd[var])
+            var_size = len(vd[var_tree])
             
         if var_size == 1:
             hists[sample][var].Fill(vd[var_tree][0], weight)
@@ -265,46 +207,18 @@ def fill_jet_histograms(vd, hists, sample, weight, mode, jet_list = [], isTTjets
     hists[sample]["numJets"].Fill( vd["numJets"][0], weight )
     if isTTjets: fill_ttjets_histograms(vd, hists, "numJets", vd["numJets"][0], weight)
     
-    if( len(jet_list) == 6 ):
-        hists[sample]["numJets_sel"].Fill( len(jet_list), weight )
-        if isTTjets: fill_ttjets_histograms(vd, hists, "numJets_sel", len(jet_list), weight)
+    hists[sample]["numJets_sel"].Fill( len(jet_list), weight )
+    if isTTjets: fill_ttjets_histograms(vd, hists, "numJets_sel", len(jet_list), weight)
 
-        for var in hists[sample]:
-            if re.search("lead_jet0", var):
-                var_tree = map_hist_variables[var]
-                hists[sample][var].Fill( vd[var_tree][0], weight)
-                if isTTjets: fill_ttjets_histograms(vd, hists, var, vd[var_tree][0], weight)
+    for var in hists[sample]:
+        if re.search("lead_jet", var):
+            var_tree = map_hist_variables[var]
+            hists[sample][var].Fill( vd[var_tree][2], weight) # pick leading jet after lepton [0] and MET [1]
+            if isTTjets: fill_ttjets_histograms(vd, hists, var, vd[var_tree][2], weight)
 
-            if re.search("lead_jet1", var):
-                var_tree = map_hist_variables[var]
-                hists[sample][var].Fill( vd[var_tree][1], weight)
-                if isTTjets: fill_ttjets_histograms(vd, hists, var, vd[var_tree][1], weight)
-
-            if re.search("lead_jet2", var):
-                var_tree = map_hist_variables[var]
-                hists[sample][var].Fill( vd[var_tree][2], weight)
-                if isTTjets: fill_ttjets_histograms(vd, hists, var, vd[var_tree][2], weight)
-
-            if re.search("lead_jet3", var):
-                var_tree = map_hist_variables[var]
-                hists[sample][var].Fill( vd[var_tree][3], weight)
-                if isTTjets: fill_ttjets_histograms(vd, hists, var, vd[var_tree][3], weight)
-
-            if re.search("lead_jet4", var):
-                var_tree = map_hist_variables[var]
-                hists[sample][var].Fill( vd[var_tree][4], weight)
-                if isTTjets: fill_ttjets_histograms(vd, hists, var, vd[var_tree][4], weight)
-
-            if re.search("lead_jet5", var):
-                var_tree = map_hist_variables[var]
-                hists[sample][var].Fill( vd[var_tree][5], weight)
-                if isTTjets: fill_ttjets_histograms(vd, hists, var, vd[var_tree][5], weight)
-
-            elif( re.search("jet_", var) ):
-#                for ijet in jet_list:
-                for ijet in range(vd["numJets"][0]):
-                    #                if vd["jet_eta"][ijet] > -0.05 and vd["jet_eta"][ijet] < 0.05:
-                    hists[sample][var].Fill( vd[var][ijet], weight)
-                    if isTTjets: fill_ttjets_histograms(vd, hists, var, vd[var][ijet], weight)
+          #  elif( re.search("jet_", var) ):
+          #      for ijet in jet_list:
+          #          hists[sample][var].Fill( vd[var][ijet], weight)
+          #          if isTTjets: fill_ttjets_histograms(vd, hists, var, vd[var][ijet], weight)
 
     

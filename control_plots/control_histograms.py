@@ -12,34 +12,23 @@ parser.add_argument('--sel', dest="sel", choices=["pre","pre_2b"], default=False
 args = parser.parse_args()
 mode = args.DL_or_SL
 
-
-
 if args.DL_or_SL == "DL":
     print "Starting dilepton analysis"
-    indir = "test_trees/DL_trees/"
 
 if args.DL_or_SL == "SL":
     print "Starting single lepton analysis"
-    indir = "test_trees/SL_trees/"
 
+indir = "test_trees/trees_2014_02_09_0-0-1_rec_reg/"
 
 f_all = {}
-t_all_mc = {}
+t_all = {}
 for sample in input_files:
     if mode == "DL" and (sample[:6] == "single"): continue
     if mode == "SL" and (sample[:2] == "di"): continue
     print "Opening sample: " + sample
     f_all[sample] = ROOT.TFile(indir + input_files[sample])
-    t_all_mc[sample] = f_all[sample].Get("tree")
+    t_all[sample] = f_all[sample].Get("tree")
             
-
-#f_all_data = {}
-#t_all_data = {}
-#for datasample in input_files_data:
-#    print "Opening data sample: " + datasample
-#    f_all_data[datasample] = ROOT.TFile(indir + input_files_data[datasample])
-#    t_all_data[datasample] = f_all_data[datasample].Get("tree")
-
 
 report_every = 100000
 if args.is_test_run:
@@ -49,7 +38,7 @@ else:
 
 hists = {} #histograms for each sample and variable
 cut_flow = {}
-for proc, tree in t_all_mc.iteritems():
+for proc, tree in t_all.iteritems():
     print "Processing: " + proc + " tree with " + str(tree.GetEntries()) + "events"
 
     isTTjets = False
@@ -78,77 +67,99 @@ for proc, tree in t_all_mc.iteritems():
         if proc[-4:] == "data":
             weight = 1
         else:
-            weight = ev_weight*pu_weight*19/12*tr_weight
+            weight = ev_weight*pu_weight*19/12 #*tr_weight
 
         #-------------select events---------------
         
-        event_count(0, cut_flow, proc, weight, vd)
+        event_count(0, cut_flow, proc, weight, vd) # cut-flow: all evts
 
         if proc[-7:] == "Mu_data" and not( pass_trigger_selection(vd, mode, "mu") ): continue
         if proc[-7:] == "El_data" and not( pass_trigger_selection(vd, mode, "el") ): continue
-        event_count(1, cut_flow, proc, weight, vd)
+
+        event_count(1, cut_flow, proc, weight, vd) # cut_flow: apply trigger for data
 
         sel_lep = pass_lepton_selection(vd, mode) # count the number of good electrons and apply preselection
-        sel_jet = pass_jet_selection(vd, mode) # count the number of good jets and apply preselection
-        bjets_m = bjet_presel(vd, jet_list = sel_jet, WP = "M") # count the number of b-jets CSV medium
 
-        if len(sel_lep) == 0: continue
-        event_count(2, cut_flow, proc, weight, vd)
-
-        if len(sel_jet) == 0: continue
-        event_count(3, cut_flow, proc, weight, vd)
-
- #       if( vd["jet_eta"][sel_jet[0]] < 0.01 and  vd["jet_eta"][sel_jet[0]] > -0.01 ):
- #           print "jet pt = " + str(vd["jet_pt"][sel_jet[0]]) + ", jet phi = " + str(vd["jet_phi"][sel_jet[0]]) + ", jet eta = " + str(vd["jet_eta"][sel_jet[0]])
-
-        if len(sel_jet) >= 6 and len(bjets_m) >= 2: # SL preselection
-            event_count(4, cut_flow, proc, weight, vd)
-        else: continue
-        
-        if len(sel_jet) >= 6 and len(bjets_m) >= 4: # an SL type0, type1
-            event_count(5, cut_flow, proc, weight, vd)
-#        else: continue
-
-        if vd["flag_type0"][0] >= 0:
-            event_count(6, cut_flow, proc, weight, vd)
-
-#        if len(sel_jet) > 6 and len(bjets_m) == 4: # an SL type3
-#            event_count(6, cut_flow, proc, weight, vd)
-
- #       if len(sel_jet) ==5 and len(bjets_m) == 4: #an type2
- #           event_count(7, cut_flow, proc, weight, vd)
+        if len(sel_lep) == 0: continue 
+        event_count(2, cut_flow, proc, weight, vd) # cut_flow: require one lepton
 
 
-  #      fill_1D_histograms( vd, hists, proc, weight, mode, isTTjets )
-  #      fill_lepton_histograms( vd, hists, proc, weight, mode, sel_lep, isTTjets)
-        fill_jet_histograms(vd, hists, proc, weight, mode, sel_jet, isTTjets)
-  #      hists[proc]["numBTagM_sel"].Fill(len(bjets_m), weight)
-  #      hists[proc]["numJets_sel"].Fill(len(sel_jet), weight)
+        if vd["numJets"][0] >= 6 and vd["numBTagM"][0] == 2:
+            event_count(3, cut_flow, proc, weight, vd) # cut_flow: Category 1 ttH
+            
+            fill_1D_histograms( vd, hists, proc, weight, mode, isTTjets )
+            fill_lepton_histograms( vd, hists, proc, weight, mode, sel_lep, isTTjets)
+            fill_jet_histograms(vd, hists, proc, weight, mode, isTTjets = isTTjets)                         
 
-        #---------------------------------------
 
-    
+        if vd["numJets"][0] == 4  and vd["numBTagM"][0] == 3:
+            event_count(4, cut_flow, proc,weight, vd)
 
-    #------ Fill cut flow histogram---------
+        if vd["numJets"][0] == 5 and vd["numBTagM"][0] == 3:
+            event_count(5, cut_flow, proc,weight, vd)
 
-   # cut_flow[proc].SetBinContent(0, nr_tot)
-   # cut_flow[proc].SetBinContent(1, nr_pass_trigger)
-   # cut_flow[proc].SetBinContetn(2, nr_pass_lep)
-   # cut_flow[proc].SetBinContent(3, nr_pass_jet)
+        if vd["numJets"][0] >=6 and vd["numBTagM"][0] == 3:
+            event_count(6, cut_flow, proc,weight, vd)
+
+        if vd["numJets"][0] == 4 and vd["numBTagM"][0] ==4:
+            event_count(7, cut_flow, proc,weight, vd)
+
+        if vd["numJets"][0] ==5 and vd["numBTagM"][0] >=4:
+            event_count(8, cut_flow, proc,weight, vd)
+
+        if vd["numJets"][0] >=6 and vd["numBTagM"][0] >=4:
+            event_count(9, cut_flow, proc,weight, vd)
+
+        #------lorenzo categories-----------
+
+        if vd["numJets"][0] ==6 and vd["numBTagM"][0] >=4: # cat 1, 2
+            event_count(10, cut_flow, proc,weight, vd)
+
+        if vd["numJets"][0] >= 7 and vd["numBTagM"][0] >= 4: # cat 5
+            event_count(11, cut_flow, proc, weight, vd)
+
+        if vd["numJets"][0] ==5 and vd["numBTagM"][0] >= 4: # cat 3, 4
+            event_count(12, cut_flow, proc,weight, vd)
+            
+        #------according to vtypes--------
+        if vd["flag_type0"][0] >= -10:
+            event_count(13, cut_flow, proc, weight, vd)
+        if vd["flag_type1"][0] >= -10:
+            event_count(14, cut_flow, proc, weight, vd)
+        if vd["flag_type2"][0] >= -10:
+            event_count(15, cut_flow, proc, weight, vd)
+        if vd["flag_type3"][0] >= -10:
+            event_count(16, cut_flow, proc, weight, vd)
+#        if vd["flag_type4"][0] >= 0:
+#            event_count(14, cut_flow, proc, weight, vd)
 
     print "--------- CUT FLOW ------------- "
     print "Nr tot = "+  str(cut_flow[proc].GetBinContent(1))
     print "Nr trig sel = " + str(cut_flow[proc].GetBinContent(2))
     print "Nr lep sel = " + str(cut_flow[proc].GetBinContent(3))
-    print "Nr jet sel = " + str(cut_flow[proc].GetBinContent(4))
-    print "SL presel  = " + str(cut_flow[proc].GetBinContent(5))
-    print ">6 jets > 4 tag = " + str(cut_flow[proc].GetBinContent(6))
-    print "vtype0 or vtype1 " + str(cut_flow[proc].GetBinContent(7))
+    print ">=6 jets + 2 tags: " + str(cut_flow[proc].GetBinContent(4))
+    print "4 jets 3 tags: "  + str(cut_flow[proc].GetBinContent(5))
+    print "5 jets 3 tags: "  + str(cut_flow[proc].GetBinContent(6))
+    print ">=6 jets 3 tags: "  + str(cut_flow[proc].GetBinContent(7))
+    print " 4 jets 4 tags: " + str(cut_flow[proc].GetBinContent(8))
+    print " 5 jets >=4 tags: " + str(cut_flow[proc].GetBinContent(9))
+    print ">= 6 jets >= 4 tags " + str(cut_flow[proc].GetBinContent(10))
+    print"---------Lorenzo categories---------------"
+    print "cat1, cat2: " + str(cut_flow[proc].GetBinContent(11))
+    print "cat5 : " + str(cut_flow[proc].GetBinContent(12))
+    print "cat 3, cat 4: " + str(cut_flow[proc].GetBinContent(13))
+#    print "type 3: " + str(cut_flow[proc].GetBinContent(14))
+#    print "type 4: " + str(cut_flow[proc].GetBinContent(15))
+
+    
+#    print ">6 jets > 4 tag = " + str(cut_flow[proc].GetBinContent(6))
+#    print "vtype0 or vtype1 " + str(cut_flow[proc].GetBinContent(7))
 
 #    print "5 jets 4 tag = " + str(cut_flow[proc].GetBinContent(8))
 
 sel = "presel_2b_"
-outfilename = "histograms_" + sel + mode + ".root"
+outdir = "./histograms/"
+outfilename = outdir + "histograms_" + sel + mode + ".root"
 print "Write output to file: " + outfilename 
 
 

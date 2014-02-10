@@ -21,9 +21,9 @@ if sel == "presel_2b":
     signal_scale = 50
 
 if mode=="SL":
-    infile = "./histograms_" + selstr + "SL.root"
+    infile = "./histograms/histograms_" + selstr + "SL.root"
 if mode=="DL":
-    infile = "./histograms_" + selstr + "DL.root"
+    infile = "./histograms/histograms_" + selstr + "DL.root"
 
 h = ROOT.TFile(infile)
 mc = {}
