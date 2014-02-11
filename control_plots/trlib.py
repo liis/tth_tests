@@ -171,13 +171,17 @@ def bjet_presel(vd, jet_list = [], WP = "M" ):
 
     return passlist
 
-def event_count(ncut, cut_flow_hists, proc, weight, vd ):
+def event_count(ncut, binlabel = "", cut_flow_hists, proc, weight, vd ):
+    cut_flow_hists[proc].GetXaxis().SetBinLabel(ncut+1, binlabel)
     cut_flow_hists[proc].Fill(ncut,weight)
 
     if proc == "TTJets":
         if vd["nSimBs"][0] > 2 and vd["nMatchSimBs"][0] > 1:
+            cut_flow_hists["ttbb"].GetXaxis().SetBinLabel(ncut+1, binlabel)
             cut_flow_hists["ttbb"].Fill(ncut, weight)
         elif vd["nSimBs"][0] > 2 and vd["nMatchSimBs"][0] < 2:
+            cut_flow_hists["ttb"].GetXaxis().SetBinLabel(ncut+1, binlabel)
             cut_flow_hists["ttb"].Fill(ncut, weight)
         elif vd["nSimBs"][0] == 2:
+            cut_flow_hists["ttjj"].GetXaxis().SetBinLabel(ncut+1, binlabel)
             cut_flow_hists["ttjj"].Fill(ncut, weight)
