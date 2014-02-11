@@ -18,6 +18,7 @@ if args.DL_or_SL == "DL":
 if args.DL_or_SL == "SL":
     print "Starting single lepton analysis"
 
+#indir = "test_trees/trees_2014_02_11_0-0-1_rec_std/"
 indir = "test_trees/trees_2014_02_09_0-0-1_rec_reg/"
 
 f_all = {}
@@ -49,7 +50,7 @@ for proc, tree in t_all.iteritems():
         isTTjets = True
         for sub_proc in ["ttbb", "ttb", "ttjj"]:
             hists[sub_proc] = initialize_histograms(sub_proc, hist_variables)
-            cut_flow[sub_proc] = ROOT.TH1F("cut_flow_" + sub_proc, "cut_flow_" + sub_proc, 15, 0, 15)
+            cut_flow[sub_proc] = ROOT.TH1F("cut_flow_" + sub_proc, "cut_flow_" + sub_proc, 25, 0, 25)
 
     vd = initialize_tree(tree, var_list) # dictionary of variables
 
@@ -70,66 +71,66 @@ for proc, tree in t_all.iteritems():
             weight = ev_weight*pu_weight*19/12 #*tr_weight
 
         #-------------select events---------------
-        
-        event_count(0, cut_flow, proc, weight, vd) # cut-flow: all evts
+
+        event_count(0, "all", cut_flow, proc, weight, vd) # cut-flow: all evts
 
         if proc[-7:] == "Mu_data" and not( pass_trigger_selection(vd, mode, "mu") ): continue
         if proc[-7:] == "El_data" and not( pass_trigger_selection(vd, mode, "el") ): continue
 
-        event_count(1, cut_flow, proc, weight, vd) # cut_flow: apply trigger for data
+        event_count(1, "trig", cut_flow, proc, weight, vd) # cut_flow: apply trigger for data
 
         sel_lep = pass_lepton_selection(vd, mode) # count the number of good electrons and apply preselection
 
-        if len(sel_lep) == 0: continue 
-        event_count(2, cut_flow, proc, weight, vd) # cut_flow: require one lepton
+        if len(sel_lep) == 0: continue
+        event_count(2, "SelLep", cut_flow, proc, weight, vd) # cut_flow: require one lepton
 
 
         if vd["numJets"][0] >= 6 and vd["numBTagM"][0] == 2:
-            event_count(3, cut_flow, proc, weight, vd) # cut_flow: Category 1 ttH
-            
+            event_count(3, "g6j2t", cut_flow, proc, weight, vd ) # cut_flow: Category 1 ttH
+
             fill_1D_histograms( vd, hists, proc, weight, mode, isTTjets )
             fill_lepton_histograms( vd, hists, proc, weight, mode, sel_lep, isTTjets)
             fill_jet_histograms(vd, hists, proc, weight, mode, isTTjets = isTTjets)                         
 
 
         if vd["numJets"][0] == 4  and vd["numBTagM"][0] == 3:
-            event_count(4, cut_flow, proc,weight, vd)
+            event_count(4, "4j3t",  cut_flow, proc,weight, vd)
 
         if vd["numJets"][0] == 5 and vd["numBTagM"][0] == 3:
-            event_count(5, cut_flow, proc,weight, vd)
+            event_count(5, "5j3t", cut_flow, proc,weight, vd)
 
         if vd["numJets"][0] >=6 and vd["numBTagM"][0] == 3:
-            event_count(6, cut_flow, proc,weight, vd)
+            event_count(6, "g6j3t", cut_flow, proc,weight, vd)
 
         if vd["numJets"][0] == 4 and vd["numBTagM"][0] ==4:
-            event_count(7, cut_flow, proc,weight, vd)
+            event_count(7, "4j4t", cut_flow, proc,weight, vd)
 
         if vd["numJets"][0] ==5 and vd["numBTagM"][0] >=4:
-            event_count(8, cut_flow, proc,weight, vd)
+            event_count(8, "5jg4t", cut_flow, proc,weight, vd)
 
         if vd["numJets"][0] >=6 and vd["numBTagM"][0] >=4:
-            event_count(9, cut_flow, proc,weight, vd)
+            event_count(9, "g6jg4t", cut_flow, proc,weight, vd)
 
         #------lorenzo categories-----------
 
         if vd["numJets"][0] ==6 and vd["numBTagM"][0] >=4: # cat 1, 2
-            event_count(10, cut_flow, proc,weight, vd)
+            event_count(10, "L6jg4t", cut_flow, proc,weight, vd)
 
         if vd["numJets"][0] >= 7 and vd["numBTagM"][0] >= 4: # cat 5
-            event_count(11, cut_flow, proc, weight, vd)
+            event_count(11, "Lg7jg4t", cut_flow, proc, weight, vd)
 
         if vd["numJets"][0] ==5 and vd["numBTagM"][0] >= 4: # cat 3, 4
-            event_count(12, cut_flow, proc,weight, vd)
+            event_count(12, "L5jg4t", cut_flow, proc,weight, vd)
             
         #------according to vtypes--------
         if vd["flag_type0"][0] >= -10:
-            event_count(13, cut_flow, proc, weight, vd)
+            event_count(13, "flag_type0", cut_flow, proc, weight, vd)
         if vd["flag_type1"][0] >= -10:
-            event_count(14, cut_flow, proc, weight, vd)
-        if vd["flag_type2"][0] >= -10:
-            event_count(15, cut_flow, proc, weight, vd)
-        if vd["flag_type3"][0] >= -10:
-            event_count(16, cut_flow, proc, weight, vd)
+            event_count(14, "flag_type1", cut_flow, proc, weight, vd)
+#        if vd["flag_type2"][0] >= -10:
+#            event_count(15, "flag_type2", cut_flow, proc, weight, vd)
+#        if vd["flag_type3"][0] >= -10:
+#            event_count(16, "flag_type3", cut_flow, proc, weight, vd)
 #        if vd["flag_type4"][0] >= 0:
 #            event_count(14, cut_flow, proc, weight, vd)
 

@@ -171,7 +171,7 @@ def bjet_presel(vd, jet_list = [], WP = "M" ):
 
     return passlist
 
-def event_count(ncut, binlabel = "", cut_flow_hists, proc, weight, vd ):
+def event_count(ncut, binlabel, cut_flow_hists, proc, weight, vd ):
     cut_flow_hists[proc].GetXaxis().SetBinLabel(ncut+1, binlabel)
     cut_flow_hists[proc].Fill(ncut,weight)
 
