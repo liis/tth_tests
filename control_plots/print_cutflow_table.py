@@ -1,4 +1,5 @@
 import ROOT
+from histlib import fill_cut_flow
 
 indir = "histograms/"
 infile = "histograms_presel_2b_SL.root"
@@ -16,6 +17,17 @@ processes["TTV"] = f.Get("TTV/cut_flow_TTV")
 processes["SingleT"] = f.Get("SingleT/cut_flow_SingleT")
 processes["EWK"] = f.Get("EWK/cut_flow_EWK")
 processes["DiBoson"] = f.Get("DiBoson/cut_flow_DiBoson")
+
+sumBkg = processes["ttjj"].Clone("sumBkg") # Get a cut-flow histogram for sum Bkg
+for proc, cf_hist in processes.iteritems():
+    if not proc == "ttH125" and not proc=="ttjj":
+        sumBkg.Add(cf_hist)
+
+data_mu = f.Get("singleMu_data/cut_flow_singleMu_data") # get cut-flow of data
+data_el = f.Get("singleEl_data/cut_flow_singleEl_data")
+data = data_mu.Clone("data")
+data.Add(data_el)
+
 
 cuts_ttHbl_SL = dict() # processes for labels in cut-flow histograms
 cuts_ttHbl_SL["g6j2t"] =  "$\ge$6j 2t"
@@ -46,22 +58,26 @@ for cutlabel in cuts.values():
     print " & " + cutlabel,
 print '\\\ \\hline'
 
+
+tot_bkg = 0
 for proc, proc_cf in processes.iteritems():
     print proc + " & ",
-
-    cut_count = 0
-    for cut in cuts:
-        cut_count += 1
-
-        bin_nr = proc_cf.GetXaxis().FindBin(cut) # find bin by cut-label
-        print str( round( proc_cf.GetBinContent(bin_nr), 1) ), 
-
-        if cut_count < len(cuts):
-            print " & ",
-        else:
-            print "\\\\" 
+    fill_cut_flow(cuts, proc_cf)
 
 print "\\hline"
+
+#----------- sum bkg --------------
+print "$\sum$ Bkg & ",
+fill_cut_flow(cuts, sumBkg)
+
+print "\\hline"
+
+#----------- data --------------------
+print "Data & ",
+fill_cut_flow(cuts, data)
+
+print "\\hline"
+#-------------------------------------
 
 print """
         \end{tabular}
