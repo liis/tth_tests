@@ -18,8 +18,7 @@ if args.DL_or_SL == "DL":
 if args.DL_or_SL == "SL":
     print "Starting single lepton analysis"
 
-#indir = "test_trees/trees_2014_02_11_0-0-1_rec_std/"
-indir = "test_trees/trees_2014_02_09_0-0-1_rec_reg/"
+indir = "test_trees/trees_2014_02_09_0-0-1_rec_std/"
 
 f_all = {}
 t_all = {}
@@ -44,13 +43,15 @@ for proc, tree in t_all.iteritems():
 
     isTTjets = False
     hists[proc] = initialize_histograms(proc, hist_variables) # dictionary of initialized histograms for each sample
-    cut_flow[proc] = ROOT.TH1F("cut_flow_" + proc, "cut_flow_" + proc, 15, 0 , 15 )
+    cut_flow[proc] = ROOT.TH1F("cut_flow_" + proc, "cut_flow_" + proc, 25, 0 , 25 )
+    cut_flow[proc].Sumw2()
 
     if proc == "TTJets": # initialize extra histograms for ttJets, separating by gen level decay
         isTTjets = True
         for sub_proc in ["ttbb", "ttb", "ttjj"]:
             hists[sub_proc] = initialize_histograms(sub_proc, hist_variables)
             cut_flow[sub_proc] = ROOT.TH1F("cut_flow_" + sub_proc, "cut_flow_" + sub_proc, 25, 0, 25)
+            cut_flow[sub_proc].Sumw2()
 
     vd = initialize_tree(tree, var_list) # dictionary of variables
 
