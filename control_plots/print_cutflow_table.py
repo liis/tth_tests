@@ -2,6 +2,9 @@ import ROOT
 from histlib import fill_cut_flow
 
 indir = "histograms/"
+an = "L" # "L", "ttHbl"
+
+
 infile = "histograms_presel_2b_SL.root"
 standalone = True
 
@@ -36,7 +39,20 @@ cuts_ttHbl_SL["g6j3t"] = "$\ge$6j 3t"
 cuts_ttHbl_SL["5jg4t"] = "$\ge$5j 4t"
 cuts_ttHbl_SL["g6jg4t"] = "$\ge$6j $\ge$ 4t"
 
-cuts = cuts_ttHbl_SL
+cuts_L_SL = dict()
+cuts_L_SL["cat1"] = "Cat. 1"
+cuts_L_SL["cat2"] = "Cat. 2"
+cuts_L_SL["cat3_4"] = "Cat. 3/4"
+cuts_L_SL["cat5"] = "Cat. 5"
+
+if an = "ttHbl":
+    cuts = cuts_ttHbl_SL
+elif an = "L":
+    cuts = cuts_L_SL
+else:
+    print "Specify correct analysis type"
+    return 0
+
 table_size = len(cuts)
 
 if standalone:
