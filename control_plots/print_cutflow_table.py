@@ -3,17 +3,30 @@ import ROOT
 from histlib import fill_cut_flow
 
 indir = "histograms/"
-#an = "L" # "L", "ttHbl"
-an = "ttHbl" 
+an = "L" # "L", "ttHbl"
+#an = "ttHbl" 
+mode = "SL"
+mctrig = False
 
-if an == "L":
-    infile = "histograms_presel_2b_SL_notrig.root"
-else:
-    infile = "histograms_presel_2b_SL.root"
+if mode == "SL":
+    if not mctrig:
+        infile = "histograms_presel_2b_SL_notrig.root"
+    else:
+        infile = "histograms_presel_2b_SL.root"
+elif mode == "DL":
+    if not mctrig:
+        infile = "histograms_presel_2b_DL_notrig.root"
+    else:
+        infile = "histograms_presel_2b_DL.root"
 
 standalone = True
 
 f = ROOT.TFile(indir + infile)
+
+pars = f.Get("pars") # read lumi normalization of mc histograms
+hist_lumi = pars.GetBinContent(pars.GetXaxis().FindBin("Lumi") )
+lf = 19.5/hist_lumi # scale lumi to new value if needed, default 1
+Lumi = hist_lumi*lf
 
 from odict import OrderedDict as dict
 processes = dict()
@@ -31,8 +44,13 @@ for proc, cf_hist in processes.iteritems():
     if not proc == "ttH125" and not proc=="ttjj":
         sumBkg.Add(cf_hist)
 
-data_mu = f.Get("singleMu_data/cut_flow_singleMu_data") # get cut-flow of data
-data_el = f.Get("singleEl_data/cut_flow_singleEl_data")
+if mode == "SL":
+    data_mu = f.Get("singleMu_data/cut_flow_singleMu_data") # get cut-flow of data
+    data_el = f.Get("singleEl_data/cut_flow_singleEl_data")
+if mode == "DL":
+    data_mu = f.Get("diMu_data/cut_flow_diMu_data") # get cut-flow of data
+    data_el = f.Get("diEl_data/cut_flow_diEl_data")
+
 data = data_mu.Clone("data")
 data.Add(data_el)
 
@@ -51,14 +69,25 @@ cuts_L_SL["cat1"] = "Cat. 1"
 cuts_L_SL["cat2"] = "Cat. 2"
 cuts_L_SL["cat3_4"] = "Cat. 3/4"
 cuts_L_SL["cat5"] = "Cat. 5"
-cuts_L_SL["L6jg4t"] = "6j $\ge$4t"
-cuts_L_SL["L5jg4t"] = "5j $\ge$4t"
-cuts_L_SL["Lg7jg4t"] = "$\ge$7j $\ge$4t"
+
+cuts_L_SL["L6j4t"] = "6j 4t"
+cuts_L_SL["L5j4t"] = "5j 4t"
+cuts_L_SL["Lg7j4t"] = "$\ge$7j 4t"
+
+#cuts_L_SL["L6jg4t"] = "6j $\ge$4t"
+#cuts_L_SL["L5jg4t"] = "5j $\ge$4t"
+#cuts_L_SL["Lg7jg4t"] = "$\ge$7j $\ge$4t"
+
+cuts_L_DL = dict()
+cuts_L_DL["cat6"] = "Cat. 6"
+cuts_L_DL["cat7"] = "Cat. 7"
 
 if an == "ttHbl":
-    cuts = cuts_ttHbl_SL
+    if mode == "SL":
+        cuts = cuts_ttHbl_SL
 elif an == "L":
-    cuts = cuts_L_SL
+    if mode == "SL":
+        cuts = cuts_L_SL
 else:
     print "Specify correct analysis type"
     sys.exit()
@@ -82,39 +111,47 @@ for it in range(len(cuts) + 1):
 print "}"
 print "\\hline"
 for cutlabel in cuts.values():
-    print "Process & " + cutlabel,
+    print " & " + cutlabel,
 print '\\\ \\hline'
 
 
 tot_bkg = 0
 for proc, proc_cf in processes.iteritems():
     print proc + " & ",
-    fill_cut_flow(cuts, proc_cf)
+    fill_cut_flow(cuts, proc_cf, lf)
 
 print "\\hline"
 
 #----------- sum bkg --------------
 print "$\sum$ Bkg & ",
-fill_cut_flow(cuts, sumBkg)
+fill_cut_flow(cuts, sumBkg, lf)
 
 print "\\hline"
 
 #----------- data --------------------
 print "Data & ",
-fill_cut_flow(cuts, data)
+fill_cut_flow(cuts, data, lf)
 
 print "\\hline"
 #-------------------------------------
 
 print """
         \end{tabular}
-        
-        \caption{Cut flow}
-        \end{center}
+"""        
+print "\caption{Cut flow,",
+if mode == "SL":
+    print "SL selection, ",
+elif mode == "DL":
+    print "DL selection, ",
+print " L = " + str( round(Lumi, 1)) + " fb$^{-1}$",
+if not mctrig:
+    print " (no MC trigger applied) ",
+print "}"
+print """   
+     \end{center}
         \end{table*}
 
         """
-
 if standalone:
     print "\end{document}"
 

@@ -99,7 +99,13 @@ def pass_lepton_selection( vd, mode ):
                 elif abs( vd["lepton_type"][ilep] == 11 and lep_eta < 2.5 and (lep_eta > 1.566 or lep_eta < 1.442)): 
                     passlist.append(ilep)
 
-        if len(passlist) == 1:
+            if ( lep_pt > 20 and vd["lepton_rIso"][ilep] < 0.2 ):
+                if abs( vd["lepton_type"][ilep] == 13 and lep_eta < 2.3 ): # if muon 
+                    looselist.append(ilep)
+                if abs( vd["lepton_type"][ilep] == 11 and lep_eta < 2.5 and (lep_eta < 1.442 or lep_eta > 1.566) ): #if electron                                             
+                    looselist.append(ilep)
+
+        if len(passlist) == 1 and len(looselist) == 0: # one good and no loose leptons
             pass_lep_sel = True
 
     if mode == "DL" and n_lep > 1:
