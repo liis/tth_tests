@@ -142,8 +142,16 @@ def initialize_histograms( sample, hist_variables):
 
     return histos
 
-def write_histograms_to_file(outfilename, hists, cut_flow):
+def write_histograms_to_file(outfilename, hists, cut_flow, additional_hists = []):
+    """
+    hists -- dict of histograms per sample and variable
+    cut_flow -- dict of cutflow hists per sample
+    additional_hists -- separate histograms for parameters
+    """
     p = ROOT.TFile(outfilename,"recreate")
+
+    for hist in additional_hists:
+        hist.Write()
     
     for sample in hists:
         dir = p.mkdir(sample)

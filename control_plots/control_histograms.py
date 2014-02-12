@@ -9,6 +9,8 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--mode', dest='DL_or_SL',  choices=["DL", "SL"], required=True, help="specify DL or SL analysis")
 parser.add_argument('--testRun', dest='is_test_run', action="store_true", default=False, required=False)
 parser.add_argument('--sel', dest="sel", choices=["pre","pre_2b"], default=False, required=False)
+parser.add_argument('--notrig', dest="notrig", action="store_true", default=False, required=False) # dont apply trigger on MC sel
+                   
 args = parser.parse_args()
 mode = args.DL_or_SL
 
@@ -20,6 +22,14 @@ if args.DL_or_SL == "SL":
 
 indir = "test_trees/trees_2014_02_09_0-0-1_rec_std/"
 
+usetrig = not args.notrig
+
+Lumi = 19.04
+
+pars = ROOT.TH1F("pars", "pars", 10, 0, 10)
+pars.SetBinContent(1, Lumi)
+pars.GetXaxis().SetBinLabel(1, "Lumi")
+
 f_all = {}
 t_all = {}
 for sample in input_files:
@@ -28,6 +38,7 @@ for sample in input_files:
     print "Opening sample: " + sample
     f_all[sample] = ROOT.TFile(indir + input_files[sample])
     t_all[sample] = f_all[sample].Get("tree")
+
             
 
 report_every = 100000
@@ -69,8 +80,11 @@ for proc, tree in t_all.iteritems():
         if proc[-4:] == "data":
             weight = 1
         else:
-            weight = ev_weight*pu_weight*19/12 #*tr_weight
+            weight = ev_weight*pu_weight*Lumi/12
+            if usetrig:
+                weight = weight*tr_weight
 
+            
         #-------------select events---------------
 
         event_count(0, "all", cut_flow, proc, weight, vd) # cut-flow: all evts
@@ -122,52 +136,60 @@ for proc, tree in t_all.iteritems():
 
         if vd["numJets"][0] ==5 and vd["numBTagM"][0] >= 4: # cat 3, 4
             event_count(12, "L5jg4t", cut_flow, proc,weight, vd)
+
+        if vd["numJets"][0] ==6 and vd["numBTagM"][0] ==4: # cat 1, 2
+            event_count(13, "L6j4t", cut_flow, proc,weight, vd)
+
+        if vd["numJets"][0] >= 7 and vd["numBTagM"][0] == 4: # cat 5
+            event_count(14, "Lg7j4t", cut_flow, proc, weight, vd)
+
+        if vd["numJets"][0] ==5 and vd["numBTagM"][0] == 4: # cat 3, 4
+            event_count(15, "L5j4t", cut_flow, proc,weight, vd)
             
-        #------according to vtypes--------
-        if vd["flag_type0"][0] >= -10:
-            event_count(13, "flag_type0", cut_flow, proc, weight, vd)
-        if vd["flag_type1"][0] >= -10:
-            event_count(14, "flag_type1", cut_flow, proc, weight, vd)
-#        if vd["flag_type2"][0] >= -10:
-#            event_count(15, "flag_type2", cut_flow, proc, weight, vd)
-#        if vd["flag_type3"][0] >= -10:
-#            event_count(16, "flag_type3", cut_flow, proc, weight, vd)
-#        if vd["flag_type4"][0] >= 0:
-#            event_count(14, cut_flow, proc, weight, vd)
+        if vd["numBTagM"][0] >=4:
+            event_count(16, "g4t", cut_flow, proc,weight, vd)
+            
+        if vd["numBTagM"][0] ==3 and vd["numBTagL"][0]==1:
+            event_count(17, "3t1t", cut_flow, proc,weight, vd)
+            
+        #------according to event type --------
+        if vd["type"][0] == 0:
+            event_count(18, "cat1", cut_flow, proc, weight, vd)
+        if vd["type"][0] == 1:
+            event_count(19, "cat2", cut_flow, proc, weight, vd)
+        if vd["type"][0] == 2:
+            event_count(20, "cat3_4", cut_flow, proc, weight, vd)
+        if vd["type"][0] == 3:
+            event_count(21, "cat5", cut_flow, proc, weight,vd)
+        if vd["type"][0] == 5:
+            event_count(22, "cat6", cut_flow, proc, weight,vd)
+        if vd["type"][0] == 6:
+            event_count(23, "cat7", cut_flow, proc, weight,vd)
 
     print "--------- CUT FLOW ------------- "
     print "Nr tot = "+  str(cut_flow[proc].GetBinContent(1))
     print "Nr trig sel = " + str(cut_flow[proc].GetBinContent(2))
     print "Nr lep sel = " + str(cut_flow[proc].GetBinContent(3))
     print ">=6 jets + 2 tags: " + str(cut_flow[proc].GetBinContent(4))
-    print "4 jets 3 tags: "  + str(cut_flow[proc].GetBinContent(5))
-    print "5 jets 3 tags: "  + str(cut_flow[proc].GetBinContent(6))
     print ">=6 jets 3 tags: "  + str(cut_flow[proc].GetBinContent(7))
-    print " 4 jets 4 tags: " + str(cut_flow[proc].GetBinContent(8))
     print " 5 jets >=4 tags: " + str(cut_flow[proc].GetBinContent(9))
     print ">= 6 jets >= 4 tags " + str(cut_flow[proc].GetBinContent(10))
-    print"---------Lorenzo categories---------------"
-    print "cat1, cat2: " + str(cut_flow[proc].GetBinContent(11))
-    print "cat5 : " + str(cut_flow[proc].GetBinContent(12))
-    print "cat 3, cat 4: " + str(cut_flow[proc].GetBinContent(13))
-#    print "type 3: " + str(cut_flow[proc].GetBinContent(14))
-#    print "type 4: " + str(cut_flow[proc].GetBinContent(15))
+    print " 4 jets 4 tags: " + str(cut_flow[proc].GetBinContent(8))
+    print "----------DL relevant---------------------"
+    print " >= 4 tags: " + str(cut_flow[proc].GetBinContent(13))
+    print " >= 3 tags: " + str(cut_flow[proc].GetBinContent(14) )
 
-    
-#    print ">6 jets > 4 tag = " + str(cut_flow[proc].GetBinContent(6))
-#    print "vtype0 or vtype1 " + str(cut_flow[proc].GetBinContent(7))
-
-#    print "5 jets 4 tag = " + str(cut_flow[proc].GetBinContent(8))
 
 sel = "presel_2b_"
 outdir = "./histograms/"
+
 outfilename = outdir + "histograms_" + sel + mode + ".root"
+if not usetrig:
+    outfilename = outfilename.rsplit(".root")[0] + "_notrig.root" 
+    
 print "Write output to file: " + outfilename 
 
-
-write_histograms_to_file(outfilename, hists, cut_flow)
-#for proc in cut_flow:
-#    cut_flow[proc].Write()
+write_histograms_to_file(outfilename, hists, cut_flow, [pars])
         
         
         
