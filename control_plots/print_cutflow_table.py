@@ -1,11 +1,16 @@
+import sys
 import ROOT
 from histlib import fill_cut_flow
 
 indir = "histograms/"
-an = "L" # "L", "ttHbl"
+#an = "L" # "L", "ttHbl"
+an = "ttHbl" 
 
+if an == "L":
+    infile = "histograms_presel_2b_SL_notrig.root"
+else:
+    infile = "histograms_presel_2b_SL.root"
 
-infile = "histograms_presel_2b_SL.root"
 standalone = True
 
 f = ROOT.TFile(indir + infile)
@@ -35,7 +40,9 @@ data.Add(data_el)
 cuts_ttHbl_SL = dict() # processes for labels in cut-flow histograms
 cuts_ttHbl_SL["g6j2t"] =  "$\ge$6j 2t"
 cuts_ttHbl_SL["4j3t"] =  "4j 3t"
+cuts_ttHbl_SL["5j3t"] = "5j 3t"
 cuts_ttHbl_SL["g6j3t"] = "$\ge$6j 3t"
+cuts_ttHbl_SL["4j4t"] = "4j 4t"
 cuts_ttHbl_SL["5jg4t"] = "$\ge$5j 4t"
 cuts_ttHbl_SL["g6jg4t"] = "$\ge$6j $\ge$ 4t"
 
@@ -44,19 +51,23 @@ cuts_L_SL["cat1"] = "Cat. 1"
 cuts_L_SL["cat2"] = "Cat. 2"
 cuts_L_SL["cat3_4"] = "Cat. 3/4"
 cuts_L_SL["cat5"] = "Cat. 5"
+cuts_L_SL["L6jg4t"] = "6j $\ge$4t"
+cuts_L_SL["L5jg4t"] = "5j $\ge$4t"
+cuts_L_SL["Lg7jg4t"] = "$\ge$7j $\ge$4t"
 
-if an = "ttHbl":
+if an == "ttHbl":
     cuts = cuts_ttHbl_SL
-elif an = "L":
+elif an == "L":
     cuts = cuts_L_SL
 else:
     print "Specify correct analysis type"
-    return 0
+    sys.exit()
 
 table_size = len(cuts)
 
 if standalone:
     print "\documentclass{article}"
+    print "\usepackage[landscape]{geometry}"
     print "\\begin{document}"
 
 print """
@@ -71,7 +82,7 @@ for it in range(len(cuts) + 1):
 print "}"
 print "\\hline"
 for cutlabel in cuts.values():
-    print " & " + cutlabel,
+    print "Process & " + cutlabel,
 print '\\\ \\hline'
 
 
@@ -97,7 +108,7 @@ print "\\hline"
 
 print """
         \end{tabular}
-
+        
         \caption{Cut flow}
         \end{center}
         \end{table*}
