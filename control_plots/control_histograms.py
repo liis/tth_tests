@@ -97,6 +97,7 @@ for proc, tree in t_all.iteritems():
         sel_lep = pass_lepton_selection(vd, mode) # count the number of good electrons and apply preselection
 
         if len(sel_lep) == 0: continue
+
         event_count(2, "SelLep", cut_flow, proc, weight, vd) # cut_flow: require one lepton
 
 
@@ -171,13 +172,11 @@ for proc, tree in t_all.iteritems():
     print "Nr trig sel = " + str(cut_flow[proc].GetBinContent(2))
     print "Nr lep sel = " + str(cut_flow[proc].GetBinContent(3))
     print ">=6 jets + 2 tags: " + str(cut_flow[proc].GetBinContent(4))
-    print ">=6 jets 3 tags: "  + str(cut_flow[proc].GetBinContent(7))
-    print " 5 jets >=4 tags: " + str(cut_flow[proc].GetBinContent(9))
-    print ">= 6 jets >= 4 tags " + str(cut_flow[proc].GetBinContent(10))
-    print " 4 jets 4 tags: " + str(cut_flow[proc].GetBinContent(8))
+    print ">= 6 jets >= 4 tags " + str(cut_flow[proc].GetBinContent(9))
+    print " 4 jets 4 tags: " + str(cut_flow[proc].GetBinContent(7))
     print "----------DL relevant---------------------"
-    print " >= 4 tags: " + str(cut_flow[proc].GetBinContent(13))
-    print " >= 3 tags: " + str(cut_flow[proc].GetBinContent(14) )
+    print " >= 4 tags: " + str(cut_flow[proc].GetBinContent(16))
+    print " >= 3 tags: " + str(cut_flow[proc].GetBinContent(17) )
 
 
 sel = "presel_2b_"

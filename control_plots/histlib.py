@@ -231,14 +231,17 @@ def fill_jet_histograms(vd, hists, sample, weight, mode, jet_list = [], isTTjets
           #          if isTTjets: fill_ttjets_histograms(vd, hists, var, vd[var][ijet], weight)
 
     
-def fill_cut_flow(cuts, cf_hist):
+def fill_cut_flow(cuts, cf_hist, lf = 1, isData = False):
     """
     cuts -- ordered dictionary of cuts in cut-flow. labels need to be saved in the cut-flow histogra
     cf_hist -- cut-flow histogram
+    lf -- optional scale factor for the yields
     """
     cut_count = 0
     for cut in cuts:
         cut_count += 1
+        if isData:
+            cf_hist.Scale(lf)
 
         bin_nr = cf_hist.GetXaxis().FindBin(cut) # find bin by cut-label
         nr_evts = cf_hist.GetBinContent(bin_nr)
