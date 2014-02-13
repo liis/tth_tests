@@ -130,7 +130,7 @@ print "\\hline"
 
 #----------- data --------------------
 print "Data & ",
-fill_cut_flow(cuts, data, lf)
+fill_cut_flow(cuts, data, lf, isData = True)
 
 print "\\hline"
 #-------------------------------------

@@ -231,7 +231,7 @@ def fill_jet_histograms(vd, hists, sample, weight, mode, jet_list = [], isTTjets
           #          if isTTjets: fill_ttjets_histograms(vd, hists, var, vd[var][ijet], weight)
 
     
-def fill_cut_flow(cuts, cf_hist, lf = 1, isData = False):
+def fill_cut_flow(cuts, cf_hist, lf = 1):
     """
     cuts -- ordered dictionary of cuts in cut-flow. labels need to be saved in the cut-flow histogra
     cf_hist -- cut-flow histogram
@@ -240,12 +240,14 @@ def fill_cut_flow(cuts, cf_hist, lf = 1, isData = False):
     cut_count = 0
     for cut in cuts:
         cut_count += 1
-        if isData:
-            cf_hist.Scale(lf)
+        round_prec = 1 # rounding precision when printing
+        
+        cf_hist.Scale(lf) # optionally normalize to different lumi value
 
         bin_nr = cf_hist.GetXaxis().FindBin(cut) # find bin by cut-label
         nr_evts = cf_hist.GetBinContent(bin_nr)
-        print str( round( nr_evts, 1) ) + " $\pm$ " + str( round( cf_hist.GetBinError(bin_nr), 1 ) ),
+
+        print str( round( nr_evts, round_prec) ) + " $\pm$ " + str( round( cf_hist.GetBinError(bin_nr), round_prec ) ),
         
         if cut_count < len(cuts):
             print " & ",
