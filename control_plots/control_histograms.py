@@ -20,7 +20,8 @@ if args.DL_or_SL == "DL":
 if args.DL_or_SL == "SL":
     print "Starting single lepton analysis"
 
-indir = "test_trees/trees_2014_02_09_0-0-1_rec_std/"
+#indir = "test_trees/trees_2014_02_09_0-0-1_rec_std/"
+indir = "test_trees/trees_2014_02_14-0-0-1_rec_std/"
 
 usetrig = not args.notrig
 
