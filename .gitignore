@@ -10,6 +10,7 @@
 control_plots/out_stackplots/DL/*
 control_plots/out_stackplots/SL/*
 control_plots/test_trees/*
+control_plots/tables/*
 control_plots/.*
 control_plots/*.pyc
 control_plots/*#
