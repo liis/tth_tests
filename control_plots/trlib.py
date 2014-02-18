@@ -46,7 +46,7 @@ def initialize_tree(tree, var_list):
 
 def pass_trigger_selection(  vd, mode, dataset ):
     """
-    dataset = "el", "mu"
+    dataset = el, mu
     """
     pass_trigger_sel = False
 
@@ -68,7 +68,9 @@ def pass_trigger_selection(  vd, mode, dataset ):
             vd["triggerFlags"][6] > 0 ) : # HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v
             
             pass_trigger_sel = True
-        elif dataset == "mu" and (vd["triggerFlags"][2] > 0 or vd["triggerFlags"][3] > 0 ):
+        elif dataset == "mu" and ( #same as single mu
+            vd["triggerFlags"][22] > 0 or
+            vd["triggerFlags"][23] > 0 ):
             pass_trigger_sel = True
 
 
@@ -104,11 +106,12 @@ def pass_lepton_selection( vd, mode ):
                 if abs( vd["lepton_type"][ilep] == 11 and lep_eta < 2.5 and (lep_eta < 1.442 or lep_eta > 1.566) ): #if electron
                     looselist.append(ilep)
 
-        if len(passlist) == 1 and len(looselist) == 0: # one good and no loose leptons
-            pass_lep_sel = True
+#        if len(passlist) == 1 and len(looselist) == 0: # one good and no loose leptons
+#            pass_lep_sel = True
 
     elif mode == "DL" and (vd["Vtype"][0]==0 or vd["Vtype"][0]==1):
-                   
+        
+        
         for ilep in range(n_lep):
             lep_eta = abs(vd["lepton_eta"][ilep])
             lep_pt = vd["lepton_pt"][ilep]
@@ -127,6 +130,9 @@ def pass_lepton_selection( vd, mode ):
             elif vd["lepton_pt"][ passlist[1] ] > 20 and vd["lepton_rIso"][ passlist[1] ] < 0.12:
                 passlist = passlist[::-1] #reverse order
                 pass_lep_sel = True
+
+ #       if n_lep > 1:
+ #           pass_lep_sel = True# clean up -- testing
             
     if pass_lep_sel:
         return passlist

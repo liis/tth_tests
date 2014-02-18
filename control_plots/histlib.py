@@ -231,12 +231,14 @@ def fill_jet_histograms(vd, hists, sample, weight, mode, jet_list = [], isTTjets
           #          if isTTjets: fill_ttjets_histograms(vd, hists, var, vd[var][ijet], weight)
 
     
-def fill_cut_flow(cuts, cf_hist, lf = 1):
+def fill_cut_flow(cuts, cf_hist, lf = 1, tablewidth = 0):
     """
     cuts -- ordered dictionary of cuts in cut-flow. labels need to be saved in the cut-flow histogra
     cf_hist -- cut-flow histogram
     lf -- optional scale factor for the yields
     """
+    if tablewidth == 0:
+        tablewidth = len(cuts)
     cut_count = 0
     for cut in cuts:
         cut_count += 1
@@ -249,7 +251,8 @@ def fill_cut_flow(cuts, cf_hist, lf = 1):
 
         print str( round( nr_evts, round_prec) ) + " $\pm$ " + str( round( cf_hist.GetBinError(bin_nr), round_prec ) ),
         
-        if cut_count < len(cuts):
+        if cut_count < tablewidth:
             print " & ",
         else:
             print "\\\\"
+            break 

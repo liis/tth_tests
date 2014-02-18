@@ -77,7 +77,7 @@ for proc, tree in t_all.iteritems():
         ev_weight = vd["weight"][0]
         tr_weight = vd["trigger"][0]
         pu_weight = vd["PUweight"][0]
-        toppt_weight = vd["weightTopPt"][0]
+#        toppt_weight = vd["weightTopPt"][0]
 
         if proc[-4:] == "data":
             weight = 1
@@ -96,14 +96,11 @@ for proc, tree in t_all.iteritems():
 
         event_count(1, "trig", cut_flow, proc, weight, vd) # cut_flow: apply trigger for data
 
-        sel_lep = pass_lepton_selection(vd, mode) # count the number of good electrons and apply preselection
-
+        sel_lep = pass_lepton_selection(vd, mode) # count the number of good leptons and apply preselection
         if not ( len(sel_lep) ): continue
         event_count(2, "SelLep", cut_flow, proc, weight, vd) # cut_flow: require one lepton
 
         sel_jet = pass_jet_selection(vd, mode, jet40=True)
-        if len(sel_jet) == 0: continue
-
 
         if vd["numJets"][0] >= 6 and vd["numBTagM"][0] == 2:
             event_count(3, "g6j2t", cut_flow, proc, weight, vd ) # cut_flow, preselection
@@ -122,8 +119,8 @@ for proc, tree in t_all.iteritems():
         if vd["numJets"][0] >=6 and vd["numBTagM"][0] == 3:
             event_count(6, "g6j3t", cut_flow, proc,weight, vd)
 
-        if vd["numJets"][0] == 4 and vd["numBTagM"][0] ==4:
-            event_count(7, "4j4t", cut_flow, proc,weight, vd)
+        if vd["numBTagM"][0] ==4:
+            event_count(7, "g4j4t", cut_flow, proc,weight, vd)
 
         if vd["numJets"][0] ==5 and vd["numBTagM"][0] >=4:
             event_count(8, "5jg4t", cut_flow, proc,weight, vd)
@@ -154,7 +151,7 @@ for proc, tree in t_all.iteritems():
         if vd["numBTagM"][0] >=4:
             event_count(16, "g4t", cut_flow, proc,weight, vd)
             
-        if vd["numBTagM"][0] ==3 and vd["numBTagL"][0]==1:
+        if vd["numBTagM"][0] ==3 and vd["numBTagL"][0]==4:
             event_count(17, "3t1t", cut_flow, proc,weight, vd)
             
         #------according to event type --------
@@ -166,25 +163,32 @@ for proc, tree in t_all.iteritems():
             event_count(20, "cat3_4", cut_flow, proc, weight, vd)
         if vd["type"][0] == 3:
             event_count(21, "cat5", cut_flow, proc, weight,vd)
-        if vd["type"][0] == 5:
-            event_count(22, "cat6", cut_flow, proc, weight,vd)
         if vd["type"][0] == 6:
+            event_count(22, "cat6", cut_flow, proc, weight,vd)
+        if vd["type"][0] == 7:
             event_count(23, "cat7", cut_flow, proc, weight,vd)
 
     print "--------- CUT FLOW ------------- "
     print "Nr tot = "+  str(cut_flow[proc].GetBinContent(1))
     print "Nr trig sel = " + str(cut_flow[proc].GetBinContent(2))
     print "Nr lep sel = " + str(cut_flow[proc].GetBinContent(3))
-    print ">=6 jets + 2 tags: " + str(cut_flow[proc].GetBinContent(4))
 
-    print ">=6 jets + 4 tags: " + str(cut_flow[proc].GetBinContent(cut_flow[proc].GetXaxis().FindBin("Lg7j4t")) )
-    print "6 jets + 4 tags: " + str(cut_flow[proc].GetBinContent(cut_flow[proc].GetXaxis().FindBin("L6j4t")) )
-    print "5 jets + 4 tags: " + str(cut_flow[proc].GetBinContent(cut_flow[proc].GetXaxis().FindBin("L5j4t")) )
-    
-    print "type 1: " + str(cut_flow[proc].GetBinContent(cut_flow[proc].GetXaxis().FindBin("cat1")) )
-    print "type 2: " + str(cut_flow[proc].GetBinContent(cut_flow[proc].GetXaxis().FindBin("cat2")) )
-    print "type 3/4: " + str(cut_flow[proc].GetBinContent(cut_flow[proc].GetXaxis().FindBin("cat3_4")) )
-    print "type 5: " + str(cut_flow[proc].GetBinContent(cut_flow[proc].GetXaxis().FindBin("cat5")) )
+    if mode == "SL":
+        print ">=6 jets + 2 tags: " + str(cut_flow[proc].GetBinContent(4))
+        print ">=6 jets + 4 tags: " + str(cut_flow[proc].GetBinContent(cut_flow[proc].GetXaxis().FindBin("Lg7j4t")) )
+        print "6 jets + 4 tags: " + str(cut_flow[proc].GetBinContent(cut_flow[proc].GetXaxis().FindBin("L6j4t")) )
+        print "5 jets + 4 tags: " + str(cut_flow[proc].GetBinContent(cut_flow[proc].GetXaxis().FindBin("L5j4t")) )
+        
+        print "type 1: " + str(cut_flow[proc].GetBinContent(cut_flow[proc].GetXaxis().FindBin("cat1")) )
+        print "type 2: " + str(cut_flow[proc].GetBinContent(cut_flow[proc].GetXaxis().FindBin("cat2")) )
+        print "type 3/4: " + str(cut_flow[proc].GetBinContent(cut_flow[proc].GetXaxis().FindBin("cat3_4")) )
+        print "type 5: " + str(cut_flow[proc].GetBinContent(cut_flow[proc].GetXaxis().FindBin("cat5")) )
+
+    if mode == "DL":
+        print "g4j4t: " + str(cut_flow[proc].GetBinContent(cut_flow[proc].GetXaxis().FindBin("g4j4t")) )
+        print "3M1L: " + str(cut_flow[proc].GetBinContent(cut_flow[proc].GetXaxis().FindBin("3t1t")) )
+        print "type 6: " + str(cut_flow[proc].GetBinContent(cut_flow[proc].GetXaxis().FindBin("cat6")) )
+        print "type 7: " + str(cut_flow[proc].GetBinContent(cut_flow[proc].GetXaxis().FindBin("cat7")) )
 
 sel = "presel_2b_"
 outdir = "./histograms/"
