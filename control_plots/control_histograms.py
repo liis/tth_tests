@@ -21,11 +21,11 @@ if args.DL_or_SL == "SL":
     print "Starting single lepton analysis"
 
 #indir = "test_trees/trees_2014_02_09_0-0-1_rec_std/"
-indir = "test_trees/trees_2014_02_14-0-0-1_rec_std/"
+indir = "test_trees/trees_2014_02_15_0-0-1_rec_std/"
 
 usetrig = not args.notrig
 
-Lumi = 19.04
+Lumi = 19.5
 
 pars = ROOT.TH1F("pars", "pars", 10, 0, 10)
 pars.SetBinContent(1, Lumi)
@@ -77,11 +77,12 @@ for proc, tree in t_all.iteritems():
         ev_weight = vd["weight"][0]
         tr_weight = vd["trigger"][0]
         pu_weight = vd["PUweight"][0]
+        toppt_weight = vd["weightTopPt"][0]
 
         if proc[-4:] == "data":
             weight = 1
         else:
-            weight = ev_weight*pu_weight*Lumi/12
+            weight = ev_weight*pu_weight*Lumi/12#toppt_weight
             if usetrig:
                 weight = weight*tr_weight
 
@@ -97,13 +98,15 @@ for proc, tree in t_all.iteritems():
 
         sel_lep = pass_lepton_selection(vd, mode) # count the number of good electrons and apply preselection
 
-        if len(sel_lep) == 0: continue
-
+        if not ( len(sel_lep) ): continue
         event_count(2, "SelLep", cut_flow, proc, weight, vd) # cut_flow: require one lepton
+
+        sel_jet = pass_jet_selection(vd, mode, jet40=True)
+        if len(sel_jet) == 0: continue
 
 
         if vd["numJets"][0] >= 6 and vd["numBTagM"][0] == 2:
-            event_count(3, "g6j2t", cut_flow, proc, weight, vd ) # cut_flow: Category 1 ttH
+            event_count(3, "g6j2t", cut_flow, proc, weight, vd ) # cut_flow, preselection
 
             fill_1D_histograms( vd, hists, proc, weight, mode, isTTjets )
             fill_lepton_histograms( vd, hists, proc, weight, mode, sel_lep, isTTjets)
@@ -173,12 +176,15 @@ for proc, tree in t_all.iteritems():
     print "Nr trig sel = " + str(cut_flow[proc].GetBinContent(2))
     print "Nr lep sel = " + str(cut_flow[proc].GetBinContent(3))
     print ">=6 jets + 2 tags: " + str(cut_flow[proc].GetBinContent(4))
-    print ">= 6 jets >= 4 tags " + str(cut_flow[proc].GetBinContent(9))
-    print " 4 jets 4 tags: " + str(cut_flow[proc].GetBinContent(7))
-    print "----------DL relevant---------------------"
-    print " >= 4 tags: " + str(cut_flow[proc].GetBinContent(16))
-    print " >= 3 tags: " + str(cut_flow[proc].GetBinContent(17) )
 
+    print ">=6 jets + 4 tags: " + str(cut_flow[proc].GetBinContent(cut_flow[proc].GetXaxis().FindBin("Lg7j4t")) )
+    print "6 jets + 4 tags: " + str(cut_flow[proc].GetBinContent(cut_flow[proc].GetXaxis().FindBin("L6j4t")) )
+    print "5 jets + 4 tags: " + str(cut_flow[proc].GetBinContent(cut_flow[proc].GetXaxis().FindBin("L5j4t")) )
+    
+    print "type 1: " + str(cut_flow[proc].GetBinContent(cut_flow[proc].GetXaxis().FindBin("cat1")) )
+    print "type 2: " + str(cut_flow[proc].GetBinContent(cut_flow[proc].GetXaxis().FindBin("cat2")) )
+    print "type 3/4: " + str(cut_flow[proc].GetBinContent(cut_flow[proc].GetXaxis().FindBin("cat3_4")) )
+    print "type 5: " + str(cut_flow[proc].GetBinContent(cut_flow[proc].GetXaxis().FindBin("cat5")) )
 
 sel = "presel_2b_"
 outdir = "./histograms/"

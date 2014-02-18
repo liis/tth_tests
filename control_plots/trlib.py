@@ -6,9 +6,9 @@ lepton_vars_f = ["lepton_pt", "lepton_eta", "lepton_rIso", "lepton_charge"]
 jet_vars_f = ["jet_pt", "jet_eta", "jet_phi", "jet_csv"]
 
 #----------------separate by type---------------------
-int_list = ["nLep", "numJets", "numBTagL", "numBTagM", "numBTagT", "nPVs", "nSimBs", "nMatchSimBs", "flag_type0", "type"]
+int_list = ["nLep", "numJets", "numBTagL", "numBTagM", "numBTagT", "nPVs", "nSimBs", "nMatchSimBs", "flag_type0", "type", "Vtype"]
 int_array_list = ["lepton_type"]
-float_list = ["weight", "trigger", "PUweight", "MET_pt", "MET_phi", "btag_LR"] 
+float_list = ["weight", "trigger", "PUweight", "weightTopPt", "MET_pt", "MET_phi", "btag_LR"] 
 float_array_list = lepton_vars_f  + jet_vars_f #lepton_vars_d + jet_vars_d
 trigger = ["triggerFlags"]
 
@@ -52,22 +52,20 @@ def pass_trigger_selection(  vd, mode, dataset ):
 
     if mode=="SL":
         if dataset == "mu" and ( 
-            vd["triggerFlags"][22]>0       # HLT_Mu40
-            or vd["triggerFlags"][23]>0    # HLT_Mu40_eta2p1 
-            or vd["triggerFlags"][14]>0    # HLT_IsoMu20
-            or vd["triggerFlags"][21]>0):  # HLT_Mu30
+            vd["triggerFlags"][22]>0       # HLT_Mu40_eta2p1
+            or vd["triggerFlags"][23]>0):    # HLT_IsoMu24_eta2p1 
+     #       or vd["triggerFlags"][14]>0    # HLT_IsoMu24
+     #       or vd["triggerFlags"][21]>0):  # HLT_Mu40
             
             pass_trigger_sel = True
         elif dataset == "el" and ( 
-            vd["triggerFlags"][3]>0        #HLT_Ele27_CaloIdVT_CaloIsoT_TrkIdT_TrkIsoT
-            or vd["triggerFlags"][44]>0 ): #HLT_Ele27_WP80
+            vd["triggerFlags"][44]>0 ): #HLT_Ele27_WP80
             
             pass_trigger_sel = True
 
     elif mode=="DL":
         if dataset == "el" and ( 
-            vd["triggerFlags"][5] > 0        # HLT_Ele27_WP80_PFMHT50_v.*
-            or vd["triggerFlags"][6] > 0 ) : # HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v
+            vd["triggerFlags"][6] > 0 ) : # HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v
             
             pass_trigger_sel = True
         elif dataset == "mu" and (vd["triggerFlags"][2] > 0 or vd["triggerFlags"][3] > 0 ):
@@ -89,27 +87,27 @@ def pass_lepton_selection( vd, mode ):
     n_lep = vd['nLep'][0]
     
         
-    if mode == "SL":
+    if mode == "SL" and (vd["Vtype"][0]==2 or vd["Vtype"][0]==3):
         for ilep in range(n_lep):
             lep_eta = abs(vd["lepton_eta"][ilep])
             lep_pt = vd["lepton_pt"][ilep]
             
-            if (  lep_pt > 30 and vd["lepton_rIso"][ilep] < 0.1 ):
+            if (  lep_pt > 30 and vd["lepton_rIso"][ilep] < 0.12 ):
                 if abs( vd["lepton_type"][ilep] == 13 and lep_eta < 2.1 ): # if muon
                     passlist.append(ilep)
                 elif abs( vd["lepton_type"][ilep] == 11 and lep_eta < 2.5 and (lep_eta > 1.566 or lep_eta < 1.442)): 
                     passlist.append(ilep)
 
             elif ( lep_pt > 20 and vd["lepton_rIso"][ilep] < 0.2 ):
-                if abs( vd["lepton_type"][ilep] == 13 and lep_eta < 2.3 ): # if muon 
+                if abs( vd["lepton_type"][ilep] == 13 and lep_eta < 2.4 ): # if muon 
                     looselist.append(ilep)
                 if abs( vd["lepton_type"][ilep] == 11 and lep_eta < 2.5 and (lep_eta < 1.442 or lep_eta > 1.566) ): #if electron
                     looselist.append(ilep)
 
-        if n_lep == 1 and len(passlist) == 1 and len(looselist) == 0: # one good and no loose leptons
+        if len(passlist) == 1 and len(looselist) == 0: # one good and no loose leptons
             pass_lep_sel = True
 
-    if mode == "DL" and n_lep > 1:
+    elif mode == "DL" and (vd["Vtype"][0]==0 or vd["Vtype"][0]==1):
                    
         for ilep in range(n_lep):
             lep_eta = abs(vd["lepton_eta"][ilep])
@@ -124,9 +122,9 @@ def pass_lepton_selection( vd, mode ):
 
         
         if len(passlist) == 2 and vd["lepton_charge"][passlist[0]]*vd["lepton_charge"][passlist[1]] < 0:
-            if vd["lepton_pt"][passlist[0] ] > 20 and vd["lepton_rIso"][ passlist[0] ] < 0.1:
+            if vd["lepton_pt"][passlist[0] ] > 20 and vd["lepton_rIso"][ passlist[0] ] < 0.12:
                 pass_lep_sel = True
-            elif vd["lepton_pt"][ passlist[1] ] > 20 and vd["lepton_rIso"][ passlist[1] ] < 0.1:
+            elif vd["lepton_pt"][ passlist[1] ] > 20 and vd["lepton_rIso"][ passlist[1] ] < 0.12:
                 passlist = passlist[::-1] #reverse order
                 pass_lep_sel = True
             
@@ -136,7 +134,11 @@ def pass_lepton_selection( vd, mode ):
     else:
         return []
 
-def pass_jet_selection(vd, mode ):
+def pass_jet_selection(vd, mode, jet40 ):
+    """
+    mode -- SL or DL
+    jet40 -- apply extra cut on 4 jets > 40
+    """
     passlist_tight = []
     passlist_loose = []
 
@@ -146,19 +148,20 @@ def pass_jet_selection(vd, mode ):
         jet_pt = vd["jet_pt"][ijet]
         jet_eta = abs(vd["jet_eta"][ijet])
 
-#        if( jet_pt > 40 and jet_eta < 2.5):
-#            passlist_tight.append(ijet)
+        if jet40:
+            if jet_pt > 40 and jet_eta < 2.5:
+                passlist_tight.append(ijet)
         
-        if( jet_pt > 30 and jet_eta < 2.5):
+            elif jet_pt > 30 and jet_eta < 2.5:
+                passlist_loose.append(ijet)
+
+        elif jet_pt > 30 and jet_eta < 2.5:
             passlist_tight.append(ijet)
 
-    #if mode == "SL" and len(passlist_tight) > 3:
-    if mode == "SL" and len(passlist_tight) > 3 and len(passlist_tight) + len(passlist_loose) > 4:
+    if mode == "SL" and len(passlist_tight) >=4 and len(passlist_tight) + len(passlist_loose) >= 4:
        return passlist_tight + passlist_loose
-    elif mode== "DL" and len(passlist_tight) > 3 and len(passlist_tight) + len(passlist_loose) > 3:
+    elif mode== "DL" and len(passlist_tight) >= 4 and len(passlist_tight) + len(passlist_loose) >= 4:
         return passlist_tight + passlist_loose
-        
-
     else:
         return []
 

@@ -25,7 +25,7 @@ f = ROOT.TFile(indir + infile)
 
 pars = f.Get("pars") # read lumi normalization of mc histograms
 hist_lumi = pars.GetBinContent(pars.GetXaxis().FindBin("Lumi") )
-lf = 19.5/hist_lumi # scale lumi to new value if needed, default 1
+lf = 1 #19.5/hist_lumi # scale lumi to new value if needed, default 1
 Lumi = hist_lumi*lf
 
 from odict import OrderedDict as dict

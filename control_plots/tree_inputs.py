@@ -7,7 +7,7 @@ input_files = { "ttH125": "MEAnalysisNew_nominal_0-0-1_rec_std_TTH125.root",
                 "DiBoson": "MEAnalysisNew_nominal_0-0-1_rec_std_DiBoson.root",
                 "EWK": "MEAnalysisNew_nominal_0-0-1_rec_std_EWK.root",
                 "diMu_data": "MEAnalysisNew_nominal_0-0-1_rec_std_Data_DoubleMu.root", 
-                "diEl_data": "MEAnalysisNew_nominal_0-0-1_rec_std_Data_DoubleElectron.root",
+  #              "diEl_data": "MEAnalysisNew_nominal_0-0-1_rec_std_Data_DoubleElectron.root",
                 "singleMu_data": "MEAnalysisNew_nominal_0-0-1_rec_std_Data_SingleMu.root",
                 "singleEl_data": "MEAnalysisNew_nominal_0-0-1_rec_std_Data_SingleElectron.root"
                 }
