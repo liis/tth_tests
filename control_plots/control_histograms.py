@@ -10,9 +10,11 @@ parser.add_argument('--mode', dest='DL_or_SL',  choices=["DL", "SL"], required=T
 parser.add_argument('--testRun', dest='is_test_run', action="store_true", default=False, required=False)
 parser.add_argument('--sel', dest="sel", choices=["pre","pre_2b"], default=False, required=False)
 parser.add_argument('--notrig', dest="notrig", action="store_true", default=False, required=False) # dont apply trigger on MC sel
+parser.add_argument('--notopw', dest="notopw", action="store_true", default=False, required=False) # dont apply top pt reweight
                    
 args = parser.parse_args()
 mode = args.DL_or_SL
+notopw=args.notopw
 
 if args.DL_or_SL == "DL":
     print "Starting dilepton analysis"
@@ -20,12 +22,12 @@ if args.DL_or_SL == "DL":
 if args.DL_or_SL == "SL":
     print "Starting single lepton analysis"
 
-#indir = "test_trees/trees_2014_02_09_0-0-1_rec_std/"
+##indir = "test_trees/trees_2014_02_09_0-0-1_rec_std/"
 indir = "test_trees/trees_2014_02_15_0-0-1_rec_std/"
 
 usetrig = not args.notrig
 
-Lumi = 19.5
+Lumi = 19.04
 
 pars = ROOT.TH1F("pars", "pars", 10, 0, 10)
 pars.SetBinContent(1, Lumi)
@@ -77,12 +79,14 @@ for proc, tree in t_all.iteritems():
         ev_weight = vd["weight"][0]
         tr_weight = vd["trigger"][0]
         pu_weight = vd["PUweight"][0]
-#        toppt_weight = vd["weightTopPt"][0]
+        toppt_weight = vd["weightTopPt"][0]
 
         if proc[-4:] == "data":
             weight = 1
         else:
-            weight = ev_weight*pu_weight*Lumi/12#toppt_weight
+            weight = ev_weight*pu_weight*Lumi/12
+            if not notopw:
+                weight = weight*toppt_weight
             if usetrig:
                 weight = weight*tr_weight
 
@@ -101,13 +105,13 @@ for proc, tree in t_all.iteritems():
         event_count(2, "SelLep", cut_flow, proc, weight, vd) # cut_flow: require one lepton
 
         sel_jet = pass_jet_selection(vd, mode, jet40=True)
+        if vd["numJets"][0] >= 6 and vd["numBTagM"][0] == 2:
+            fill_1D_histograms( vd, hists, proc, weight, mode, isTTjets )
+            fill_lepton_histograms( vd, hists, proc, weight, mode, sel_lep, isTTjets)
+            fill_jet_histograms(vd, hists, proc, weight, mode, isTTjets = isTTjets)
 
         if vd["numJets"][0] >= 6 and vd["numBTagM"][0] == 2:
             event_count(3, "g6j2t", cut_flow, proc, weight, vd ) # cut_flow, preselection
-
-            fill_1D_histograms( vd, hists, proc, weight, mode, isTTjets )
-            fill_lepton_histograms( vd, hists, proc, weight, mode, sel_lep, isTTjets)
-            fill_jet_histograms(vd, hists, proc, weight, mode, isTTjets = isTTjets)                         
 
 
         if vd["numJets"][0] == 4  and vd["numBTagM"][0] == 3:
@@ -119,19 +123,22 @@ for proc, tree in t_all.iteritems():
         if vd["numJets"][0] >=6 and vd["numBTagM"][0] == 3:
             event_count(6, "g6j3t", cut_flow, proc,weight, vd)
 
+        if vd["numJets"][0] == 4 and vd["numBTagM"][0] ==4:
+            event_count(7, "4j4t", cut_flow, proc,weight, vd)
+
         if vd["numBTagM"][0] ==4:
-            event_count(7, "g4j4t", cut_flow, proc,weight, vd)
+            event_count(8, "g4j4t", cut_flow, proc,weight, vd)
 
         if vd["numJets"][0] ==5 and vd["numBTagM"][0] >=4:
-            event_count(8, "5jg4t", cut_flow, proc,weight, vd)
+            event_count(9, "5jg4t", cut_flow, proc,weight, vd)
 
         if vd["numJets"][0] >=6 and vd["numBTagM"][0] >=4:
-            event_count(9, "g6jg4t", cut_flow, proc,weight, vd)
+            event_count(10, "g6jg4t", cut_flow, proc,weight, vd)
 
         #------lorenzo categories-----------
 
-        if vd["numJets"][0] ==6 and vd["numBTagM"][0] >=4: # cat 1, 2
-            event_count(10, "L6jg4t", cut_flow, proc,weight, vd)
+#        if vd["numJets"][0] ==6 and vd["numBTagM"][0] >=4: # cat 1, 2
+#            event_count(11, "L6jg4t", cut_flow, proc,weight, vd)
 
         if vd["numJets"][0] >= 7 and vd["numBTagM"][0] >= 4: # cat 5
             event_count(11, "Lg7jg4t", cut_flow, proc, weight, vd)
@@ -193,12 +200,15 @@ for proc, tree in t_all.iteritems():
 sel = "presel_2b_"
 outdir = "./histograms/"
 
-outfilename = outdir + "histograms_" + sel + mode + ".root"
+outfilename = outdir + "histograms_" + sel + mode
 if not usetrig:
-    outfilename = outfilename.rsplit(".root")[0] + "_notrig.root" 
+    outfilename = outfilename + "_notrig" 
+if notopw:
+    outfilename = outfilename + "_notopw"
+
+outfilename = outfilename + ".root"
     
 print "Write output to file: " + outfilename 
-
 write_histograms_to_file(outfilename, hists, cut_flow, [pars])
         
         

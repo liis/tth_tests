@@ -1,16 +1,32 @@
 import sys
 import ROOT
-from histlib import fill_cut_flow
+from histlib import fill_cut_flow, set_file_name
 
 indir = "histograms/"
-mctrig = False
+import argparse
+parser = argparse.ArgumentParser()
+parser.add_argument('--notrig', dest="notrig", action="store_true", default=False, required=False) # dont apply trigger on MC sel
+parser.add_argument('--notopw', dest="notopw", action="store_true", default=False, required=False) # dont apply top pt weight
+args = parser.parse_args()
+
+mctrig = not args.notrig
+topw = not args.notopw
+
+#def set_file_name(file_name_base, mctrig, topw):
+#    infile = file_name_base
+#    if not mctrig:
+#        infile = infile + "_notrig"
+#    if not topw:
+#        infile = infile + "_notopw"
+#    infile = infile + ".root"
+#    return infile
 
 if not mctrig:
-    infile_SL = "histograms_presel_2b_SL_notrig.root"
-    infile_DL = "histograms_presel_2b_DL_notrig.root"
+    infile_SL = set_file_name("histograms_presel_2b_SL", mctrig, topw)
+    infile_DL = set_file_name("histograms_presel_2b_DL", mctrig, topw)
 else:
-    infile_SL = "histograms_presel_2b_SL_notrig.root"
-    infile_DL = "histograms_presel_2b_DL_notrig.root"
+    infile_SL = set_file_name("histograms_presel_2b_SL", mctrig, topw)
+    infile_DL = set_file_name("histograms_presel_2b_DL", mctrig, topw)
 
 standalone = True
 
@@ -65,9 +81,9 @@ data_el_SL = f_SL.Get("singleEl_data/cut_flow_singleEl_data")
 data_mu_DL = f_DL.Get("diMu_data/cut_flow_diMu_data") # get cut-flow of data
 data_el_DL = f_DL.Get("diEl_data/cut_flow_diEl_data")
 
-data_SL = data_mu_SL.Clone("data_DL")
+data_SL = data_mu_SL.Clone("data_SL")
 data_SL.Add(data_el_SL)
-data_DL = data_mu_SL.Clone("data_DL")
+data_DL = data_mu_DL.Clone("data_DL")
 data_DL.Add(data_el_DL)
 
 cuts_SL = dict()
@@ -107,24 +123,26 @@ print '\\\ \\hline'
 
 tot_bkg = 0
 for proc in processes_SL:
-    print proc + " & ",
+    print proc,
     fill_cut_flow(cuts_SL, processes_SL[proc], lf, table_size)
     fill_cut_flow(cuts_DL, processes_DL[proc], lf, table_size)
+
+    print "\\\\"
 
 print "\\hline"
 
 #----------- sum bkg --------------
-print "$\sum$ Bkg & ",
+print "$\sum$ Bkg ",
 fill_cut_flow(cuts_SL, sumBkg_SL, lf, table_size)
 fill_cut_flow(cuts_DL, sumBkg_DL, lf, table_size)
-
+print "\\\\"
 print "\\hline"
 
 #----------- data --------------------
-print "Data & ",
+print "Data ",
 fill_cut_flow(cuts_SL, data_SL, lf, table_size)
 fill_cut_flow(cuts_DL, data_DL, lf, table_size)
-
+print "\\\\"
 print "\\hline"
 #-------------------------------------
 
@@ -132,7 +150,7 @@ print """
         \end{tabular}
 """        
 print "\caption{Cut flow in event categories,",
-print " L = " + str( round(Lumi, 1)) + " fb$^-1}$",
+print " L = " + str( round(Lumi, 2)) + " fb$^-1$",
 if not mctrig:
     print " (no MC trigger applied) ",
 print "}"

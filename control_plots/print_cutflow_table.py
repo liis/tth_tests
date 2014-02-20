@@ -1,23 +1,24 @@
 import sys
 import ROOT
-from histlib import fill_cut_flow
+from histlib import fill_cut_flow, set_file_name
 
 indir = "histograms/"
-an = "L" # "L", "ttHbl"
-#an = "ttHbl" 
+
+import argparse
+parser = argparse.ArgumentParser()
+parser.add_argument('--notrig', dest="notrig", action="store_true", default=False, required=False) # dont apply trigger on MC sel
+parser.add_argument('--notopw', dest="notopw", action="store_true", default=False, required=False) # dont apply top pt weight
+args = parser.parse_args()
+
+an = "ttHbl" 
 mode = "SL"
-mctrig = False
+mctrig = not args.notrig
+topw = not args.notopw
 
 if mode == "SL":
-    if not mctrig:
-        infile = "histograms_presel_2b_SL_notrig.root"
-    else:
-        infile = "histograms_presel_2b_SL.root"
+    infile = set_file_name("histograms_presel_2b_SL", mctrig, topw)
 elif mode == "DL":
-    if not mctrig:
-        infile = "histograms_presel_2b_DL_notrig.root"
-    else:
-        infile = "histograms_presel_2b_DL.root"
+    infile = set_file_name("histograms_presel_2b_DL", mctrig, topw)
 
 standalone = True
 
@@ -61,7 +62,7 @@ cuts_ttHbl_SL["4j3t"] =  "4j 3t"
 cuts_ttHbl_SL["5j3t"] = "5j 3t"
 cuts_ttHbl_SL["g6j3t"] = "$\ge$6j 3t"
 cuts_ttHbl_SL["4j4t"] = "4j 4t"
-cuts_ttHbl_SL["5jg4t"] = "$\ge$5j 4t"
+cuts_ttHbl_SL["5jg4t"] = "5j $\ge$ 4t"
 cuts_ttHbl_SL["g6jg4t"] = "$\ge$6j $\ge$ 4t"
 
 cuts_L_SL = dict()
@@ -117,21 +118,21 @@ print '\\\ \\hline'
 
 tot_bkg = 0
 for proc, proc_cf in processes.iteritems():
-    print proc + " & ",
+    print proc,
     fill_cut_flow(cuts, proc_cf, lf)
-
+    print "\\\\"
 print "\\hline"
 
 #----------- sum bkg --------------
-print "$\sum$ Bkg & ",
+print "$\sum$ Bkg ",
 fill_cut_flow(cuts, sumBkg, lf)
-
+print "\\\\"
 print "\\hline"
 
 #----------- data --------------------
-print "Data & ",
+print "Data ",
 fill_cut_flow(cuts, data, lf)
-
+print "\\\\"
 print "\\hline"
 #-------------------------------------
 
@@ -143,7 +144,7 @@ if mode == "SL":
     print "SL selection, ",
 elif mode == "DL":
     print "DL selection, ",
-print " L = " + str( round(Lumi, 1)) + " fb$^{-1}$",
+print " L = " + str( round(Lumi, 2)) + " fb$^{-1}$",
 if not mctrig:
     print " (no MC trigger applied) ",
 print "}"

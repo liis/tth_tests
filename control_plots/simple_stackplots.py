@@ -1,13 +1,17 @@
 import ROOT, sys, os
-from histlib import hist_variables, variable_names, colors
+from histlib import hist_variables, variable_names, colors, set_file_name
 import argparse
 parser = argparse.ArgumentParser()
 parser.add_argument('--mode', dest='mode',  choices=["DL", "SL"], required=True, help="specify DL or SL analysis")
 parser.add_argument('--sel', dest='sel', choices=["presel","presel_2b"], required=True, help="Specify the preselection level" )
+parser.add_argument('--notrig', dest="notrig", action="store_true", default=False, required=False) # dont apply trigger on MC sel
+parser.add_argument('--notopw', dest="notopw", action="store_true", default=False, required=False) # dont apply toppt weight    
 args = parser.parse_args()
 
 mode = args.mode
 sel = args.sel
+mctrig = not args.notrig
+topw = not args.notopw
 
 inclusive_ttjets = False
 
@@ -20,12 +24,14 @@ signal_scale = 100
 if sel == "presel_2b":
     signal_scale = 50
 
-if mode=="SL":
-    infile = "./histograms/histograms_" + selstr + "SL.root"
-if mode=="DL":
-    infile = "./histograms/histograms_" + selstr + "DL.root"
+indir = "histograms/"
 
-h = ROOT.TFile(infile)
+if mode=="SL":
+    infile = set_file_name("histograms_presel_2b_SL", mctrig, topw)
+if mode=="DL":
+    infile = set_file_name("histograms_presel_2b_DL", mctrig, topw)
+
+h = ROOT.TFile(indir + infile)
 mc = {}
 
 if mode == "DL":

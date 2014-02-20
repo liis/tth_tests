@@ -248,11 +248,16 @@ def fill_cut_flow(cuts, cf_hist, lf = 1, tablewidth = 0):
 
         bin_nr = cf_hist.GetXaxis().FindBin(cut) # find bin by cut-label
         nr_evts = cf_hist.GetBinContent(bin_nr)
+        print " & ",
 
         print str( round( nr_evts, round_prec) ) + " $\pm$ " + str( round( cf_hist.GetBinError(bin_nr), round_prec ) ),
-        
-        if cut_count < tablewidth:
-            print " & ",
-        else:
-            print "\\\\"
-            break 
+
+def set_file_name(file_name_base, mctrig, topw):
+    infile = file_name_base
+    if not mctrig:
+        infile = infile + "_notrig"
+    if not topw:
+        infile = infile + "_notopw"
+    infile = infile + ".root"
+    return infile
+                                    
