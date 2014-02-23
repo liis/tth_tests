@@ -1,32 +1,32 @@
 import ROOT, sys, re
 
 hist_variables = {
-    "MET_pt": (50, 0 , 250),
-    "MET_phi": (50, -3.15, 3.15),
+#    "MET_pt": (50, 0 , 250),
+#    "MET_phi": (50, -3.15, 3.15),
         
-    "lead_electron_eta":(50, -2.5, 2.5),
-    "lead_electron_pt": (50, 0, 250),
-    "lead_electron_rIso": (50, 0, 0.15),
+#    "lead_electron_eta":(50, -2.5, 2.5),
+#    "lead_electron_pt": (50, 0, 250),
+#    "lead_electron_rIso": (50, 0, 0.15),
 
-    "trail_electron_eta":(50, -2.5, 2.5),
-    "trail_electron_pt": (50, 0, 250),
-    "trail_electron_rIso": (50, 0, 0.15),
+#    "trail_electron_eta":(50, -2.5, 2.5),
+#    "trail_electron_pt": (50, 0, 250),
+#    "trail_electron_rIso": (50, 0, 0.15),
 
-    "lead_muon_rIso": (50, 0, 0.15),
-    "lead_muon_pt": (50, 0, 250),
-    "lead_muon_eta":(50, -2.5, 2.5),
+#    "lead_muon_rIso": (50, 0, 0.15),
+#    "lead_muon_pt": (50, 0, 250),
+ #   "lead_muon_eta":(50, -2.5, 2.5),
 
-    "trail_muon_rIso": (50, 0, 0.15),
-    "trail_muon_pt": (50, 0, 250),
-    "trail_muon_eta":(50, -2.5, 2.5),
+ #   "trail_muon_rIso": (50, 0, 0.15),
+ #   "trail_muon_pt": (50, 0, 250),
+ #   "trail_muon_eta":(50, -2.5, 2.5),
 
-    "lead_jet_pt": (50, 0, 250),
-    "lead_jet_eta": (50, -3, 3),
-    "lead_jet_phi": (50, -3.15, 3.15),
+ #   "lead_jet_pt": (50, 0, 250),
+ #   "lead_jet_eta": (50, -3, 3),
+ #   "lead_jet_phi": (50, -3.15, 3.15),
 
-    "jet_pt": (50, 0, 250),
-    "jet_eta": (200, -3, 3),
-    "jet_phi": (50, -3.15, 3.15),
+ #   "jet_pt": (50, 0, 250),
+ #   "jet_eta": (200, -3, 3),
+ #   "jet_phi": (50, -3.15, 3.15),
 
     "numJets": (12, 0, 12),
     "numJets_sel":(12, 0, 12),
@@ -38,8 +38,11 @@ hist_variables = {
     "numBTagT": (8, 0, 8),
 
     "btag_LR": (50, 0, 1),
+    "btag_lr_7j": (50, 0, 1),
+    "btag_lr_6j": (50, 0, 1),
+    "btag_lr_5j": (50, 0, 1),
     
-    "nPVs": (50, 0, 50)
+  #  "nPVs": (50, 0, 50)
     
     }
 
@@ -66,7 +69,11 @@ map_hist_variables = { # if histogram name is different from the tree entry name
     "lead_jet_phi": "jet_phi",
 
     "numBTagM_sel": "numBTagM",
-    "numJets_sel": "numJets"
+    "numJets_sel": "numJets",
+
+    "btag_lr_7j": "btag_LR",
+    "btag_lr_6j": "btag_LR",
+    "btag_lr_5j": "btag_LR",
     }
 
 variable_names = {"MET_pt": "MET",
@@ -111,7 +118,10 @@ variable_names = {"MET_pt": "MET",
 
                   "nPVs": " # primary vertices",
 
-                  "btag_LR": "b-tagging LR"
+                  "btag_LR": "b-tagging LR",
+                  "btag_lr_7j": "b-tagging LR (>= 7 jets)",
+                  "btag_lr_6j": "b-tagging LR (6 jets)",
+                  "btag_lr_5j": "b-tagging LR (5 jets)" ,
 
                   }
 
@@ -142,7 +152,7 @@ def initialize_histograms( sample, hist_variables):
 
     return histos
 
-def write_histograms_to_file(outfilename, hists, cut_flow, additional_hists = []):
+def write_histograms_to_file(outfilename, hists, additional_hist_per_sample = [], additional_hists = []):
     """
     hists -- dict of histograms per sample and variable
     cut_flow -- dict of cutflow hists per sample
@@ -156,7 +166,9 @@ def write_histograms_to_file(outfilename, hists, cut_flow, additional_hists = []
     for sample in hists:
         dir = p.mkdir(sample)
         dir.cd()
-        cut_flow[sample].Write()
+        for hist in additional_hist_per_sample:
+            hist[sample].Write()
+            
         for variable in hists[sample]:
             hists[sample][variable].Write()
 

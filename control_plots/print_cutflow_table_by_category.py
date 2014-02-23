@@ -150,7 +150,7 @@ print """
         \end{tabular}
 """        
 print "\caption{Cut flow in event categories,",
-print " L = " + str( round(Lumi, 2)) + " fb$^-1$",
+print " L = " + str( round(Lumi, 2)) + " fb$^{-1}$",
 if not mctrig:
     print " (no MC trigger applied) ",
 print "}"

@@ -52,6 +52,9 @@ else:
 
 hists = {} #histograms for each sample and variable
 cut_flow = {}
+btag_LR_5j = {}
+btag_LR_6j = {}
+btag_LR_7j = {}
 for proc, tree in t_all.iteritems():
     print "Processing: " + proc + " tree with " + str(tree.GetEntries()) + "events"
 
@@ -60,13 +63,23 @@ for proc, tree in t_all.iteritems():
     cut_flow[proc] = ROOT.TH1F("cut_flow_" + proc, "cut_flow_" + proc, 25, 0 , 25 )
     cut_flow[proc].Sumw2()
 
+    btag_LR_5j[proc] = ROOT.TH1F("btag_lr_5j_" + proc, "btag_lr_5j_" + proc, 50, 0, 1)
+    btag_LR_7j[proc] = ROOT.TH1F("btag_lr_7j_" + proc, "btag_lr_7j_" + proc, 50, 0, 1)
+    btag_LR_6j[proc] = ROOT.TH1F("btag_lr_6j_" + proc, "btag_lr_6j_" + proc, 50, 0, 1)
+    
+
     if proc == "TTJets": # initialize extra histograms for ttJets, separating by gen level decay
         isTTjets = True
         for sub_proc in ["ttbb", "ttb", "ttjj"]:
             hists[sub_proc] = initialize_histograms(sub_proc, hist_variables)
             cut_flow[sub_proc] = ROOT.TH1F("cut_flow_" + sub_proc, "cut_flow_" + sub_proc, 25, 0, 25)
             cut_flow[sub_proc].Sumw2()
-
+            
+            btag_LR_5j[sub_proc] = ROOT.TH1F("btag_lr_5j_" + sub_proc, "btag_lr_5j_" + sub_proc, 50, 0, 1)
+            btag_LR_6j[sub_proc] = ROOT.TH1F("btag_lr_6j_" + sub_proc, "btag_lr_6j_" + sub_proc, 50, 0, 1)
+            btag_LR_7j[sub_proc] = ROOT.TH1F("btag_lr_7j_" + sub_proc, "btag_lr_7j_" + sub_proc, 50, 0, 1)
+            
+    
     vd = initialize_tree(tree, var_list) # dictionary of variables
 
     for i in range( tree.GetEntries() ):
@@ -105,10 +118,42 @@ for proc, tree in t_all.iteritems():
         event_count(2, "SelLep", cut_flow, proc, weight, vd) # cut_flow: require one lepton
 
         sel_jet = pass_jet_selection(vd, mode, jet40=True)
-        if vd["numJets"][0] >= 6 and vd["numBTagM"][0] == 2:
+        if vd["numJets"][0] >= 6 and vd["numBTagM"][0] >= 2:
             fill_1D_histograms( vd, hists, proc, weight, mode, isTTjets )
             fill_lepton_histograms( vd, hists, proc, weight, mode, sel_lep, isTTjets)
             fill_jet_histograms(vd, hists, proc, weight, mode, isTTjets = isTTjets)
+
+        if vd["numJets"][0] >= 7: # and vd["numBTagM"][0] >= 2:
+            btag_LR_7j[proc].Fill(vd["btag_LR"][0])
+            if isTTjets:
+                if vd["nSimBs"][0] > 2 and vd["nMatchSimBs"][0] > 1:
+                    btag_LR_7j["ttbb"].Fill(vd["btag_LR"][0], weight)
+                elif vd["nSimBs"][0] > 2 and vd["nMatchSimBs"][0] < 2:
+                    btag_LR_7j["ttb"].Fill(vd["btag_LR"][0], weight)
+                elif vd["nSimBs"][0] == 2:
+                    btag_LR_7j["ttjj"].Fill(vd["btag_LR"][0], weight)
+
+                                    
+            
+        if vd["numJets"][0] == 6: # and vd["numBTagM"][0] >= 2:
+            btag_LR_6j[proc].Fill(vd["btag_LR"][0])
+            if isTTjets:
+                if vd["nSimBs"][0] > 2 and vd["nMatchSimBs"][0] > 1:
+                    btag_LR_6j["ttbb"].Fill(vd["btag_LR"][0], weight)
+                elif vd["nSimBs"][0] > 2 and vd["nMatchSimBs"][0] < 2:
+                    btag_LR_6j["ttb"].Fill(vd["btag_LR"][0], weight)
+                elif vd["nSimBs"][0] == 2:
+                    btag_LR_6j["ttjj"].Fill(vd["btag_LR"][0], weight)
+
+        if vd["numJets"][0] == 5: # and vd["numBTagM"][0] >= 2:
+            btag_LR_5j[proc].Fill(vd["btag_LR"][0])
+            if isTTjets:
+                if vd["nSimBs"][0] > 2 and vd["nMatchSimBs"][0] > 1:
+                    btag_LR_5j["ttbb"].Fill(vd["btag_LR"][0], weight)
+                elif vd["nSimBs"][0] > 2 and vd["nMatchSimBs"][0] < 2:
+                    btag_LR_5j["ttb"].Fill(vd["btag_LR"][0], weight)
+                elif vd["nSimBs"][0] == 2:
+                    btag_LR_5j["ttjj"].Fill(vd["btag_LR"][0], weight)
 
         if vd["numJets"][0] >= 6 and vd["numBTagM"][0] == 2:
             event_count(3, "g6j2t", cut_flow, proc, weight, vd ) # cut_flow, preselection
@@ -206,11 +251,11 @@ if not usetrig:
 if notopw:
     outfilename = outfilename + "_notopw"
 
-outfilename = outfilename + ".root"
+outfilename = outfilename + "_forLRno2tag.root"
     
 print "Write output to file: " + outfilename 
-write_histograms_to_file(outfilename, hists, cut_flow, [pars])
-        
+write_histograms_to_file(outfilename, hists, [cut_flow, btag_LR_5j, btag_LR_6j, btag_LR_7j], [pars])
+
         
         
 
