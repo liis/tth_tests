@@ -23,7 +23,8 @@ if args.DL_or_SL == "SL":
     print "Starting single lepton analysis"
 
 ##indir = "test_trees/trees_2014_02_09_0-0-1_rec_std/"
-indir = "test_trees/trees_2014_02_15_0-0-1_rec_std/"
+#indir = "test_trees/trees_2014_02_15_0-0-1_rec_std/"
+indir = "test_trees/trees_2014_02_24_0-0-1_rec_std/"
 
 usetrig = not args.notrig
 
@@ -108,8 +109,8 @@ for proc, tree in t_all.iteritems():
 
         event_count(0, "all", cut_flow, proc, weight, vd) # cut-flow: all evts
 
-        if proc[-7:] == "Mu_data" and not( pass_trigger_selection(vd, mode, "mu") ): continue
-        if proc[-7:] == "El_data" and not( pass_trigger_selection(vd, mode, "el") ): continue
+        if proc[-7:] == "Mu_data" and not( pass_trigger_selection(vd, mode, "mu") and vd["Vtype"][0]==2): continue #combined trigger and lepton selection
+        if proc[-7:] == "El_data" and not( pass_trigger_selection(vd, mode, "el") and vd["Vtype"][0]==3): continue
 
         event_count(1, "trig", cut_flow, proc, weight, vd) # cut_flow: apply trigger for data
 
@@ -182,11 +183,11 @@ for proc, tree in t_all.iteritems():
 
         #------lorenzo categories-----------
 
-#        if vd["numJets"][0] ==6 and vd["numBTagM"][0] >=4: # cat 1, 2
-#            event_count(11, "L6jg4t", cut_flow, proc,weight, vd)
+        if vd["numJets"][0] ==6 and vd["numBTagM"][0] >=4: # cat 1, 2
+            event_count(11, "L6jg4t", cut_flow, proc,weight, vd)
 
         if vd["numJets"][0] >= 7 and vd["numBTagM"][0] >= 4: # cat 5
-            event_count(11, "Lg7jg4t", cut_flow, proc, weight, vd)
+            event_count(24, "Lg7jg4t", cut_flow, proc, weight, vd)
 
         if vd["numJets"][0] ==5 and vd["numBTagM"][0] >= 4: # cat 3, 4
             event_count(12, "L5jg4t", cut_flow, proc,weight, vd)
@@ -227,14 +228,20 @@ for proc, tree in t_all.iteritems():
 
     if mode == "SL":
         print ">=6 jets + 2 tags: " + str(cut_flow[proc].GetBinContent(4))
+        print "--------------------"
         print ">=6 jets + 4 tags: " + str(cut_flow[proc].GetBinContent(cut_flow[proc].GetXaxis().FindBin("Lg7j4t")) )
         print "6 jets + 4 tags: " + str(cut_flow[proc].GetBinContent(cut_flow[proc].GetXaxis().FindBin("L6j4t")) )
         print "5 jets + 4 tags: " + str(cut_flow[proc].GetBinContent(cut_flow[proc].GetXaxis().FindBin("L5j4t")) )
+
+        print "------------------"
+        print ">=6 jets + >4 tags: " + str(cut_flow[proc].GetBinContent(cut_flow[proc].GetXaxis().FindBin("Lg7jg4t")))
+        print "6 jets + >4 tags: " + str(cut_flow[proc].GetBinContent(cut_flow[proc].GetXaxis().FindBin("L6jg4t")) )
+        print "5 jets + >4 tags: " + str(cut_flow[proc].GetBinContent(cut_flow[proc].GetXaxis().FindBin("L5jg4t")) )
         
-        print "type 1: " + str(cut_flow[proc].GetBinContent(cut_flow[proc].GetXaxis().FindBin("cat1")) )
-        print "type 2: " + str(cut_flow[proc].GetBinContent(cut_flow[proc].GetXaxis().FindBin("cat2")) )
-        print "type 3/4: " + str(cut_flow[proc].GetBinContent(cut_flow[proc].GetXaxis().FindBin("cat3_4")) )
-        print "type 5: " + str(cut_flow[proc].GetBinContent(cut_flow[proc].GetXaxis().FindBin("cat5")) )
+#        print "type 1: " + str(cut_flow[proc].GetBinContent(cut_flow[proc].GetXaxis().FindBin("cat1")) )
+#        print "type 2: " + str(cut_flow[proc].GetBinContent(cut_flow[proc].GetXaxis().FindBin("cat2")) )
+#        print "type 3/4: " + str(cut_flow[proc].GetBinContent(cut_flow[proc].GetXaxis().FindBin("cat3_4")) )
+#        print "type 5: " + str(cut_flow[proc].GetBinContent(cut_flow[proc].GetXaxis().FindBin("cat5")) )
 
     if mode == "DL":
         print "g4j4t: " + str(cut_flow[proc].GetBinContent(cut_flow[proc].GetXaxis().FindBin("g4j4t")) )
