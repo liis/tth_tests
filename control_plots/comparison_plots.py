@@ -1,4 +1,6 @@
 import ROOT, sys, os
+import tdrstyle
+tdrstyle.tdrstyle()
 from histlib import hist_variables, variable_names, colors, set_file_name
 import argparse
 parser = argparse.ArgumentParser()
@@ -125,7 +127,7 @@ for hist in hist_variables:
     
     p1.Draw()
     p1.SetTicks(1, 1);
-    p1.SetGrid();
+#    p1.SetGrid();
     p1.SetFillStyle(0);
     p1.cd()
 
@@ -135,6 +137,30 @@ for hist in hist_variables:
     mc["TTH125"].SetLineColor(ROOT.kBlack)
     signal.Draw("histsame")
     data.Draw("epsame")
+
+    #---legend---
+    legend1 = ROOT.TLegend(0.7, 0.78, 0.9, 0.89, "", "brNDC")
+    legend1.SetBorderSize(0)
+    legend1.SetFillColor(0)
+    legend1.AddEntry(data, "Data", "p")
+    legend1.AddEntry(sum, "Expectation", "l")
+    legend1.AddEntry(signal, "TTH125 x " + str(signal_scale) , "l")
+    legend1.Draw()
+    
+    legend2 = ROOT.TLegend(0.7, 0.55, 0.9, 0.765, "", "brNDC")
+    legend2.SetBorderSize(0)
+    legend2.SetFillColor(0)
+    
+    mcitems = mc.items()
+    mcitems.reverse()
+    
+    lmc = dict(mcitems)
+    for lname, lh in lmc.iteritems():
+        if not (lname == "TTH125"):
+            legend2.AddEntry(lh, lname, "f")
+            
+    legend2.Draw()     
+
     c.cd()
     #--------------
     
@@ -146,22 +172,22 @@ for hist in hist_variables:
     p2.cd()
 
     #--------------
-    hist_ratio = h_sumMC.Clone()
+    hist_ratio = data.Clone()
 #    hist_ratio.Add(data, -1.0) # mc - data
-    hist_ratio.Divide(data) # mc - data/data
-    data.Draw("epsame")
+    hist_ratio.Divide(h_sumMC) # mc - data/data
     
     hist_ratio.SetStats(False)
     hist_ratio.SetMarkerStyle(20)
     hist_ratio.SetMarkerSize(0.35)
     hist_ratio.SetMarkerColor(ROOT.kBlack)
+    hist_ratio.SetLineColor(ROOT.kBlack)
     hist_ratio.SetMaximum(2)
     hist_ratio.SetMinimum(0.)
     
     xAxis = hist_ratio.GetXaxis()
     yAxis = hist_ratio.GetYaxis()
     yAxis.CenterTitle()
-    yAxis.SetTitle("Data/MC.")
+    yAxis.SetTitle("Data/MC")
     yAxis.SetTitleOffset(0.2)
     yAxis.SetTitleSize(0.18)
     yAxis.SetLabelSize(0.15)
@@ -176,47 +202,20 @@ for hist in hist_variables:
     hist_ratio.Draw("p0e1")
     c.cd()
 
+    latex = ROOT.TLatex()
+    latex.SetNDC()
+    latex.SetTextSize(0.03)
+    latex.SetTextAlign(31)
+    latex.SetTextAlign(11)
+
+    cut = "5 jets + 2 b-tags"
+    std_txt = "   #sqrt{s}=8 TeV, L=19.04 fb^{-1}"
+    
+    textlabel = cut + std_txt
+    if topw:
+        textlabel = cut + ", (with top p_{T} SF)" + std_txt
+    latex.DrawLatex(0.2, 0.93, textlabel)
+
     c.SaveAs("out_stackplots/" + mode + "/" + hist + "_" + selstr +".pdf")
     c.SaveAs("out_stackplots/" + mode + "/" + hist + "_" + selstr + ".png")
     c.Close()   
-    
-
-#---------------draw on canvas-------------------
-"""    
-    c = ROOT.TCanvas("c" + hist ,"c" + hist, 600, 600)
-    
-    h_sumMC.Draw("hist")
-    sum.Draw("histsame")
-    h_sumMC.Draw("histsame")
-    mc["TTH125"].SetLineColor(ROOT.kBlack)
-    signal.Draw("histsame")
-    data.Draw("epsame")
-
-#------------- legend ---------------------
-    legend1 = ROOT.TLegend(0.64, 0.79, 0.89, 0.89, "", "brNDC")
-    legend1.SetBorderSize(0)
-    legend1.SetFillColor(0)
-    legend1.AddEntry(data, "Data", "p")
-    legend1.AddEntry(sum, "Expectation", "l")
-    legend1.AddEntry(signal, "TTH125 x " + str(signal_scale) , "l")
-    legend1.Draw()
-
-    legend2 = ROOT.TLegend(0.64, 0.6, 0.89, 0.765, "", "brNDC")
-    legend2.SetBorderSize(0)
-    legend2.SetFillColor(0)
-    
-    mcitems = mc.items()
-    mcitems.reverse()
-
-    lmc = dict(mcitems)
-    for lname, lh in lmc.iteritems():
-        if not (lname == "TTH125"):
-            legend2.AddEntry(lh, lname, "f")
-
-    legend2.Draw()
-
-#----------------------------------------------
-    c.SaveAs("out_stackplots/" + mode + "/" + hist + "_" + selstr +".pdf")
-    c.SaveAs("out_stackplots/" + mode + "/" + hist + "_" + selstr + ".png")
-    c.Close()
-"""
