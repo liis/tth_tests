@@ -31,6 +31,7 @@ if mode=="SL":
 if mode=="DL":
     infile = set_file_name("histograms_presel_2b_DL", mctrig, topw)
 
+print "opening input file:" + indir + infile
 h = ROOT.TFile(indir + infile)
 mc = {}
 

@@ -1,7 +1,7 @@
 import ROOT, sys, os
 import tdrstyle
 tdrstyle.tdrstyle()
-from histlib import hist_variables, variable_names, colors, set_file_name
+from histlib import variable_names, colors, set_file_name, get_ratio
 import argparse
 parser = argparse.ArgumentParser()
 parser.add_argument('--mode', dest='mode',  choices=["DL", "SL"], required=True, help="specify DL or SL analysis")
@@ -42,7 +42,7 @@ if mode == "DL":
 else:
     nrebin = 1
 
-for hist in hist_variables:
+for hist in variable_names:
     hist_to_plot = hist
     print "Plotting histogram for variable: " + hist_to_plot
     
@@ -66,6 +66,7 @@ for hist in hist_variables:
     from odict import OrderedDict as dict
     mc = dict()
 
+    mc["TTH125"] = h.Get("ttH125/" + hist_to_plot + "_ttH125")
     mc["EWK"] = h.Get("EWK/" + hist_to_plot + "_EWK") # 
     mc["SingleTop"] = h.Get("SingleT/" + hist_to_plot + "_SingleT")
     mc["DiBoson"] = h.Get("DiBoson/" + hist_to_plot + "_DiBoson")
@@ -77,7 +78,7 @@ for hist in hist_variables:
         mc["ttjj"] = h.Get("ttjj/" + hist_to_plot + "_ttjj")
         mc["ttb"] = h.Get("ttb/" + hist_to_plot + "_ttb")
         mc["ttbb"] = h.Get("ttbb/" + hist_to_plot + "_ttbb")
-    mc["TTH125"] = h.Get("ttH125/" + hist_to_plot + "_ttH125")
+    
 
     for key in mc:
         print "Starting MC process: " + key
@@ -100,12 +101,13 @@ for hist in hist_variables:
     print "plotting histogram " + hist
 
     for key, sample in mc.iteritems():
-        print "adding sample " + key + " to stack"
-        sum.Add( sample )
+        if not key=="TTH125":
+            print "adding sample " + key + " to stack"
+            sum.Add( sample )
 
-    h_sumMC = mc["TTH125"].Clone("h_sumMC")
+    h_sumMC = mc["TTV"].Clone("h_sumMC")
     for sample in mc:
-        if sample is not "TTH125":
+        if not sample=="TTH125" and not sample=="TTV":
             h_sumMC.Add(mc[sample])
             
     h_sumMC.SetTitle("")  
@@ -172,33 +174,9 @@ for hist in hist_variables:
     p2.cd()
 
     #--------------
-    hist_ratio = data.Clone()
-#    hist_ratio.Add(data, -1.0) # mc - data
-    hist_ratio.Divide(h_sumMC) # mc - data/data
     
-    hist_ratio.SetStats(False)
-    hist_ratio.SetMarkerStyle(20)
-    hist_ratio.SetMarkerSize(0.35)
-    hist_ratio.SetMarkerColor(ROOT.kBlack)
-    hist_ratio.SetLineColor(ROOT.kBlack)
-    hist_ratio.SetMaximum(2)
-    hist_ratio.SetMinimum(0.)
     
-    xAxis = hist_ratio.GetXaxis()
-    yAxis = hist_ratio.GetYaxis()
-    yAxis.CenterTitle()
-    yAxis.SetTitle("Data/MC")
-    yAxis.SetTitleOffset(0.2)
-    yAxis.SetTitleSize(0.18)
-    yAxis.SetLabelSize(0.15)
-    yAxis.SetNdivisions(3)
-    
-    xAxis.SetLabelSize(0.01)
-    xAxis.SetTitleSize(0.15)
-    xAxis.SetTitleOffset(0.5)
-    xAxis.SetTitle("")
-    #-----------------     
-    
+    hist_ratio = get_ratio(data, h_sumMC, "Data/MC")
     hist_ratio.Draw("p0e1")
     c.cd()
 
@@ -208,13 +186,19 @@ for hist in hist_variables:
     latex.SetTextAlign(31)
     latex.SetTextAlign(11)
 
+
     cut = "5 jets + 2 b-tags"
+    if mode=="SL":
+        cut = "1 lep. + " + cut
+    if mode=="DL":
+        cut = "2 lep. + " + cut
+        
     std_txt = "   #sqrt{s}=8 TeV, L=19.04 fb^{-1}"
     
     textlabel = cut + std_txt
     if topw:
         textlabel = cut + ", (with top p_{T} SF)" + std_txt
-    latex.DrawLatex(0.2, 0.93, textlabel)
+    latex.DrawLatex(0.15, 0.975, textlabel)
 
     c.SaveAs("out_stackplots/" + mode + "/" + hist + "_" + selstr +".pdf")
     c.SaveAs("out_stackplots/" + mode + "/" + hist + "_" + selstr + ".png")

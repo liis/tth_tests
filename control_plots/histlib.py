@@ -1,28 +1,28 @@
 import ROOT, sys, re
 
 hist_variables = {
-#    "MET_pt": (50, 0 , 250),
-#    "MET_phi": (50, -3.15, 3.15),
-        
-#    "lead_electron_eta":(50, -2.5, 2.5),
-#    "lead_electron_pt": (50, 0, 250),
-#    "lead_electron_rIso": (50, 0, 0.15),
+    "MET_pt": (50, 0 , 250),
+    "MET_phi": (50, -3.15, 3.15),
+
+    "lead_electron_eta":(50, -2.5, 2.5),
+    "lead_electron_pt": (50, 0, 250),
+    "lead_electron_rIso": (50, 0, 0.15),
 
 #    "trail_electron_eta":(50, -2.5, 2.5),
 #    "trail_electron_pt": (50, 0, 250),
 #    "trail_electron_rIso": (50, 0, 0.15),
 
-#    "lead_muon_rIso": (50, 0, 0.15),
-#    "lead_muon_pt": (50, 0, 250),
- #   "lead_muon_eta":(50, -2.5, 2.5),
+    "lead_muon_rIso": (50, 0, 0.15),
+    "lead_muon_pt": (50, 0, 250),
+    "lead_muon_eta":(50, -2.5, 2.5),
 
  #   "trail_muon_rIso": (50, 0, 0.15),
  #   "trail_muon_pt": (50, 0, 250),
  #   "trail_muon_eta":(50, -2.5, 2.5),
 
- #   "lead_jet_pt": (50, 0, 250),
- #   "lead_jet_eta": (50, -3, 3),
- #   "lead_jet_phi": (50, -3.15, 3.15),
+    "lead_jet_pt": (50, 0, 500),
+    "lead_jet_eta": (50, -3, 3),
+    "lead_jet_phi": (50, -3.15, 3.15),
 
  #   "jet_pt": (50, 0, 250),
  #   "jet_eta": (200, -3, 3),
@@ -37,12 +37,7 @@ hist_variables = {
     "numBTagL":(8, 0, 8),
     "numBTagT": (8, 0, 8),
 
-    "btag_LR": (50, 0, 1),
-    "btag_lr_7j": (50, 0, 1),
-    "btag_lr_6j": (50, 0, 1),
-    "btag_lr_5j": (50, 0, 1),
-    
-  #  "nPVs": (50, 0, 50)
+    "nPVs": (50, 0, 50)
     
     }
 
@@ -74,78 +69,77 @@ map_hist_variables = { # if histogram name is different from the tree entry name
     "btag_lr_7j": "btag_LR",
     "btag_lr_6j": "btag_LR",
     "btag_lr_5j": "btag_LR",
+    "btag_lr_4j": "btag_LR",
     }
 
-variable_names = {"MET_pt": "MET",
-                  "MET_phi": "MET #phi",
-                  "lepton_pt": "lepton p_{T}",
-
-                  "lead_electron_eta": "Electron #eta",
-                  "lead_electron_rIso": "Electron isolation",
-                  "lead_electron_pt": "Electron p_{T}",
-
-                  "trail_electron_eta": "Electron #eta",
-                  "trail_electron_rIso": "Electron isolation",
-                  "trail_electron_pt": "Electron p_{T}",
-
-                  "lead_muon_pt": "Muon p_{T}",
-                  "lead_muon_rIso": "Muon isolation",
-                  "lead_muon_eta": "Muon #eta",
-
-                  "trail_muon_pt": "Muon p_{T}",
-                  "trail_muon_rIso": "Muon isolation",
-                  "trail_muon_eta": "Muon #eta",
-                  
-                  "lepton_rIso": "Lepton isolation",
-                  "lepton_type": "Lepton type",
-                 
-                  "jet_pt": "jet p_{T}",
-                  "jet_eta": "jet #eta",
-                  "jet_phi": "jet #phi",
-
-                  "lead_jet_pt": "leading jet p_{T}",
-                  "lead_jet_eta": "leading jet #eta",
-                  "lead_jet_phi": "leading jet #phi",
-
-                  "numJets": "Number of jets",
-                  "numJets_sel": "Number of sel. jets",
-
-                  "numBTagM": "Number of b-tagged jets (Medium)",
-                  "numBTagM_sel": "Number of sel. b-tagged jets (Medium)",
-
-                  "numBTagL": "Number of b-tagged jets (Loose)",
-                  "numBTagT": "Number of b-tagged jets (Tight)",
-
-                  "nPVs": " # primary vertices",
-
-                  "btag_LR": "b-tagging LR",
-                  "btag_lr_7j": "b-tagging LR (>= 7 jets)",
-                  "btag_lr_6j": "b-tagging LR (6 jets)",
-                  "btag_lr_5j": "b-tagging LR (5 jets)" ,
-
-                  }
+variable_names = {
+    "MET_pt": "MET",
+    "MET_phi": "MET #phi",
+#                  "lepton_pt": "lepton p_{T}",
+    
+    "lead_electron_eta": "Electron #eta",
+    "lead_electron_rIso": "Electron isolation",
+    "lead_electron_pt": "Electron p_{T}",
+    
+    #                "trail_electron_eta": "Electron #eta",
+    #                "trail_electron_rIso": "Electron isolation",
+    #                "trail_electron_pt": "Electron p_{T}",
+    
+    "lead_muon_pt": "Muon p_{T}",
+    "lead_muon_rIso": "Muon isolation",
+    "lead_muon_eta": "Muon #eta",
+    
+    #               "trail_muon_pt": "Muon p_{T}",
+   #               "trail_muon_rIso": "Muon isolation",
+    #               "trail_muon_eta": "Muon #eta",
+    
+    #                  "jet_pt": "jet p_{T}",
+    #                  "jet_eta": "jet #eta",
+    #                  "jet_phi": "jet #phi",
+    
+    "lead_jet_pt": "leading jet p_{T}",
+    "lead_jet_eta": "leading jet #eta",
+    "lead_jet_phi": "leading jet #phi",
+    
+    "numJets": "Number of jets",
+    #              "numJets_sel": "Number of sel. jets",
+    
+    "numBTagM": "Number of b-tagged jets (Medium)",
+    #             "numBTagM_sel": "Number of sel. b-tagged jets (Medium)",
+    
+    "numBTagL": "Number of b-tagged jets (Loose)",
+    "numBTagT": "Number of b-tagged jets (Tight)",
+    
+    #            "nPVs": " # primary vertices",
+    
+    #           "btag_LR": "b-tagging LR",
+    "btag_lr_7j": "b-tagging LR (>= 7 jets)",
+    "btag_lr_6j": "b-tagging LR (6 jets)",
+    "btag_lr_5j": "b-tagging LR (5 jets)" ,
+    "btag_lr_4j": "b-tagging LR (4 jets)",
+    }
 
 colors = {"TTJets": ROOT.kBlue,
-          "ttbb": ROOT.kBlue - 8,
-          "ttb": ROOT.kBlue - 5,
-          "ttjj": ROOT.kBlue + 3,
-          "EWK": ROOT.kYellow+1,
-          "DiBoson": ROOT.kRed,
-          "TTH125": ROOT.kWhite,
-          "TTV": ROOT.kGreen + 3,
-          "SingleTop": ROOT.kViolet
+          "ttbb": 16,
+          "ttb": 17,
+          "ttjj": 18,
+          "EWK": ROOT.kGreen+3,
+          "DiBoson": ROOT.kYellow+1,
+          "TTH125": ROOT.kRed,
+          "TTV": 30,
+          "SingleTop": ROOT.kMagenta
           }
 
 
 
-def initialize_histograms( sample, hist_variables):
+def initialize_histograms( sample, hist_variables, syst = ""):
     """
     sample - sample name
     var_list - dictionary of variable names and hist parameters
     """
     histos = {}
     for variable, reg in hist_variables.iteritems():
-        histname = variable + "_" + sample
+        histname = variable + "_" + sample + syst
         h = ROOT.TH1F(histname, histname, reg[0], reg[1], reg[2])
         h.Sumw2() # errors
         histos[variable] = h
@@ -160,6 +154,7 @@ def write_histograms_to_file(outfilename, hists, additional_hist_per_sample = []
     """
     p = ROOT.TFile(outfilename,"recreate")
 
+    print "saving cut-flow histograms"
     for hist in additional_hists:
         hist.Write()
     
@@ -167,6 +162,7 @@ def write_histograms_to_file(outfilename, hists, additional_hist_per_sample = []
         dir = p.mkdir(sample)
         dir.cd()
         for hist in additional_hist_per_sample:
+#            print "opening " + str(hist[sample])
             hist[sample].Write()
             
         for variable in hists[sample]:
@@ -187,6 +183,18 @@ def fill_ttjets_histograms( vd, hists, varname, var, weight ):
     elif vd["nSimBs"][0] == 2:
         hists["ttjj"][varname].Fill(var, weight)
 
+def fill_single_histogram(vd, hist, proc, var, weight, isTTjets = False):
+    hist[proc].Fill(var, weight)
+    if isTTjets:
+        if vd["nSimBs"][0] > 2 and vd["nMatchSimBs"][0] > 1:
+            hist["ttbb"].Fill(var, weight)
+
+        elif vd["nSimBs"][0] > 2 and vd["nMatchSimBs"][0] < 2:
+            hist["ttb"].Fill(var, weight)
+
+        elif vd["nSimBs"][0] == 2:
+            hist["ttjj"].Fill(var, weight)
+        
 
 def fill_1D_histograms( vd, hists, sample, weight, mode, isTTjets = False):
     
@@ -272,4 +280,37 @@ def set_file_name(file_name_base, mctrig, topw):
         infile = infile + "_notopw"
     infile = infile + ".root"
     return infile
+
+def get_ratio(hist1, hist2, ratio_ytitle = ""):
+    """
+    hist1 -- numerator
+    hist2 -- denominator
+    """
+    hist_ratio = hist1.Clone()
+    hist_ratio.Divide(hist2)
+
+    hist_ratio.SetStats(False)
+    hist_ratio.SetMarkerStyle(20)
+    hist_ratio.SetMarkerSize(0.35)
+    hist_ratio.SetMarkerColor(ROOT.kBlack)
+    hist_ratio.SetLineColor(ROOT.kBlack)
+    hist_ratio.SetMaximum(2)
+    hist_ratio.SetMinimum(0.)
+    
+    xAxis = hist_ratio.GetXaxis()
+    yAxis = hist_ratio.GetYaxis()
+
+    yAxis.CenterTitle()
+    yAxis.SetTitle(ratio_ytitle)
+    yAxis.SetTitleOffset(0.2)
+    yAxis.SetTitleSize(0.18)
+    yAxis.SetLabelSize(0.15)
+    yAxis.SetNdivisions(3)
+    
+    xAxis.SetLabelSize(0.01)
+    xAxis.SetTitleSize(0.15)
+    xAxis.SetTitleOffset(0.5)
+    xAxis.SetTitle("")
+                                                                             
+    return hist_ratio
                                     
