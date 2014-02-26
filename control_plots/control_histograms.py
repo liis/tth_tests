@@ -1,6 +1,6 @@
 import ROOT, sys
 
-from fill_jet_counts import fill_jet_count_histograms
+from fill_jet_counts import fill_jet_count_histograms, fill_btag_count_histograms, fill_category_count_histograms
 from tree_inputs import input_files
 from trlib import initialize_tree, var_list, pass_trigger_selection, pass_lepton_selection, pass_jet_selection, bjet_presel, event_count
 from histlib import hist_variables, initialize_histograms, fill_1D_histograms, fill_lepton_histograms, fill_jet_histograms, fill_single_histogram, write_histograms_to_file
@@ -26,11 +26,13 @@ if args.DL_or_SL == "SL":
 
 ##indir = "test_trees/trees_2014_02_09_0-0-1_rec_std/"
 #indir = "test_trees/trees_2014_02_15_0-0-1_rec_std/"
-#indir = "test_trees/trees_2014_02_25_0-0-1_rec_std/"
-indir = "test_trees/trees_2014_02_26_0-0-1_rec_std_syst/"
+#indir = "test_trees/trees_2014_02_25_0-0-1_rec_std/" # syst set to 1
+#indir = "test_trees/trees_2014_02_26_0-0-1_rec_std_syst/" # broken ttbar
+#indir = "test_trees/trees_2014_02_26_0-0-1_rec_std/" # broken ttbar
+#indir = "test_trees/trees_2014_02_26_0-0-1_rec_std_sysNew/"
+indir = "test_trees/trees_2014_02_26_0-0-1_rec_std_syst_singlerun/"
 
 usetrig = not args.notrig
-
 Lumi = 19.04
 
 pars = ROOT.TH1F("pars", "pars", 10, 0, 10)
@@ -55,8 +57,8 @@ else:
     max_event = -1
 
 if args.doSys:
-    do_syst = ["", "_CSVup"]
-#    do_syst = ["","_CSVup","_CSVdown", "_JECup", "_JECdown", "_JERup", "_JERdown"] #
+#    do_syst = ["", "_CSVup"]
+    do_syst = ["","_CSVup","_CSVdown", "_JECup", "_JECdown", "_JERup", "_JERdown"] #
 else:
     do_syst = [""]
 
@@ -79,8 +81,14 @@ for proc, tree in t_all.iteritems():
         cut_flow[proc + isyst] = ROOT.TH1F("cut_flow_" + proc + isyst, "cut_flow_" + proc + isyst, 25, 0 , 25 )
         cut_flow[proc + isyst].Sumw2()
 
-        jet_count_hist[proc + isyst] = ROOT.TH1F("jet_count_" + proc + isyst, "jet_count_" + proc + isyst, 25, 0 , 25 )
+        jet_count_hist[proc + isyst] = ROOT.TH1F("jet_count_" + proc + isyst, "jet_count_" + proc + isyst, 8, 0 , 8 )
         jet_count_hist[proc + isyst].Sumw2()
+
+        btag_count_hist[proc + isyst] = ROOT.TH1F("btag_count_" + proc + isyst, "btag_count_" + proc + isyst, 4, 0 , 4 )
+        btag_count_hist[proc + isyst].Sumw2()
+
+        category_count_hist[proc + isyst] = ROOT.TH1F("cat_count_" + proc + isyst, "cat_count_" + proc + isyst, 4, 0 , 4 )
+        category_count_hist[proc + isyst].Sumw2()
 
         btag_LR_4j[proc + isyst] = ROOT.TH1F("btag_lr_4j_" + proc + isyst, "btag_lr_4j_" + proc, 50, 0, 1)
         btag_LR_4j[proc + isyst].Sumw2()
@@ -106,6 +114,17 @@ for proc, tree in t_all.iteritems():
                 btag_LR_6j[sub_proc + isyst].Sumw2()
                 btag_LR_7j[sub_proc + isyst] = ROOT.TH1F("btag_lr_7j_" + sub_proc + isyst, "btag_lr_7j_" + sub_proc, 50, 0, 1)
                 btag_LR_7j[sub_proc + isyst].Sumw2()
+                
+                jet_count_hist[sub_proc + isyst] = ROOT.TH1F("jet_count_" + sub_proc + isyst, "jet_count_" + sub_proc + isyst, 8, 0 , 8 )
+                jet_count_hist[sub_proc + isyst].Sumw2()
+
+                btag_count_hist[sub_proc + isyst] = ROOT.TH1F("btag_count_" + sub_proc + isyst, "btag_count_" + sub_proc + isyst, 4, 0 , 4 )
+                btag_count_hist[sub_proc + isyst].Sumw2()
+                
+                category_count_hist[sub_proc + isyst] = ROOT.TH1F("cat_count_" + sub_proc + isyst, "cat_count_" + sub_proc + isyst, 4, 0 , 4 )
+                category_count_hist[sub_proc + isyst].Sumw2()
+
+                
     
     vd = initialize_tree(tree, var_list) # dictionary of variables
 
@@ -118,8 +137,6 @@ for proc, tree in t_all.iteritems():
         tree.GetEntry(i)
         #-----------------Check systematic variation-----------------
         idx_sys = vd["syst"][0] # index of syst uncertainty
-#        print idx_sys
-#        if ( idx_sys != 0 ) and not args.doSys: continue # skip systematic variations if doSys is False TEMPORARY FIXME
 
         run_variation = False # Whether or not to run paricualr systematic variation
         for idx_runsys, isyst in enumerate(do_syst):
@@ -153,21 +170,19 @@ for proc, tree in t_all.iteritems():
 
         if proc[-7:] == "Mu_data"  and not( pass_trigger_selection(vd, mode, "mu") and ( (mode=="SL" and vd["Vtype"][0]==2) or (mode=="DL" and vd["Vtype"][0]==0)) ): continue #combined trigger and lepton selection
         if proc[-7:] == "El_data" and not( pass_trigger_selection(vd, mode, "el") and ( (mode=="SL" and vd["Vtype"][0]==3) or (mode=="DL" and vd["Vtype"][0]==1)) ): continue
-        #FIXME continue if syst!=0
+        if (proc[-7:] == "Mu_data" or proc[-7:] == "El_data") and idx_sys != 0: continue # continue if syst!=0 
 
-        event_count(1, "trig", cut_flow, proc, weight, vd, idx_sys) # cut_flow: apply trigger for data
+#        event_count(1, "trig", cut_flow, proc, weight, vd, idx_sys) # cut_flow: apply trigger for data FIXME
 
         sel_lep = pass_lepton_selection(vd, mode) # count the number of good leptons and apply preselection
         if not ( len(sel_lep) ): continue
         event_count(2, "SelLep", cut_flow, proc, weight, vd, idx_sys) # cut_flow: require one lepton
         sel_jet = pass_jet_selection(vd, mode, jet40=True)
 
-             
-        if vd["numJets"][0] >= 5 and vd["numBTagM"][0] >= 2: # All-inclusive preselection #FIXME add dl >4jets plots put LR4 there
-            fill_1D_histograms( vd, hists, proc + isyst, weight, mode, isTTjets )
-            fill_lepton_histograms( vd, hists, proc + isyst, weight, mode, sel_lep, isTTjets)
-            fill_jet_histograms(vd, hists, proc + isyst, weight, mode, isTTjets = isTTjets)
-#            fill_jet_count_histograms(vd, jet_count_hist, proc + isyst, weight )
+        #jet count histograms (fill before preselection!)
+        fill_jet_count_histograms(vd, jet_count_hist, proc, isyst, weight )
+        fill_btag_count_histograms(vd, btag_count_hist, proc, isyst, weight )
+        fill_category_count_histograms(vd, category_count_hist, proc, isyst, weight )
 
         # btag LR before preselection
         if vd["numJets"][0] >= 7: # and vd["numBTagM"][0] >= 2:
@@ -189,7 +204,12 @@ for proc, tree in t_all.iteritems():
             fill_single_histogram(vd, btag_LR_5j, proc + isyst, vd["btag_LR"][0], weight, isTTjets = isTTjets)
         if vd["numJets"][0] == 4: # and vd["numBTagM"][0] >= 2:
             fill_single_histogram(vd, btag_LR_4j, proc + isyst, vd["btag_LR"][0], weight, isTTjets = isTTjets)
-        
+
+
+        if vd["numJets"][0] >= 5 and vd["numBTagM"][0] >= 2: # All-inclusive preselection #FIXME add dl >4jets plots put LR4 there
+            fill_1D_histograms( vd, hists, proc + isyst, weight, mode, isTTjets )
+            fill_lepton_histograms( vd, hists, proc + isyst, weight, mode, sel_lep, isTTjets)
+            fill_jet_histograms(vd, hists, proc + isyst, weight, mode, isTTjets = isTTjets)
         #---------------do cutfolw--------------------------
 
         if vd["numJets"][0] >= 6 and vd["numBTagM"][0] == 2:
@@ -299,7 +319,7 @@ if args.doSys:
 outfilename = outfilename + ".root"
     
 print "Write output to file: " + outfilename 
-write_histograms_to_file(outfilename, hists, [cut_flow, btag_LR_4j, btag_LR_5j, btag_LR_6j, btag_LR_7j], [pars])
+write_histograms_to_file(outfilename, hists, [cut_flow, jet_count_hist, btag_count_hist, category_count_hist, btag_LR_4j, btag_LR_5j, btag_LR_6j, btag_LR_7j], [pars])
 
         
         

@@ -29,16 +29,16 @@ hist_variables = {
  #   "jet_phi": (50, -3.15, 3.15),
 
     "numJets": (12, 0, 12),
-    "numJets_sel":(12, 0, 12),
+#    "numJets_sel":(12, 0, 12),
     
     "numBTagM": (8, 0, 8),
-    "numBTagM_sel":(8,0,8),
+#    "numBTagM_sel":(8,0,8),
     
     "numBTagL":(8, 0, 8),
     "numBTagT": (8, 0, 8),
 
-    "nPVs": (50, 0, 50)
-    
+    "nPVs": (50, 0, 50),
+
     }
 
 map_hist_variables = { # if histogram name is different from the tree entry name
@@ -110,13 +110,17 @@ variable_names = {
     "numBTagL": "Number of b-tagged jets (Loose)",
     "numBTagT": "Number of b-tagged jets (Tight)",
     
-    #            "nPVs": " # primary vertices",
+    "nPVs": " # primary vertices",
     
     #           "btag_LR": "b-tagging LR",
     "btag_lr_7j": "b-tagging LR (>= 7 jets)",
     "btag_lr_6j": "b-tagging LR (6 jets)",
     "btag_lr_5j": "b-tagging LR (5 jets)" ,
     "btag_lr_4j": "b-tagging LR (4 jets)",
+
+    "jet_count": "Nr. of jets",
+    "btag_count": "Nr. of b-tags (CSV medium)",
+    "cat_count": "Selection categories",
     }
 
 colors = {"TTJets": ROOT.kBlue,
@@ -236,8 +240,8 @@ def fill_jet_histograms(vd, hists, sample, weight, mode, jet_list = [], isTTjets
     hists[sample]["numJets"].Fill( vd["numJets"][0], weight )
     if isTTjets: fill_ttjets_histograms(vd, hists, "numJets", vd["numJets"][0], weight)
     
-    hists[sample]["numJets_sel"].Fill( len(jet_list), weight )
-    if isTTjets: fill_ttjets_histograms(vd, hists, "numJets_sel", len(jet_list), weight)
+#    hists[sample]["numJets_sel"].Fill( len(jet_list), weight )
+#    if isTTjets: fill_ttjets_histograms(vd, hists, "numJets_sel", len(jet_list), weight)
 
     for var in hists[sample]:
         if re.search("lead_jet", var):

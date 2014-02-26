@@ -126,13 +126,26 @@ for hist in variable_names:
     c = ROOT.TCanvas("c" + hist ,"c" + hist, 800, 1000)
     p1 = ROOT.TPad("p1", "p1", 0, 0.25, 1, 1)
     p1.SetBottomMargin(0)
+
+    if hist == "jet_count" or hist == "btag_count" or hist == "cat_count":
+        p1.SetLogy()    
     
     p1.Draw()
     p1.SetTicks(1, 1);
+
+#    if hist == "jet_count" or hist == "btag_count" or hist == "cat_count":
+#        p1.SetLogy()
 #    p1.SetGrid();
     p1.SetFillStyle(0);
     p1.cd()
-
+    
+    if hist == "jet_count" or hist == "btag_count" or hist == "cat_count":
+        h_sumMC.SetMinimum(0.01)
+        sum.SetMinimum(0.01)
+        mc["TTH125"].SetMinimum(0.01)
+        signal.SetMinimum(0.01)
+        data.SetMinimum(0.01)
+    
     h_sumMC.Draw("hist")
     sum.Draw("histsame")
     h_sumMC.Draw("histsame")
@@ -195,9 +208,9 @@ for hist in variable_names:
         
     std_txt = "   #sqrt{s}=8 TeV, L=19.04 fb^{-1}"
     
-    textlabel = cut + std_txt
-    if topw:
-        textlabel = cut + ", (with top p_{T} SF)" + std_txt
+    textlabel = std_txt
+#    if topw:
+#        textlabel = cut + ", (with top p_{T} SF)" + std_txt
     latex.DrawLatex(0.15, 0.975, textlabel)
 
     c.SaveAs("out_stackplots/" + mode + "/" + hist + "_" + selstr +".pdf")
