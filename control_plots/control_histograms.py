@@ -26,7 +26,8 @@ if args.DL_or_SL == "SL":
 ##indir = "test_trees/trees_2014_02_09_0-0-1_rec_std/"
 #indir = "test_trees/trees_2014_02_15_0-0-1_rec_std/"
 #indir = "test_trees/trees_2014_02_25_0-0-1_rec_std/"
-indir = "test_trees/trees_2014_02_25_0-0-1_rec_std_syst/"
+#indir = "test_trees/trees_2014_02_25_0-0-1_rec_std_syst/"
+indir = "test_trees/trees_2014_02_26_0-0-1_rec_std/"
 
 usetrig = not args.notrig
 
@@ -47,7 +48,7 @@ for sample in input_files:
 
             
 
-report_every = 10000
+report_every = 100000
 if args.is_test_run:
     max_event = 10000
 else:
@@ -95,25 +96,23 @@ for proc, tree in t_all.iteritems():
     vd = initialize_tree(tree, var_list) # dictionary of variables
 
     for i in range( tree.GetEntries() ):
-        if i % report_every == 0: 
-            print "Event nr: " + str(i)
-        if i == max_event and not i == -1: break            
 
         tree.LoadTree(i)
         tree.GetEntry(i)
+        #-----------------Check systematic variation-----------------
+        idx_sys = vd["syst"][0] # index of syst uncertainty
+#        print idx_sys
+        if ( idx_sys > 0 ) and not args.doSys: continue # skip systematic variations if doSys is False
+
         ev_weight = vd["weight"][0]
         tr_weight = vd["trigger"][0]
         pu_weight = vd["PUweight"][0]
         toppt_weight = vd["weightTopPt"][0]
-
-        #-----------------Check systematic variation-----------------
-        idx_syst = vd["syst"][0] # index of syst uncertainty
-        if ( idx_syst>0 ) and not args.doSys: continue # skip systematic variations if doSys is False
-
-        isyst = do_syst[idx_syst] # name of syst uncertainty
-#        print "idx_syst = " + str(idx_syst)
+                   
+#        isyst = do_syst[idx_sys] # name of syst uncertainty
+#        print "idx_sys = " + str(idx_sys)
 #        print "isyst = " + isyst
-#        if idx_syst == 0: print "Processing nominal sample"
+#        if idx_sys == 0: print "Processing nominal sample"
 #        else:
 #            print "Processing systematic variation: " + isyst
         #-----------------------------------------------------------
@@ -130,17 +129,17 @@ for proc, tree in t_all.iteritems():
 
 
         #-------------Select events---------------
-
-        event_count(0, "all", cut_flow, proc, weight, vd) # cut-flow: all evts
+        
+        event_count(0, "all", cut_flow, proc, weight, vd, idx_sys) # cut-flow: all evts
 
         if proc[-7:] == "Mu_data" and not( pass_trigger_selection(vd, mode, "mu") and ( (mode=="SL" and vd["Vtype"][0]==2) or (mode=="DL" and vd["Vtype"][0]==0)) ): continue #combined trigger and lepton selection
         if proc[-7:] == "El_data" and not( pass_trigger_selection(vd, mode, "el") and ( (mode=="DL" and vd["Vtype"][0]==3) or (mode=="DL" and vd["Vtype"][0]==1)) ): continue
 
-        event_count(1, "trig", cut_flow, proc, weight, vd) # cut_flow: apply trigger for data
+        event_count(1, "trig", cut_flow, proc, weight, vd, idx_sys) # cut_flow: apply trigger for data
 
         sel_lep = pass_lepton_selection(vd, mode) # count the number of good leptons and apply preselection
         if not ( len(sel_lep) ): continue
-        event_count(2, "SelLep", cut_flow, proc, weight, vd) # cut_flow: require one lepton
+        event_count(2, "SelLep", cut_flow, proc, weight, vd, idx_sys) # cut_flow: require one lepton
         sel_jet = pass_jet_selection(vd, mode, jet40=True)
 
  #       for idx, isyst in enumerate(do_syst):
@@ -174,68 +173,68 @@ for proc, tree in t_all.iteritems():
         #---------------do cutfolw--------------------------
 
         if vd["numJets"][0] >= 6 and vd["numBTagM"][0] == 2:
-            event_count(3, "g6j2t", cut_flow, proc, weight, vd ) # cut_flow, preselection
+            event_count(3, "g6j2t", cut_flow, proc, weight, vd, idx_sys ) # cut_flow, preselection
 
         if vd["numJets"][0] == 4  and vd["numBTagM"][0] == 3:
-            event_count(4, "4j3t",  cut_flow, proc,weight, vd)
+            event_count(4, "4j3t",  cut_flow, proc,weight, vd, idx_sys)
 
         if vd["numJets"][0] == 5 and vd["numBTagM"][0] == 3:
-            event_count(5, "5j3t", cut_flow, proc,weight, vd)
+            event_count(5, "5j3t", cut_flow, proc,weight, vd, idx_sys)
 
         if vd["numJets"][0] >=6 and vd["numBTagM"][0] == 3:
-            event_count(6, "g6j3t", cut_flow, proc,weight, vd)
+            event_count(6, "g6j3t", cut_flow, proc,weight, vd, idx_sys)
 
         if vd["numJets"][0] == 4 and vd["numBTagM"][0] ==4:
-            event_count(7, "4j4t", cut_flow, proc,weight, vd)
+            event_count(7, "4j4t", cut_flow, proc,weight, vd, idx_sys)
 
         if vd["numBTagM"][0] ==4:
-            event_count(8, "g4j4t", cut_flow, proc,weight, vd)
+            event_count(8, "g4j4t", cut_flow, proc,weight, vd, idx_sys)
 
         if vd["numJets"][0] ==5 and vd["numBTagM"][0] >=4:
-            event_count(9, "5jg4t", cut_flow, proc,weight, vd)
+            event_count(9, "5jg4t", cut_flow, proc,weight, vd, idx_sys)
 
         if vd["numJets"][0] >=6 and vd["numBTagM"][0] >=4:
-            event_count(10, "g6jg4t", cut_flow, proc,weight, vd)
+            event_count(10, "g6jg4t", cut_flow, proc,weight, vd, idx_sys)
 
         #------lorenzo categories-----------
 
         if vd["numJets"][0] ==6 and vd["numBTagM"][0] >=4: # cat 1, 2
-            event_count(11, "L6jg4t", cut_flow, proc,weight, vd)
+            event_count(11, "L6jg4t", cut_flow, proc,weight, vd, idx_sys)
 
         if vd["numJets"][0] >= 7 and vd["numBTagM"][0] >= 4: # cat 5
-            event_count(24, "Lg7jg4t", cut_flow, proc, weight, vd)
+            event_count(24, "Lg7jg4t", cut_flow, proc, weight, vd, idx_sys)
 
         if vd["numJets"][0] ==5 and vd["numBTagM"][0] >= 4: # cat 3, 4
-            event_count(12, "L5jg4t", cut_flow, proc,weight, vd)
+            event_count(12, "L5jg4t", cut_flow, proc,weight, vd, idx_sys)
 
         if vd["numJets"][0] ==6 and vd["numBTagM"][0] ==4: # cat 1, 2
-            event_count(13, "L6j4t", cut_flow, proc,weight, vd)
+            event_count(13, "L6j4t", cut_flow, proc,weight, vd, idx_sys)
 
         if vd["numJets"][0] >= 7 and vd["numBTagM"][0] == 4: # cat 5
-            event_count(14, "Lg7j4t", cut_flow, proc, weight, vd)
+            event_count(14, "Lg7j4t", cut_flow, proc, weight, vd, idx_sys)
 
         if vd["numJets"][0] ==5 and vd["numBTagM"][0] == 4: # cat 3, 4
-            event_count(15, "L5j4t", cut_flow, proc,weight, vd)
+            event_count(15, "L5j4t", cut_flow, proc,weight, vd, idx_sys)
             
         if vd["numBTagM"][0] >=4:
-            event_count(16, "g4t", cut_flow, proc,weight, vd)
+            event_count(16, "g4t", cut_flow, proc,weight, vd, idx_sys)
             
         if vd["numBTagM"][0] ==3 and vd["numBTagL"][0]==4:
-            event_count(17, "3t1t", cut_flow, proc,weight, vd)
+            event_count(17, "3t1t", cut_flow, proc,weight, vd, idx_sys)
             
         #------according to event type --------
         if vd["type"][0] == 0:
-            event_count(18, "cat1", cut_flow, proc, weight, vd)
+            event_count(18, "cat1", cut_flow, proc, weight, vd, idx_sys)
         if vd["type"][0] == 1:
-            event_count(19, "cat2", cut_flow, proc, weight, vd)
+            event_count(19, "cat2", cut_flow, proc, weight, vd, idx_sys)
         if vd["type"][0] == 2:
-            event_count(20, "cat3_4", cut_flow, proc, weight, vd)
+            event_count(20, "cat3_4", cut_flow, proc, weight, vd, idx_sys)
         if vd["type"][0] == 3:
-            event_count(21, "cat5", cut_flow, proc, weight,vd)
+            event_count(21, "cat5", cut_flow, proc, weight,vd, idx_sys)
         if vd["type"][0] == 6:
-            event_count(22, "cat6", cut_flow, proc, weight,vd)
+            event_count(22, "cat6", cut_flow, proc, weight,vd, idx_sys)
         if vd["type"][0] == 7:
-            event_count(23, "cat7", cut_flow, proc, weight,vd)
+            event_count(23, "cat7", cut_flow, proc, weight,vd, idx_sys)
 
     print "--------- CUT FLOW ------------- "
     print "Nr tot = "+  str(cut_flow[proc].GetBinContent(1))

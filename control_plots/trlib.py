@@ -7,7 +7,7 @@ jet_vars_f = ["jet_pt", "jet_eta", "jet_phi", "jet_csv"]
 
 #----------------separate by type---------------------
 int_list = ["nLep", "numJets", "numBTagL", "numBTagM", "numBTagT", "nPVs", "nSimBs", "nMatchSimBs", "flag_type0", "type", "Vtype"]
-int_array_list = ["lepton_type"]
+int_array_list = ["lepton_type", "syst"]
 float_list = ["weight", "trigger", "PUweight", "weightTopPt", "MET_pt", "MET_phi", "btag_LR"] 
 float_array_list = lepton_vars_f  + jet_vars_f #lepton_vars_d + jet_vars_d
 trigger = ["triggerFlags"]
@@ -53,8 +53,9 @@ def pass_trigger_selection(  vd, mode, dataset ):
     if mode=="SL":
         if dataset == "mu" and ( 
             vd["triggerFlags"][22]>0       # HLT_Mu40_eta2p1
-            or vd["triggerFlags"][23]>0):    # HLT_IsoMu24_eta2p1 
-     #       or vd["triggerFlags"][14]>0    # HLT_IsoMu24
+            or vd["triggerFlags"][23]>0    # HLT_IsoMu24_eta2p1 
+            or vd["triggerFlags"][47]>0 ):   # HLT_IsoMu24
+            
      #       or vd["triggerFlags"][21]>0):  # HLT_Mu40
             
             pass_trigger_sel = True
@@ -65,7 +66,7 @@ def pass_trigger_selection(  vd, mode, dataset ):
 
     elif mode=="DL":
         if dataset == "el" and ( 
-            vd["triggerFlags"][44] > 0 ) : # HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v
+            vd["triggerFlags"][6] > 0 ) : # HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v
             pass_trigger_sel = True
 
         elif dataset == "mu" and ( #same as single mu
@@ -187,17 +188,21 @@ def bjet_presel(vd, jet_list = [], WP = "M" ):
 
     return passlist
 
-def event_count(ncut, binlabel, cut_flow_hists, proc, weight, vd ):
-    cut_flow_hists[proc].GetXaxis().SetBinLabel(ncut+1, binlabel)
-    cut_flow_hists[proc].Fill(ncut,weight)
-
-    if proc == "TTJets":
-        if vd["nSimBs"][0] > 2 and vd["nMatchSimBs"][0] > 1:
-            cut_flow_hists["ttbb"].GetXaxis().SetBinLabel(ncut+1, binlabel)
-            cut_flow_hists["ttbb"].Fill(ncut, weight)
-        elif vd["nSimBs"][0] > 2 and vd["nMatchSimBs"][0] < 2:
-            cut_flow_hists["ttb"].GetXaxis().SetBinLabel(ncut+1, binlabel)
-            cut_flow_hists["ttb"].Fill(ncut, weight)
-        elif vd["nSimBs"][0] == 2:
-            cut_flow_hists["ttjj"].GetXaxis().SetBinLabel(ncut+1, binlabel)
-            cut_flow_hists["ttjj"].Fill(ncut, weight)
+def event_count(ncut, binlabel, cut_flow_hists, proc, weight, vd, idx_sys = 0):
+    """
+    idx_sys -- only fill nominal FIXME
+    """
+    if idx_sys == 0: 
+        cut_flow_hists[proc].GetXaxis().SetBinLabel(ncut+1, binlabel)
+        cut_flow_hists[proc].Fill(ncut,weight)
+    
+        if proc == "TTJets":
+            if vd["nSimBs"][0] > 2 and vd["nMatchSimBs"][0] > 1:
+                cut_flow_hists["ttbb"].GetXaxis().SetBinLabel(ncut+1, binlabel)
+                cut_flow_hists["ttbb"].Fill(ncut, weight)
+            elif vd["nSimBs"][0] > 2 and vd["nMatchSimBs"][0] < 2:
+                cut_flow_hists["ttb"].GetXaxis().SetBinLabel(ncut+1, binlabel)
+                cut_flow_hists["ttb"].Fill(ncut, weight)
+            elif vd["nSimBs"][0] == 2:
+                cut_flow_hists["ttjj"].GetXaxis().SetBinLabel(ncut+1, binlabel)
+                cut_flow_hists["ttjj"].Fill(ncut, weight)
