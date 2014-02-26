@@ -192,7 +192,7 @@ def event_count(ncut, binlabel, cut_flow_hists, proc, weight, vd, idx_sys = 0):
     """
     idx_sys -- only fill nominal FIXME
     """
-    if idx_sys == 0: 
+    if idx_sys == 0: #FIXME
         cut_flow_hists[proc].GetXaxis().SetBinLabel(ncut+1, binlabel)
         cut_flow_hists[proc].Fill(ncut,weight)
     

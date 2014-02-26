@@ -27,8 +27,7 @@ if args.DL_or_SL == "SL":
 ##indir = "test_trees/trees_2014_02_09_0-0-1_rec_std/"
 #indir = "test_trees/trees_2014_02_15_0-0-1_rec_std/"
 #indir = "test_trees/trees_2014_02_25_0-0-1_rec_std/"
-#indir = "test_trees/trees_2014_02_25_0-0-1_rec_std_syst/"
-indir = "test_trees/trees_2014_02_26_0-0-1_rec_std/"
+indir = "test_trees/trees_2014_02_26_0-0-1_rec_std_syst/"
 
 usetrig = not args.notrig
 
@@ -56,7 +55,8 @@ else:
     max_event = -1
 
 if args.doSys:
-    do_syst = ["","_CSVup","_CSVdown", "_JECup", "_JECdown", "_JERup", "_JERdown"] #
+    do_syst = ["", "_CSVup"]
+#    do_syst = ["","_CSVup","_CSVdown", "_JECup", "_JECdown", "_JERup", "_JERdown"] #
 else:
     do_syst = [""]
 
@@ -79,8 +79,8 @@ for proc, tree in t_all.iteritems():
         cut_flow[proc + isyst] = ROOT.TH1F("cut_flow_" + proc + isyst, "cut_flow_" + proc + isyst, 25, 0 , 25 )
         cut_flow[proc + isyst].Sumw2()
 
-#        jet_count_hist[proc +isyst] = ROOT.TH1F("jet_count_" + proc + isyst, "jet_count_" + proc + isyst, 25, 0 , 25 )
-#        jet_count_hist[proc + isyst].Sumw2()
+        jet_count_hist[proc + isyst] = ROOT.TH1F("jet_count_" + proc + isyst, "jet_count_" + proc + isyst, 25, 0 , 25 )
+        jet_count_hist[proc + isyst].Sumw2()
 
         btag_LR_4j[proc + isyst] = ROOT.TH1F("btag_lr_4j_" + proc + isyst, "btag_lr_4j_" + proc, 50, 0, 1)
         btag_LR_4j[proc + isyst].Sumw2()
@@ -119,19 +119,21 @@ for proc, tree in t_all.iteritems():
         #-----------------Check systematic variation-----------------
         idx_sys = vd["syst"][0] # index of syst uncertainty
 #        print idx_sys
-        if ( idx_sys != 0 ) and not args.doSys: continue # skip systematic variations if doSys is False TEMPORARY FIXME
+#        if ( idx_sys != 0 ) and not args.doSys: continue # skip systematic variations if doSys is False TEMPORARY FIXME
 
+        run_variation = False # Whether or not to run paricualr systematic variation
+        for idx_runsys, isyst in enumerate(do_syst):
+            if idx_runsys == idx_sys: run_variation = True
+        if not run_variation: continue
+
+#        print "running systematic" + do_syst[idx_sys]
+        isyst = do_syst[idx_sys] # name of syst uncertainty
+    
         ev_weight = vd["weight"][0]
         tr_weight = vd["trigger"][0]
         pu_weight = vd["PUweight"][0]
         toppt_weight = vd["weightTopPt"][0]
                    
-#        isyst = do_syst[idx_sys] # name of syst uncertainty
-#        print "idx_sys = " + str(idx_sys)
-#        print "isyst = " + isyst
-#        if idx_sys == 0: print "Processing nominal sample"
-#        else:
-#            print "Processing systematic variation: " + isyst
         #-----------------------------------------------------------
 
         if proc[-4:] == "data":
@@ -149,8 +151,9 @@ for proc, tree in t_all.iteritems():
         
         event_count(0, "all", cut_flow, proc, weight, vd, idx_sys) # cut-flow: all evts
 
-        if proc[-7:] == "Mu_data" and not( pass_trigger_selection(vd, mode, "mu") and ( (mode=="SL" and vd["Vtype"][0]==2) or (mode=="DL" and vd["Vtype"][0]==0)) ): continue #combined trigger and lepton selection
+        if proc[-7:] == "Mu_data"  and not( pass_trigger_selection(vd, mode, "mu") and ( (mode=="SL" and vd["Vtype"][0]==2) or (mode=="DL" and vd["Vtype"][0]==0)) ): continue #combined trigger and lepton selection
         if proc[-7:] == "El_data" and not( pass_trigger_selection(vd, mode, "el") and ( (mode=="SL" and vd["Vtype"][0]==3) or (mode=="DL" and vd["Vtype"][0]==1)) ): continue
+        #FIXME continue if syst!=0
 
         event_count(1, "trig", cut_flow, proc, weight, vd, idx_sys) # cut_flow: apply trigger for data
 
