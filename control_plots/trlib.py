@@ -6,7 +6,7 @@ lepton_vars_f = ["lepton_pt", "lepton_eta", "lepton_rIso", "lepton_charge"]
 jet_vars_f = ["jet_pt", "jet_eta", "jet_phi", "jet_csv"]
 
 #----------------separate by type---------------------
-int_list = ["nLep", "numJets", "numBTagL", "numBTagM", "numBTagT", "nPVs", "nSimBs", "nMatchSimBs", "flag_type0", "type", "Vtype"]
+int_list = ["nLep", "numJets", "numBTagL", "numBTagM", "numBTagT", "nPVs", "nSimBs", "nMatchSimBs", "flag_type0", "type", "Vtype", "flag_type2"]
 int_array_list = ["lepton_type", "syst"]
 float_list = ["weight", "trigger", "PUweight", "weightTopPt", "MET_pt", "MET_phi", "btag_LR"] 
 float_array_list = lepton_vars_f  + jet_vars_f #lepton_vars_d + jet_vars_d

@@ -93,11 +93,11 @@ def fill_btag_count_histograms(vd, jet_count_hists, proc, syst, weight):
         if proc[:6] == "TTJets":
             fill_ttjets_histograms_singlevar(vd, jet_count_hists, 3, "5 b-tag", syst, weight)
             
-    elif vd["numBTagM"][0] ==6:
-        jet_count_hists[proc + syst].GetXaxis().SetBinLabel( 5, "6 b-tag")
-        jet_count_hists[proc + syst].Fill(4, weight)
-        if proc[:6] == "TTJets":
-            fill_ttjets_histograms_singlevar(vd, jet_count_hists, 4, "6 b-tag", syst, weight)
+#    elif vd["numBTagM"][0] ==6:
+#        jet_count_hists[proc + syst].GetXaxis().SetBinLabel( 5, "6 b-tag")
+#        jet_count_hists[proc + syst].Fill(4, weight)
+#        if proc[:6] == "TTJets":
+#            fill_ttjets_histograms_singlevar(vd, jet_count_hists, 4, "6 b-tag", syst, weight)
 
 def fill_category_count_histograms(vd, jet_count_hists, proc, syst, weight):
             
@@ -120,9 +120,9 @@ def fill_category_count_histograms(vd, jet_count_hists, proc, syst, weight):
             fill_ttjets_histograms_singlevar(vd, jet_count_hists, 2, "6j >3t", syst, weight)
         
     if vd["numJets"][0] == 7 and vd["numBTagM"][0] >=4:
-        jet_count_hists[proc + syst].GetXaxis().SetBinLabel( 4, ">7j >4t")
+        jet_count_hists[proc + syst].GetXaxis().SetBinLabel( 4, ">7j >3t")
         jet_count_hists[proc + syst].Fill(3, weight)
         if proc[:6] == "TTJets":
-            fill_ttjets_histograms_singlevar(vd, jet_count_hists, 3, ">7j >2t", syst, weight)
+            fill_ttjets_histograms_singlevar(vd, jet_count_hists, 3, ">7j >3t", syst, weight)
         
 

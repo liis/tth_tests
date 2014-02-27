@@ -63,8 +63,8 @@ map_hist_variables = { # if histogram name is different from the tree entry name
     "lead_jet_eta": "jet_eta",
     "lead_jet_phi": "jet_phi",
 
-    "numBTagM_sel": "numBTagM",
-    "numJets_sel": "numJets",
+#    "numBTagM_sel": "numBTagM",
+#    "numJets_sel": "numJets",
 
     "btag_lr_7j": "btag_LR",
     "btag_lr_6j": "btag_LR",
@@ -174,33 +174,33 @@ def write_histograms_to_file(outfilename, hists, additional_hist_per_sample = []
 
     p.Close()
 
-def fill_ttjets_histograms( vd, hists, varname, var, weight ):
+def fill_ttjets_histograms( vd, hists, varname, var, syst, weight ):
     """
     Apply gen level filter to separate subprocesses of ttjj. Seva histograms separately
     """
     if vd["nSimBs"][0] > 2 and vd["nMatchSimBs"][0] > 1:
-        hists["ttbb"][varname].Fill(var, weight)
+        hists["ttbb" + syst][varname].Fill(var, weight)
 
     elif vd["nSimBs"][0] > 2 and vd["nMatchSimBs"][0] < 2:
-        hists["ttb"][varname].Fill(var, weight)
+        hists["ttb" + syst][varname].Fill(var, weight)
 
     elif vd["nSimBs"][0] == 2:
-        hists["ttjj"][varname].Fill(var, weight)
+        hists["ttjj" + syst][varname].Fill(var, weight)
 
-def fill_single_histogram(vd, hist, proc, var, weight, isTTjets = False):
-    hist[proc].Fill(var, weight)
+def fill_single_histogram(vd, hist, proc, var, syst, weight, isTTjets = False):
+    hist[proc + syst].Fill(var, weight)
     if isTTjets:
         if vd["nSimBs"][0] > 2 and vd["nMatchSimBs"][0] > 1:
-            hist["ttbb"].Fill(var, weight)
+            hist["ttbb" + syst].Fill(var, weight)
 
         elif vd["nSimBs"][0] > 2 and vd["nMatchSimBs"][0] < 2:
-            hist["ttb"].Fill(var, weight)
+            hist["ttb" + syst].Fill(var, weight)
 
         elif vd["nSimBs"][0] == 2:
-            hist["ttjj"].Fill(var, weight)
+            hist["ttjj" + syst].Fill(var, weight)
         
 
-def fill_1D_histograms( vd, hists, sample, weight, mode, isTTjets = False):
+def fill_1D_histograms( vd, hists, sample, syst, weight, mode, isTTjets = False):
     
     for var in hists[sample]: # loop over dictionary of histograms for a specific datasample
         try:
@@ -211,11 +211,11 @@ def fill_1D_histograms( vd, hists, sample, weight, mode, isTTjets = False):
             var_size = len(vd[var_tree])
             
         if var_size == 1:
-            hists[sample][var].Fill(vd[var_tree][0], weight)
-            if isTTjets: fill_ttjets_histograms(vd, hists, var, vd[var_tree][0], weight) 
+            hists[sample+syst][var].Fill(vd[var_tree][0], weight)
+            if isTTjets: fill_ttjets_histograms(vd, hists, var, vd[var_tree][0], syst, weight) 
 
 
-def fill_lepton_histograms(vd, hists, sample, weight, mode, lepton_list = [], isTTjets = False):
+def fill_lepton_histograms(vd, hists, sample, syst, weight, mode, lepton_list = [], isTTjets = False):
 
     if len(lepton_list) == 0: # if not specified, consider all leptons
         lepton_list = range(vd["nLep"][0])
@@ -224,21 +224,21 @@ def fill_lepton_histograms(vd, hists, sample, weight, mode, lepton_list = [], is
         if (  re.search("electron",var) and vd["lepton_type"][0] == 11 ) or (  re.search("muon",var) and vd["lepton_type"][0] == 13 ): 
             
             if re.search("lead", var): # fill histograms for leading leptons
-                hists[sample][var].Fill(vd[ map_hist_variables[var] ][ lepton_list[0] ], weight)
-                if isTTjets: fill_ttjets_histograms(vd, hists, var, vd[ map_hist_variables[var] ][ lepton_list[0] ], weight)
+                hists[sample+syst][var].Fill(vd[ map_hist_variables[var] ][ lepton_list[0] ], weight)
+                if isTTjets: fill_ttjets_histograms(vd, hists, var, vd[ map_hist_variables[var] ][ lepton_list[0] ], syst, weight)
 
             elif mode == "DL" and re.search("trail", var): # fill histograms for trailing leptons
-                hists[sample][var].Fill(vd[ map_hist_variables[var] ][ lepton_list[1] ], weight)
-                if isTTjets: fill_ttjets_histograms(vd, hists, var, vd[ map_hist_variables[var] ][ lepton_list[1] ], weight)
+                hists[sample+syst][var].Fill(vd[ map_hist_variables[var] ][ lepton_list[1] ], weight)
+                if isTTjets: fill_ttjets_histograms(vd, hists, var, vd[ map_hist_variables[var] ][ lepton_list[1] ], syst, weight)
 
 
-def fill_jet_histograms(vd, hists, sample, weight, mode, jet_list = [], isTTjets = False):
+def fill_jet_histograms(vd, hists, sample, syst, weight, mode, jet_list = [], isTTjets = False):
     
     if len(jet_list) == 0:
         jet_list = range(vd["numJets"][0])
 
-    hists[sample]["numJets"].Fill( vd["numJets"][0], weight )
-    if isTTjets: fill_ttjets_histograms(vd, hists, "numJets", vd["numJets"][0], weight)
+    hists[sample + syst]["numJets"].Fill( vd["numJets"][0], weight )
+    if isTTjets: fill_ttjets_histograms(vd, hists, "numJets", vd["numJets"][0], syst, weight)
     
 #    hists[sample]["numJets_sel"].Fill( len(jet_list), weight )
 #    if isTTjets: fill_ttjets_histograms(vd, hists, "numJets_sel", len(jet_list), weight)
@@ -246,8 +246,8 @@ def fill_jet_histograms(vd, hists, sample, weight, mode, jet_list = [], isTTjets
     for var in hists[sample]:
         if re.search("lead_jet", var):
             var_tree = map_hist_variables[var]
-            hists[sample][var].Fill( vd[var_tree][2], weight) # pick leading jet after lepton [0] and MET [1]
-            if isTTjets: fill_ttjets_histograms(vd, hists, var, vd[var_tree][2], weight)
+            hists[sample + syst][var].Fill( vd[var_tree][2], weight) # pick leading jet after lepton [0] and MET [1]
+            if isTTjets: fill_ttjets_histograms(vd, hists, var, vd[var_tree][2], syst, weight)
 
           #  elif( re.search("jet_", var) ):
           #      for ijet in jet_list:
@@ -276,12 +276,15 @@ def fill_cut_flow(cuts, cf_hist, lf = 1, tablewidth = 0):
 
         print str( round( nr_evts, round_prec) ) + " $\pm$ " + str( round( cf_hist.GetBinError(bin_nr), round_prec ) ),
 
-def set_file_name(file_name_base, mctrig, topw):
+def set_file_name(file_name_base, mctrig, topw, dosys=False):
     infile = file_name_base
     if not mctrig:
         infile = infile + "_notrig"
     if not topw:
         infile = infile + "_notopw"
+    if dosys:
+        infile = infile + "_withSys"
+
     infile = infile + ".root"
     return infile
 

@@ -78,7 +78,7 @@ for proc, tree in t_all.iteritems():
 
     for isyst in do_syst:
         hists[proc + isyst] = initialize_histograms(proc, hist_variables, isyst) # dictionary of initialized histograms for each sample
-        cut_flow[proc + isyst] = ROOT.TH1F("cut_flow_" + proc + isyst, "cut_flow_" + proc + isyst, 35, 0 , 35 )
+        cut_flow[proc + isyst] = ROOT.TH1F("cut_flow_" + proc + isyst, "cut_flow_" + proc + isyst, 25, 0 , 25 )
         cut_flow[proc + isyst].Sumw2()
 
         jet_count_hist[proc + isyst] = ROOT.TH1F("jet_count_" + proc + isyst, "jet_count_" + proc + isyst, 6, 0 , 6 )
@@ -103,7 +103,7 @@ for proc, tree in t_all.iteritems():
             isTTjets = True
             for sub_proc in ["ttbb", "ttb", "ttjj"]:
                 hists[sub_proc + isyst] = initialize_histograms(sub_proc, hist_variables, isyst)
-                cut_flow[sub_proc + isyst] = ROOT.TH1F("cut_flow_" + sub_proc + isyst, "cut_flow_" + sub_proc, 35, 0, 35)
+                cut_flow[sub_proc + isyst] = ROOT.TH1F("cut_flow_" + sub_proc + isyst, "cut_flow_" + sub_proc, 25, 0, 25)
                 cut_flow[sub_proc + isyst].Sumw2()
 
                 btag_LR_4j[sub_proc + isyst] = ROOT.TH1F("btag_lr_4j_" + sub_proc + isyst, "btag_lr_4j_" + sub_proc, 50, 0, 1)
@@ -205,7 +205,7 @@ for proc, tree in t_all.iteritems():
         if vd["numJets"][0] == 4: # and vd["numBTagM"][0] >= 2:
             fill_single_histogram(vd, btag_LR_4j, proc, vd["btag_LR"][0], isyst, weight, isTTjets = isTTjets)
 
-        if vd["numJets"][0] >= 5 and vd["numBTagM"][0] >= 2: # All-inclusive preselection #FIXME add dl >4jets plots put LR4 there
+        if vd["numJets"][0] >= 2 and vd["numBTagM"][0] >= 2: # All-inclusive preselection #FIXME add dl >4jets plots put LR4 there
             fill_1D_histograms( vd, hists, proc, isyst, weight, mode, isTTjets )
             fill_lepton_histograms( vd, hists, proc, isyst, weight, mode, sel_lep, isTTjets)
             fill_jet_histograms(vd, hists, proc, isyst, weight, mode, isTTjets = isTTjets)
@@ -274,21 +274,6 @@ for proc, tree in t_all.iteritems():
             event_count(22, "cat6", cut_flow, proc, weight,vd, idx_sys)
         if vd["type"][0] == 7:
             event_count(23, "cat7", cut_flow, proc, weight,vd, idx_sys)
-
-        if vd["type"][0] == 2 and vd["flag_type2"][0] == 2:
-            event_count(24, "cat3", cut_flow, proc, weight, vd, idx_sys)
-        if vd["type"][0] ==2 and vd["flag_type2"][0] != 2:
-            event_count(25, "cat4", cut_flow, proc, weight, vd, idx_sys)
-                       
-        #------------additional-----------------
-        if vd["numJets"][0] ==3 and vd["numBTagM"][0] != 2:
-            event_count(26, "3j2t", cut_flow, proc, weight,vd, idx_sys)
-            
-        if vd["numJets"][0] >=4 and vd["numBTagM"][0]==2:
-            event_count(27, "g4j2t", cut_flow, proc, weight,vd, idx_sys)
-
-        if vd["numBTagM"][0]>=3:
-            event_count(28, "g3t", cut_flow, proc, weight,vd, idx_sys)
 
     print "--------- CUT FLOW ------------- "
     print "Nr tot = "+  str(cut_flow[proc].GetBinContent(1))

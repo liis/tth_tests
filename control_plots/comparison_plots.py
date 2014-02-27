@@ -2,12 +2,15 @@ import ROOT, sys, os
 import tdrstyle
 tdrstyle.tdrstyle()
 from histlib import variable_names, colors, set_file_name, get_ratio
+from systematics import find_sum_sys
+
 import argparse
 parser = argparse.ArgumentParser()
 parser.add_argument('--mode', dest='mode',  choices=["DL", "SL"], required=True, help="specify DL or SL analysis")
 parser.add_argument('--sel', dest='sel', choices=["presel","presel_2b"], required=True, help="Specify the preselection level" )
 parser.add_argument('--notrig', dest="notrig", action="store_true", default=False, required=False) # dont apply trigger on MC sel
 parser.add_argument('--notopw', dest="notopw", action="store_true", default=False, required=False) # dont apply toppt weight    
+parser.add_argument('--doSys', dest="doSys", action="store_true", default=False, required=False) # draw with systematics band
 args = parser.parse_args()
 
 mode = args.mode
@@ -29,11 +32,13 @@ if sel == "presel_2b":
 indir = "histograms/"
 
 if mode=="SL":
-    infile = set_file_name("histograms_presel_2b_SL", mctrig, topw)
+    infile = set_file_name("histograms_presel_2b_SL", mctrig, topw, args.doSys)
 if mode=="DL":
-    infile = set_file_name("histograms_presel_2b_DL", mctrig, topw)
+    infile = set_file_name("histograms_presel_2b_DL", mctrig, topw, args.doSys)
 
 print "opening input file:" + indir + infile
+
+#infile = "histograms_presel_2b_SL_notopw_withSys_useThisone.root"
 h = ROOT.TFile(indir + infile)
 mc = {}
 
@@ -42,8 +47,15 @@ if mode == "DL":
 else:
     nrebin = 1
 
+
 for hist in variable_names:
     hist_to_plot = hist
+
+#-----------------------------systematics--------------------------------
+#    if args.doSys: #dictionary for sys variation of each process
+#        sys_up = find_sum_sys(h, ["CSVup", "JECup", "JERup"], hist)
+
+        
     print "Plotting histogram for variable: " + hist_to_plot
     
     if mode=="SL":
@@ -80,6 +92,7 @@ for hist in variable_names:
         mc["ttbb"] = h.Get("ttbb/" + hist_to_plot + "_ttbb")
     
 
+    
     for key in mc:
         print "Starting MC process: " + key
         if not (hist_to_plot[:3] == "num"):
@@ -109,7 +122,10 @@ for hist in variable_names:
     for sample in mc:
         if not sample=="TTH125" and not sample=="TTV":
             h_sumMC.Add(mc[sample])
-            
+
+
+#    sys_up.Add(h_sumMC) # add total MC systematic to sumMC
+    
     h_sumMC.SetTitle("")  
     h_sumMC.SetStats(False)
     h_sumMC.SetLineWidth(2)
@@ -133,20 +149,19 @@ for hist in variable_names:
     p1.Draw()
     p1.SetTicks(1, 1);
 
-#    if hist == "jet_count" or hist == "btag_count" or hist == "cat_count":
-#        p1.SetLogy()
-#    p1.SetGrid();
     p1.SetFillStyle(0);
     p1.cd()
     
     if hist == "jet_count" or hist == "btag_count" or hist == "cat_count":
-        h_sumMC.SetMinimum(0.01)
+        h_sumMC.SetMinimum(1)
+        h_sumMC.SetMaximum(150500)
         sum.SetMinimum(0.01)
         mc["TTH125"].SetMinimum(0.01)
         signal.SetMinimum(0.01)
         data.SetMinimum(0.01)
     
     h_sumMC.Draw("hist")
+   # sys_up.Draw("histsame")
     sum.Draw("histsame")
     h_sumMC.Draw("histsame")
     mc["TTH125"].SetLineColor(ROOT.kBlack)

@@ -10,15 +10,15 @@ parser.add_argument('--notrig', dest="notrig", action="store_true", default=Fals
 parser.add_argument('--notopw', dest="notopw", action="store_true", default=False, required=False) # dont apply top pt weight
 args = parser.parse_args()
 
-an = "ttHbl" 
+sys = False
 mode = "SL"
 mctrig = not args.notrig
 topw = not args.notopw
 
 if mode == "SL":
-    infile = set_file_name("histograms_presel_2b_SL", mctrig, topw)
+    infile = set_file_name("histograms_presel_2b_SL", mctrig, topw, sys)
 elif mode == "DL":
-    infile = set_file_name("histograms_presel_2b_DL", mctrig, topw)
+    infile = set_file_name("histograms_presel_2b_DL", mctrig, topw, sys)
 
 standalone = True
 
@@ -49,7 +49,7 @@ if mode == "SL":
     data_mu = f.Get("singleMu_data/cut_flow_singleMu_data") # get cut-flow of data
     data_el = f.Get("singleEl_data/cut_flow_singleEl_data")
 if mode == "DL":
-    data_mu = f.Get("diMu_data/cut_flow_diMu_data") # get cut-flow of data
+    danta_mu = f.Get("diMu_data/cut_flow_diMu_data") # get cut-flow of data
     data_el = f.Get("diEl_data/cut_flow_diEl_data")
 
 data = data_mu.Clone("data")
@@ -80,17 +80,18 @@ cuts_L_SL["Lg7j4t"] = "$\ge$7j 4t"
 #cuts_L_SL["Lg7jg4t"] = "$\ge$7j $\ge$4t"
 
 cuts_L_DL = dict()
-cuts_L_DL["cat6"] = "Cat. 6"
-cuts_L_DL["cat7"] = "Cat. 7"
+cuts_L_DL["4j2t"] = "4j 2t"
+cuts_L_DL["4j3t"] = "4j 3t" 
+cuts_L_DL["4j4t"] = "4j $\ge$4t"
 
-if an == "ttHbl":
-    if mode == "SL":
-        cuts = cuts_ttHbl_SL
-elif an == "L":
-    if mode == "SL":
-        cuts = cuts_L_SL
+
+if mode == "SL":
+    cuts = cuts_ttHbl_SL
+
+elif mode == "DL":
+    cuts = cuts_L_DL
 else:
-    print "Specify correct analysis type"
+    print "Specify SL or DL"
     sys.exit()
 
 table_size = len(cuts)
