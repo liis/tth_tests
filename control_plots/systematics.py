@@ -53,7 +53,7 @@ def find_sum_sys( h, list_of_sys, hist):
             print "mean = " + str(sum_err2[proc].GetMean())
 
         sys_tot[proc] = sum_err2[proc].Clone("sys_tot")
-        for ibin in range(sum_err2[proc].GetNbinsX()):
+        for ibin in range(sum_err2[proc].GetNbinsX()+1):
             isys_sum = sum_err2[proc].GetBinContent(ibin)
             sys_tot[proc].SetBinContent(ibin, math.sqrt(isys_sum) )
 

@@ -125,6 +125,11 @@ for hist in variable_names:
     if args.doSys: #dictionary for sys variation of each process
         sys_up = find_sum_sys(h, ["CSVup", "JECup", "JERup"], hist)
         sys_up.Add(h_sumMC) # add total MC systematic to sumMC
+
+        sys_down = find_sum_sys(h, ["CSVdown", "JECdown", "JERdown"], hist)
+        sys_down.Scale(-1)
+        sys_down.Add(h_sumMC)
+        
     
     h_sumMC.SetTitle("")  
     h_sumMC.SetStats(False)
@@ -204,10 +209,15 @@ for hist in variable_names:
     p2.cd()
 
     #--------------
-    
-    
+
     hist_ratio = get_ratio(data, h_sumMC, "Data/MC")
+    if args.doSys:
+        hist_ratio_up = get_ratio(sys_up, h_sumMC)
+        hist_ratio_down = get_ratio(sys_down, h_sumMC)
+    
     hist_ratio.Draw("p0e1")
+    hist_ratio_up.Draw("histsame")
+    hist_ratio_down.Draw("histsame")
     c.cd()
 
     latex = ROOT.TLatex()
