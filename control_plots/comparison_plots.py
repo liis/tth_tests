@@ -38,7 +38,6 @@ if mode=="DL":
 
 print "opening input file:" + indir + infile
 
-#infile = "histograms_presel_2b_SL_notopw_withSys_useThisone.root"
 h = ROOT.TFile(indir + infile)
 mc = {}
 
@@ -52,10 +51,9 @@ for hist in variable_names:
     hist_to_plot = hist
 
 #-----------------------------systematics--------------------------------
-#    if args.doSys: #dictionary for sys variation of each process
-#        sys_up = find_sum_sys(h, ["CSVup", "JECup", "JERup"], hist)
+    if args.doSys: #dictionary for sys variation of each process
+        sys_up = find_sum_sys(h, ["CSVup", "JECup", "JERup"], hist)
 
-        
     print "Plotting histogram for variable: " + hist_to_plot
     
     if mode=="SL":
@@ -124,7 +122,9 @@ for hist in variable_names:
             h_sumMC.Add(mc[sample])
 
 
-#    sys_up.Add(h_sumMC) # add total MC systematic to sumMC
+    if args.doSys: #dictionary for sys variation of each process
+        sys_up = find_sum_sys(h, ["CSVup", "JECup", "JERup"], hist)
+        sys_up.Add(h_sumMC) # add total MC systematic to sumMC
     
     h_sumMC.SetTitle("")  
     h_sumMC.SetStats(False)
@@ -161,7 +161,9 @@ for hist in variable_names:
         data.SetMinimum(0.01)
     
     h_sumMC.Draw("hist")
-   # sys_up.Draw("histsame")
+    if args.doSys:
+        sys_up.Draw("histsame")
+
     sum.Draw("histsame")
     h_sumMC.Draw("histsame")
     mc["TTH125"].SetLineColor(ROOT.kBlack)
