@@ -42,7 +42,7 @@ h = ROOT.TFile(indir + infile)
 mc = {}
 
 if mode == "DL":
-    nrebin = 2
+    nrebin = 1
 else:
     nrebin = 1
 
@@ -61,7 +61,7 @@ for hist in variable_names:
         data_el = h.Get("singleEl_data/" + hist_to_plot + "_singleEl_data")
         data = data_mu.Clone("data")
         data.Add(data_el)
-        if not (hist_to_plot[:3] == "num"):
+        if not (hist_to_plot[:3] == "num" or hist_to_plot[-5:] == "count"):
             data.Rebin(nrebin)
 
 
@@ -70,7 +70,7 @@ for hist in variable_names:
         data_el = h.Get("diEl_data/" + hist_to_plot + "_diEl_data")
         data = data_mu.Clone("data")
         data.Add(data_el)
-        if not(hist_to_plot[:3] == "num"):
+        if not(hist_to_plot[:3] == "num" or hist_to_plot[-5:] == "count"):
             data.Rebin(nrebin)
 
     from odict import OrderedDict as dict
@@ -93,7 +93,7 @@ for hist in variable_names:
     
     for key in mc:
         print "Starting MC process: " + key
-        if not (hist_to_plot[:3] == "num"):
+        if not (hist_to_plot[:3] == "num" or hist_to_plot[-5:] == "count"):
             mc[key].Rebin(nrebin)
         mc[key].SetLineColor(colors[key])
         mc[key].SetFillColor(colors[key])
@@ -123,13 +123,18 @@ for hist in variable_names:
 
 
     if args.doSys: #dictionary for sys variation of each process
-        sys_up = find_sum_sys(h, ["CSVup", "JECup", "JERup"], hist)
+        sys_up = find_sum_sys(h, ["CSVup", "JECup", "JERup"], hist, nrebin)
+        sys_down = find_sum_sys(h, ["CSVdown", "JECdown", "JERdown"], hist, nrebin)
+
+#        if not(hist_to_plot[:3] == "num" or hist_to_plot[-5:] == "count"):
+#            sys_down.Rebin(nrebin)
+#            sys_up.Rebin(nrebin)
+            
         sys_up.Add(h_sumMC) # add total MC systematic to sumMC
 
-        sys_down = find_sum_sys(h, ["CSVdown", "JECdown", "JERdown"], hist)
         sys_down.Scale(-1)
         sys_down.Add(h_sumMC)
-        
+
     
     h_sumMC.SetTitle("")  
     h_sumMC.SetStats(False)
@@ -166,9 +171,6 @@ for hist in variable_names:
         data.SetMinimum(0.01)
     
     h_sumMC.Draw("hist")
-    if args.doSys:
-        sys_up.Draw("histsame")
-
     sum.Draw("histsame")
     h_sumMC.Draw("histsame")
     mc["TTH125"].SetLineColor(ROOT.kBlack)
@@ -211,13 +213,18 @@ for hist in variable_names:
     #--------------
 
     hist_ratio = get_ratio(data, h_sumMC, "Data/MC")
+    hist_ratio.Draw("p0e1")
     if args.doSys:
         hist_ratio_up = get_ratio(sys_up, h_sumMC)
         hist_ratio_down = get_ratio(sys_down, h_sumMC)
-    
-    hist_ratio.Draw("p0e1")
-    hist_ratio_up.Draw("histsame")
-    hist_ratio_down.Draw("histsame")
+
+   #     gr_up = ROOT.TGraph(2);   
+   #     gr_up.SetHistogram(hist_ratio_up)
+   #     gr_up.Draw()
+     
+        hist_ratio_up.Draw("histsame")
+        hist_ratio_down.Draw("histsame")
+
     c.cd()
 
     latex = ROOT.TLatex()

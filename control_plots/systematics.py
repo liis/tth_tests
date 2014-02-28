@@ -6,7 +6,7 @@ def get_sys_err( sys_hist, nominal_hist ):
 
     return sys_variation
 
-def find_sum_sys( h, list_of_sys, hist):
+def find_sum_sys( h, list_of_sys, hist, nrebin=1):
     """
     h - input file containing systematic histograms
     list_of_hist_names -- list of histograms for sys variation
@@ -24,6 +24,7 @@ def find_sum_sys( h, list_of_sys, hist):
         histname = proc + "/" + hist + "_" +  proc
         print "Opening histogram: " + histname
         nominal[proc] = h.Get(histname)
+#        nominal[proc].Rebin(nrebin)
         sub_nominal = {}
             
   #      nominal[proc].Draw()
@@ -33,16 +34,19 @@ def find_sum_sys( h, list_of_sys, hist):
             err2[proc] = {}
 
             sys_histname = proc + "_" + sys + "/" +  hist + "_" + proc + "_" + sys
-            print sys_histname
+#            print sys_histname
             
             sys_hist[proc][sys] = h.Get(sys_histname)
+#            sys_hist[proc][sys].Rebin(nrebin)
 
-
-
+#            print "rebinned both"
             err[proc][sys]= sys_hist[proc][sys].Clone("sys_variation")
             sub_nominal[proc] = nominal[proc].Clone()
             sub_nominal[proc].Scale(-1)
+#            print "add sys to nominal"
+
             err[proc][sys].Add(sub_nominal[proc])
+#            print "added sys to nominal"
             err2[proc][sys] = err[proc][sys]*err[proc][sys]
 
             if idx == 0:
@@ -50,15 +54,15 @@ def find_sum_sys( h, list_of_sys, hist):
             else:
                 sum_err2[proc].Add(err2[proc][sys])
                         
-            print "mean = " + str(sum_err2[proc].GetMean())
+ #           print "mean = " + str(sum_err2[proc].GetMean())
 
         sys_tot[proc] = sum_err2[proc].Clone("sys_tot")
         for ibin in range(sum_err2[proc].GetNbinsX()+1):
-            isys_sum = sum_err2[proc].GetBinContent(ibin)
-            sys_tot[proc].SetBinContent(ibin, math.sqrt(isys_sum) )
+            isys_sum = sum_err2[proc].GetBinContent(ibin+1)
+            sys_tot[proc].SetBinContent(ibin+1, math.sqrt(isys_sum) )
 
-            print "systot2 = " + str(sys_tot[proc].GetBinContent(ibin))
-            print "systot = " + str(math.sqrt(isys_sum))
+  #          print "systot2 = " + str(sys_tot[proc].GetBinContent(ibin))
+  #          print "systot = " + str(math.sqrt(isys_sum))
 
     i = 0
     for proc in sys_tot:

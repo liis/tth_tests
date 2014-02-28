@@ -81,7 +81,7 @@ for proc, tree in t_all.iteritems():
         cut_flow[proc + isyst] = ROOT.TH1F("cut_flow_" + proc + isyst, "cut_flow_" + proc + isyst, 35, 0 , 35 )
         cut_flow[proc + isyst].Sumw2()
 
-        jet_count_hist[proc + isyst] = ROOT.TH1F("jet_count_" + proc + isyst, "jet_count_" + proc + isyst, 6, 0 , 6 )
+        jet_count_hist[proc + isyst] = ROOT.TH1F("jet_count_" + proc + isyst, "jet_count_" + proc + isyst, 4, 0 , 4 )
         jet_count_hist[proc + isyst].Sumw2()
 
         btag_count_hist[proc + isyst] = ROOT.TH1F("btag_count_" + proc + isyst, "btag_count_" + proc + isyst, 4, 0 , 4 )
@@ -90,7 +90,7 @@ for proc, tree in t_all.iteritems():
         category_count_hist[proc + isyst] = ROOT.TH1F("cat_count_" + proc + isyst, "cat_count_" + proc + isyst, 4, 0 , 4 )
         category_count_hist[proc + isyst].Sumw2()
 
-        btag_LR_4j[proc + isyst] = ROOT.TH1F("btag_lr_4j_" + proc + isyst, "btag_lr_4j_" + proc, 50, 0, 1)
+        btag_LR_4j[proc + isyst] = ROOT.TH1F("btag_lr_4j_" + proc + isyst, "btag_lr_4j_" + proc, 25, 0, 1)
         btag_LR_4j[proc + isyst].Sumw2()
         btag_LR_5j[proc + isyst] = ROOT.TH1F("btag_lr_5j_" + proc + isyst, "btag_lr_5j_" + proc, 50, 0, 1)
         btag_LR_5j[proc + isyst].Sumw2()
@@ -106,7 +106,7 @@ for proc, tree in t_all.iteritems():
                 cut_flow[sub_proc + isyst] = ROOT.TH1F("cut_flow_" + sub_proc + isyst, "cut_flow_" + sub_proc, 35, 0, 35)
                 cut_flow[sub_proc + isyst].Sumw2()
 
-                btag_LR_4j[sub_proc + isyst] = ROOT.TH1F("btag_lr_4j_" + sub_proc + isyst, "btag_lr_4j_" + sub_proc, 50, 0, 1)
+                btag_LR_4j[sub_proc + isyst] = ROOT.TH1F("btag_lr_4j_" + sub_proc + isyst, "btag_lr_4j_" + sub_proc, 25, 0, 1)
                 btag_LR_4j[sub_proc + isyst].Sumw2()
                 btag_LR_5j[sub_proc + isyst] = ROOT.TH1F("btag_lr_5j_" + sub_proc + isyst, "btag_lr_5j_" + sub_proc, 50, 0, 1)
                 btag_LR_5j[sub_proc + isyst].Sumw2()
@@ -115,7 +115,7 @@ for proc, tree in t_all.iteritems():
                 btag_LR_7j[sub_proc + isyst] = ROOT.TH1F("btag_lr_7j_" + sub_proc + isyst, "btag_lr_7j_" + sub_proc, 50, 0, 1)
                 btag_LR_7j[sub_proc + isyst].Sumw2()
                 
-                jet_count_hist[sub_proc + isyst] = ROOT.TH1F("jet_count_" + sub_proc + isyst, "jet_count_" + sub_proc + isyst, 6, 0 , 6 )
+                jet_count_hist[sub_proc + isyst] = ROOT.TH1F("jet_count_" + sub_proc + isyst, "jet_count_" + sub_proc + isyst, 4, 0 , 4 )
                 jet_count_hist[sub_proc + isyst].Sumw2()
 
                 btag_count_hist[sub_proc + isyst] = ROOT.TH1F("btag_count_" + sub_proc + isyst, "btag_count_" + sub_proc + isyst, 4, 0 , 4 )
@@ -180,9 +180,9 @@ for proc, tree in t_all.iteritems():
         sel_jet = pass_jet_selection(vd, mode, jet40=True)
 
         #jet count histograms (fill before preselection!)
-        fill_jet_count_histograms(vd, jet_count_hist, proc, isyst, weight )
+        fill_jet_count_histograms(vd, jet_count_hist, proc, isyst, weight, mode )
         fill_btag_count_histograms(vd, btag_count_hist, proc, isyst, weight )
-        fill_category_count_histograms(vd, category_count_hist, proc, isyst, weight )
+        fill_category_count_histograms(vd, category_count_hist, proc, isyst, weight, mode )
 
         # btag LR before preselection
         if vd["numJets"][0] >= 7: # and vd["numBTagM"][0] >= 2:
@@ -205,7 +205,7 @@ for proc, tree in t_all.iteritems():
         if vd["numJets"][0] == 4: # and vd["numBTagM"][0] >= 2:
             fill_single_histogram(vd, btag_LR_4j, proc, vd["btag_LR"][0], isyst, weight, isTTjets = isTTjets)
 
-        if vd["numJets"][0] >= 5 and vd["numBTagM"][0] >= 2: # All-inclusive preselection #FIXME add dl >4jets plots put LR4 there
+        if (mode == "SL" and vd["numJets"][0] >= 5 and vd["numBTagM"][0] >= 2) or (mode == "DL" and vd["numJets"][0] >= 2 and vd["numBTagM"][0] >= 2): # All-inclusive preselection #FIXME add dl >4jets plots put LR4 there
             fill_1D_histograms( vd, hists, proc, isyst, weight, mode, isTTjets )
             fill_lepton_histograms( vd, hists, proc, isyst, weight, mode, sel_lep, isTTjets)
             fill_jet_histograms(vd, hists, proc, isyst, weight, mode, isTTjets = isTTjets)
