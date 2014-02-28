@@ -1,4 +1,5 @@
 *.log
+transfers/*
 copy_*
 submit_*TT*.sh
 submit_*Electron*.sh
