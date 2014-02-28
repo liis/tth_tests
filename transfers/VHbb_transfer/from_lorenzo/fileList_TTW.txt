@@ -1,0 +1,8 @@
+/store/user/nmohr/TTWJets_8TeV-madgraph/TTWJets_8TeV_madgraph_Tester/6a5d9bb3161446313514456198d10252/PAT.edm_8_0_g8f.root
+/store/user/nmohr/TTWJets_8TeV-madgraph/TTWJets_8TeV_madgraph_Tester/6a5d9bb3161446313514456198d10252/PAT.edm_7_0_7QX.root
+/store/user/nmohr/TTWJets_8TeV-madgraph/TTWJets_8TeV_madgraph_Tester/6a5d9bb3161446313514456198d10252/PAT.edm_6_0_fkZ.root
+/store/user/nmohr/TTWJets_8TeV-madgraph/TTWJets_8TeV_madgraph_Tester/6a5d9bb3161446313514456198d10252/PAT.edm_3_3_sJY.root
+/store/user/nmohr/TTWJets_8TeV-madgraph/TTWJets_8TeV_madgraph_Tester/6a5d9bb3161446313514456198d10252/PAT.edm_1_3_t5E.root
+/store/user/nmohr/TTWJets_8TeV-madgraph/TTWJets_8TeV_madgraph_Tester/6a5d9bb3161446313514456198d10252/PAT.edm_4_1_y7v.root
+/store/user/nmohr/TTWJets_8TeV-madgraph/TTWJets_8TeV_madgraph_Tester/6a5d9bb3161446313514456198d10252/PAT.edm_5_1_xLz.root
+/store/user/nmohr/TTWJets_8TeV-madgraph/TTWJets_8TeV_madgraph_Tester/6a5d9bb3161446313514456198d10252/PAT.edm_2_3_y2b.root
