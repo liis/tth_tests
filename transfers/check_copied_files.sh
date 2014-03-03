@@ -8,7 +8,7 @@ DEST_PATH="/hdfs/cms/store/user/liis/VHbb_patTuples/"
 
 
 #OUTDIR=$1 #later take from an argument
-OUTDIR="SingleElectronRun2012AAug06EdmV42/" #defined by INFILELIST name
+OUTDIR="SingleElectronRun2012AAug06EdmV42" #defined by INFILELIST name
 
 
 echo Getting file-lists from final directory: $DEST_SRMPATH$DEST_PATH$OUTDIR
@@ -23,6 +23,15 @@ if [ $NR_FILESIZES_DEST != $NR_FILENAMES_DEST ]; then # sanity chech
 fi
 
 
+######## initialize output file###########
+fail_list="fail_list_"$OUTDIR".txt"
+if [ ! -f "$fail_list" ] ; then
+    touch "$fail_list"
+else
+    >$fail_list #empty existing content
+fi
+###############
+
 echo "Loop over files in infilelist $INFILELIST"
 while read line
 do
@@ -30,131 +39,37 @@ do
   FILE_INIT=`basename $line`
   echo Matching initial file $FILE_INIT with size $SIZE_INIT
 
-
   MATCH_INIT_DEST=0
   SIZE_INIT_DEST=0
+  
   for (( i=0; i<$NR_FILESIZES_DEST; i++)) #Loop over files at destination
     do
     FILE_DEST=`basename ${FILENAMES_DEST[$i]}`
     SIZE_DEST=${FILESIZES_DEST[$i]} 
-
     if [ $FILE_DEST == $FILE_INIT ]; then
 	MATCH_INIT_DEST=1
-	if [ $SIZE_DEST == $SIZE_INIT ]; then
-	    SIZE_INIT_DEST=1
-	fi
+	SIZE_DEST_MATCHED=$SIZE_DEST
     fi
+    
+    if [ $FILE_DEST == $FILE_INIT ]  && [ $SIZE_DEST_MATCHED == $SIZE_INIT ]; then
+	SIZE_INIT_DEST=1
+    fi
+    
   done
 
-  if [ $MATCH_INIT_DEST ]; then #Check whether the file exists at destination
-      echo Match found
-      if [ $SIZE_INIT_DEST ]; then
-	  echo With correct size
-      else
-	  echo "Size init = $SIZE_INIT, size dest = $SIZE_DEST --> Clean up and resubmit copy!"
-      fi
+#  echo MATCH_INIT_DEST = $MATCH_INIT_DEST
+#  echo SIZE_INIT_DEST = $SIZE_INIT_DEST
+
+  if [ $MATCH_INIT_DEST == 1 ] && [ $SIZE_INIT_DEST == 1 ]; then #Check whether the file exists at destination
+      echo Transfer OK
+
+  elif [ $MATCH_INIT_DEST == 1 ] && [ $SIZE_INIT_DEST == 0 ]; then 
+      echo "Match found but broken transfer (size_init != size_dest )"
+      echo "Size init = $SIZE_INIT, size dest = $SIZE_DEST_MATCHED --> Clean up and resubmit copy!"
+      echo "$line" >> $fail_list
   else
-      echo No match found --> resubmit copy!
+      echo "No match found --> resubmit copy!"
+      echo "$line" >> $fail_list
   fi
 
-done < $INFILELIST # done reading initial files from filelist
-
-#for FILENAME in ${FILENAMES_DEST[@]}
-#do
-#  echo `basename $FILENAME`
-#done
-
-#echo ${FILENAMES_DEST[0]}
-#echo `basename ${FILENAMES_DEST[0]}`
-
-
-#echo Matching to $NR_FILESIZES_DEST files at destination
-
-
-
-
-
-
-#echo ${FILESIZES_DEST[5]}
-
-
-
-#echo ${#FILESIZES_DEST[@]}
-#FILENAMES_DEST= $FILENAMES_DEST
-
-#a=(1 2 3)
-#echo ${#a[@]} 
-
-
-
-#echo $FILESIZES_DEST
-
-#i = 0
-#FILESIZES_DEST_LIST=
-#for INFILESIZE in $FILENAMES_DEST:
-#do
-#  echo i = $i
-#  echo infilesize = $INFILESIZE
-#  
-#  FILESIZES_DEST_LIST=(${FILESIZES_DEST_LIST[@]} $i)
-#  let i++
-#done
-
-#echo $FILESIZES_DEST_LIST
-
-#echo "filenames =" $FILENAMES
-#echo "size of filenames = " ${#FILENAMES[*]}
-#echo "filesizes =" $FILESIZES
-#Filesizes=
-
-#for INFILE_DEST in `srmls $DEST_SRMPATH$DEST_PATH$OUTDIR`
-#do
-#  echo $INFILE_DEST
-#  echo $INFILE_DEST
-#  echo -----------------------
-
- 
-  # echo `$INFILE_DEST | awk '{print $1}'`
-
-
-   # echo $INFILE_DEST
-#done
-
-#"/hdfs/cms/store/user/liis/VHbb_patTuples/" #backup working testpath for EE
-
-#SIZE_FINAL=`srmls -l %s $DEST_SRMPATH"/store/user/liis/VHbb_patTuples/SingleElectronRun2012AAug06EdmV42/PAT.edm_9_1_5if.root" `
-
-#i=1
-#for INFILE_DEST in $FILENAMES_DEST
-#do
-#  echo $INFILE_DEST
-#  echo ${INFILESIZES_DEST[i]}
-
-#  SIZE_INIT=`srmls $INIT_SRMPATH$INFILE_INIT | awk '{print $1}'`
-#  echo size init = $SIZE_INIT
-
-#  echo  `srmls $DEST_SRMPATH"/store/user/liis/VHbb_patTuples/SingleElectronRun2012AAug06EdmV42/"`
-
-#  
-#  do
-#    echo $DEST_SRMPATH$INFILE_DEST
-#
-#  done
-
-#  SIZE_INIT=`srmls -l %s $INIT_SRMPATH$INFILE" | awk '{print $1}'`
-  
-#done
-
-
-#INIT_DIR="/store/user/lpchbb/dlopes/SingleElectronRun2012AAug06EdmV42/dlopes/SingleElectron/HBB_EDMNtupleV42/5acd311e7ac1c2e546a3f05006d77347//"
-#FINAL_DIR="/store/user/liis/VHbb_patTuples/"+$OUTDIR
-
-
-
-#SIZE_FINAL=`srmls -l %s $FINAL_SRMPATH"/store/user/liis/VHbb_patTuples/SingleElectronRun2012AAug06EdmV42/PAT.edm_9_1_5if.root" | awk '{print $1}'`
-
-
-#if [ "$SIZE_INIT" != "$SIZE_COPIED" ]; then
-#    echo problem with file transfer -- reinitialize transfer! 
-#    
-#fi
+done < $INFILELIST 
