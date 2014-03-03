@@ -2,12 +2,21 @@
 
 INFILELIST_DIR="VHbb_transfer/from_lorenzo"
 OUTPUT_FILE_DIR="TransfersForResubmit"
+RUN_DATA_REPLICA=1
+SUBMIT_TO_BATCH=1
 
 for INFILELIST in `ls -d -1 $INFILELIST_DIR/**` # take whole path
   do
   
   echo Start processing $INFILELIST
-  sh check_file_transfers.sh $INFILELIST $OUTPUT_FILE_DIR
+  
+  if [ $SUBMIT_TO_BATCH == 1 ] ; then
+      echo "Submitting to batch"
+      qsub -V -cwd -q all.q check_file_transfers.sh $INFILELIST $RUN_DATA_REPLICA
+  else
+      sh check_file_transfers.sh $INFILELIST $RUN_DATA_REPLICA
+  fi
+
 
 done
 
