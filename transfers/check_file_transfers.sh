@@ -26,21 +26,31 @@ else
 fi
 ###############   
 
-echo Getting file-lists from final directory: $DEST_SRMPATH$DEST_PATH$OUTDIR
+echo Getting file-list from final directory: $DEST_SRMPATH$DEST_PATH$OUTDIR
 FILENAMES_DEST=(`srmls -l %s $DEST_SRMPATH$DEST_PATH$OUTDIR | awk '{print $2}'`) #Get first/2nd part of the output
 NR_FILENAMES_DEST=${#FILENAMES_DEST[@]}
 if [ $NR_FILENAMES_DEST == 0 ]; then
     echo "Full Directory missing at destination --> resubmit full file-list."
     cat $1>$fail_list
+
+#    if [ $RESUBMIT_TRANSFER == 1 ]; then
+#	echo "Submitting data_replica for full file-list: $fail_list"
+#	data_replica.py --delete --from-site T2_IT_Pisa --to-site T2_EE_Estonia $fail_list /store/user/liis/VHbb_patTuples/$OUTDIR #--delete overwrites at dest    
+#    fi
+
     exit 1
 fi
 
 FILESIZES_DEST=(`srmls -l %s $DEST_SRMPATH$DEST_PATH$OUTDIR | awk '{print $1}'`) # put parentheses to indicate an array
 FILESIZES_DEST=("${FILESIZES_DEST[@]:1}") # remove the first element (name of directory)
 NR_FILESIZES_DEST=${#FILESIZES_DEST[@]} #get nr of files
+echo ...done
 
 if [ $NR_FILESIZES_DEST != $NR_FILENAMES_DEST ]; then # sanity chech
-    echo WARNING nrFilenames = $NR_FILENAMES_DEST , nrFilesizes = $NR_FILESIZES_DEST -- dont match!
+    echo ERROR nrFilenames = $NR_FILENAMES_DEST , nrFilesizes = $NR_FILESIZES_DEST -- dont match!
+    echo "ERROR WHILE READING FILES -- REDO!!" >> $fail_list
+
+    exit 1
 fi
 
 echo "Loop over files in infilelist $INFILELIST"
