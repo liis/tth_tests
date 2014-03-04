@@ -1,8 +1,12 @@
-FILELISTS_DIR="VHbb_transfer/WJets"
+FILELISTS_DIR="Filelists_data"
+SPLIT_DIR=$FILELISTS_DIR"_split/"
 
+mkdir $SPLIT_DIR
+rm $SPLIT_DIR/*_part*
 
 cd $FILELISTS_DIR
 FILELISTS=`ls *.txt`
+echo Saving split filelists to $SPLIT_DIR
 
 echo `pwd`
 echo $FILELISTS
@@ -10,10 +14,6 @@ for FILELIST in $FILELISTS
 do
   echo Opening input file $FILELIST with nr. files `wc -l $FILELIST`
 
-
-#  OUTDIR=$(basename $FILELIST)
-#  OUTDIR=${OUTDIR#*_}
-#  OUTDIR=${OUTDIR%%.*}
-
-#  split -l 100 $FILELIST $OUTDIR"_" 
+  FILELIST_SPLIT=${FILELIST%.*} #drop .txt (drop after '.')
+  split -l 100 $FILELIST ../$SPLIT_DIR$FILELIST_SPLIT"_part_" 
 done
