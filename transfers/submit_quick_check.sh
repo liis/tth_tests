@@ -1,6 +1,6 @@
 #!/bin/bash
 
-INFILELIST_DIR="Filelists"
+INFILELIST_DIR=$1
 
 for INFILELIST in `ls -d -1 $INFILELIST_DIR/**` # take whole path
   do
