@@ -3,27 +3,29 @@ import re
 import os
 import sys
 sys.path.append('./')
-indir = "TransfersForResubmit_split/"
-#indir = "Filelists_data_split/"
+#indir = "TransfersForResubmit_split/"
+indir = "Filelists_data_el_split/"
 #infilelists_filename = indir + "/filelist_double_el_data.txt"
 
 infilelists_filename = indir + "to_run.txt"
 lists = open(infilelists_filename, 'r')
 
+os.system("voms-proxy-init -voms cms")
 while True: # read line by line
     infilelist = lists.readline().strip('\n')
     if not infilelist: break
     if re.search("skip", infilelist) != None: continue
 
-#    outdir = infilelist.split("_part_")[0]
+    outdir = infilelist.split("_part_")[0]
+    ext =  (infilelist.split("_part_")[1]).split(".txt")[0]
 #    outdir = infilelist.split(".txt")[0]
 #    outdir = (infilelist.split("fileList_")[1]).split(".txt")[0]
 #    outdir = (infilelist.split("fail_list_")[1]).split(".txt")[0]
-    outdir = (infilelist.split("fail_list_")[1]).split("_part_")[0]
+#    outdir = (infilelist.split("fail_list_")[1]).split("_part_")[0]
 
     print "Saving output to directory: " + outdir
 
-    scriptname = "submit_" + outdir + ".sh"
+    scriptname = "submit_" + outdir + ext + ".sh" #save unique scriptname
     f = open(scriptname, 'w')
     f.write('#!/bin/bash\n\n')
     f.write('\n\n')
