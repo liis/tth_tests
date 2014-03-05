@@ -3,8 +3,8 @@ import re
 import os
 import sys
 sys.path.append('./')
-#indir = "TransfersForResubmit/"
-indir = "Filelists_data_split/"
+indir = "TransfersForResubmit_split/"
+#indir = "Filelists_data_split/"
 #infilelists_filename = indir + "/filelist_double_el_data.txt"
 
 infilelists_filename = indir + "to_run.txt"
@@ -16,11 +16,16 @@ while True: # read line by line
     if not infilelist: break
     if re.search("skip", infilelist) != None: continue
 
+<<<<<<< HEAD
     outdir = infilelist.split("_part_")[0]
     ext = (infilelist.split("_part_")[1]).split(".txt")[0]
+=======
+#    outdir = infilelist.split("_part_")[0]
+>>>>>>> a76e64700abcd9e5ce8f573a6b457c42a35dbc3d
 #    outdir = infilelist.split(".txt")[0]
 #    outdir = (infilelist.split("fileList_")[1]).split(".txt")[0]
 #    outdir = (infilelist.split("fail_list_")[1]).split(".txt")[0]
+    outdir = (infilelist.split("fail_list_")[1]).split("_part_")[0]
 
     print "Saving output to directory: " + outdir
 
