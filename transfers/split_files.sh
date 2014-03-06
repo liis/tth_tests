@@ -1,7 +1,8 @@
-#FILELISTS_DIR="Filelists_data"
-FILELISTS_DIR="TransfersForResubmit"
-SPLIT_DIR=$FILELISTS_DIR"_split/"
+FILELISTS_DIR="Filelists_data_el"
+#FILELISTS_DIR="TransfersForResubmit"
+LINES_PER_FILE=30
 
+SPLIT_DIR=$FILELISTS_DIR"_split/"
 mkdir $SPLIT_DIR
 rm $SPLIT_DIR/*_part*
 
@@ -16,5 +17,5 @@ do
   echo Opening input file $FILELIST with nr. files `wc -l $FILELIST`
 
   FILELIST_SPLIT=${FILELIST%.*} #drop .txt (drop after '.')
-  split -l 30 $FILELIST ../$SPLIT_DIR$FILELIST_SPLIT"_part_" 
+  split -l $LINES_PER_FILE $FILELIST ../$SPLIT_DIR$FILELIST_SPLIT"_part_" 
 done
