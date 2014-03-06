@@ -2,11 +2,9 @@
 
 INIT_SRMPATH="srm://stormfe1.pi.infn.it:8444/srm/managerv2?SFN=/cms" # initial location of copied files
 INFILELIST=$1
-RESUBMIT_TRANSFER=$2 #submit fail-list for transfer in the end (otherwise only saved as files)
 RUN_AT_DEST=1 # When run at destination, can do ls instead of srmls
 
-#INFILELIST="VHbb_transfer/fileList_SingleElectronRun2012AAug06EdmV42.txt" #filelist with input filenames (including full paths) --> take as argument
-#RESUBMIT_TRANSFER=0 #for debug
+SUPERQUICK=-1
 
 DEST_SRMPATH="srm://ganymede.hep.kbfi.ee:8888/srm/v2/server?SFN="
 DEST_PATH="/hdfs/cms/store/user/liis/VHbb_patTuples/"
@@ -18,8 +16,10 @@ OUTDIR=${OUTDIR%.*} #drop .txt (drop after '.')
 #echo OUTDIR = $OUTDIR 
 
 ######## initialize output file###########
-OUTPUT_FILES_DIR="TransfersForResubmit"
+OUTPUT_FILES_DIR="TransfersForResubmit_quick"
 fail_list="$OUTPUT_FILES_DIR/fail_list_"$OUTDIR".txt" #read dir for output files from the argument
+delete_list="$OUTPUT_FILES_DIR/delete_list_"$OUTDIR".txt"
+
 if [ ! -f "$fail_list" ] ; then
     touch "$fail_list"
 else
@@ -42,31 +42,60 @@ if [ $NR_FILENAMES_DEST == 0 ]; then
     echo "Full Directory missing at destination --> resubmit full file-list -> EXITING."
     cat $1>$fail_list
 
-#    if [ $RESUBMIT_TRANSFER == 1 ]; then
-#	echo "Submitting data_replica for full file-list: $fail_list"
-#	data_replica.py --delete --from-site T2_IT_Pisa --to-site T2_EE_Estonia $fail_list /store/user/liis/VHbb_patTuples/$OUTDIR #--delete overwrites at dest    
-#    fi
-
     exit 1
 fi
 
-if [ $RUN_AT_DEST == 1 ]; then
-    FILESIZES_DEST=(`ls -la $DEST_PATH$OUTDIR/*.root | awk '{print $5}'`)
-else
-    FILESIZES_DEST=(`srmls -l %s $DEST_SRMPATH$DEST_PATH$OUTDIR | awk '{print $1}'`) # put parentheses to indicate an array
-    FILESIZES_DEST=("${FILESIZES_DEST[@]:1}") # remove the first element (name of directory)
-fi
-
-NR_FILESIZES_DEST=${#FILESIZES_DEST[@]} #get nr of files
 echo ...done
 
-if [ $NR_FILESIZES_DEST != $NR_FILENAMES_DEST ]; then # sanity chech
-    echo ERROR nrFilenames = $NR_FILENAMES_DEST , nrFilesizes = $NR_FILESIZES_DEST -- dont match!
-    echo "ERROR WHILE READING FILES -- REDO!!" >> $fail_list
+NR_INIT_FILES=`wc -l $INFILELIST | awk '{print $1}'`
+echo $NR_INIT_FILES present at initial site, $NR_FILENAMES_DEST copied to destination
 
-    exit 1
+if [ $SUPERQUICK == 0 ]; then
+    echo Missing files:
+    while read line
+      do
+      FILE_INIT=`basename $line`
+      
+      MATCH_INIT_DEST=0
+      for (( i=0; i<$NR_FILENAMES_DEST; i++)) #Loop over files at destination
+	do
+	FILE_DEST=`basename ${FILENAMES_DEST[$i]}`
+	if [ $FILE_DEST == $FILE_INIT ]; then #Check whether the file exists at destination
+	    MATCH_INIT_DEST=1
+	fi
+      done
+
+      if [ $MATCH_INIT_DEST == 0 ]; then
+	  echo $line
+	  echo $line >> $fail_list
+      fi
+
+    done < $INFILELIST 
+    echo Done scanning for missing files
 fi
 
-NR_INIT_FILES=`wc -l $INFILELIST | awk '{print $1}'`
-echo $NR_INIT_FILES present at initial site, $NR_FILESIZES_DEST copied to destination
+if [ $SUPERQUICK == -1 ]; then
+    echo Checking for additional files to delete:
 
+    for (( i=0; i<$NR_FILENAMES_DEST; i++)) #Loop over copied files                                    
+      do
+
+      FILE_DEST=`basename ${FILENAMES_DEST[$i]}`
+      MATCH_INIT_DEST=0
+      while read line
+	do
+	FILE_INIT=`basename $line`
+	if [ $FILE_DEST == $FILE_INIT ]; then #Check whether the file exists in file list                        
+	    MATCH_INIT_DEST=1
+	    echo found match for file: $FILE_DEST
+	fi
+      done < $INFILELIST      
+
+      if [ $MATCH_INIT_DEST == 0 ]; then # if no match found in the file list, write to delete_list
+	  echo No match found for file ${FILENAMES_DEST[$i]} at destination
+	  echo ${FILENAMES_DEST[$i]} >> $delete_list
+      fi
+    
+    done
+    echo Done scanning for additional files
+fi
