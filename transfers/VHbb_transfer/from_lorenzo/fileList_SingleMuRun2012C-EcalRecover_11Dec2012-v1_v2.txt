@@ -1,2 +1,0 @@
-/store/user/lpchbb/degrutto/SingleMuRun2012C-EcalRecover_11Dec2012-v1_v2/degrutto/SingleMu/SingleMuRun2012C-EcalRecover_11Dec2012-v1_v2/225d03e147cd35bb368280b3d5f9e456/PAT.edm_46_1_6SI.root
-/store/user/lpchbb/degrutto/SingleMuRun2012C-EcalRecover_11Dec2012-v1_v2/degrutto/SingleMu/SingleMuRun2012C-EcalRecover_11Dec2012-v1_v2/225d03e147cd35bb368280b3d5f9e456/PAT.edm_50_1_Jhf.root
