@@ -266,7 +266,7 @@ def fill_jet_histograms(vd, hists, sample, syst, weight, mode, jet_list = [], is
           #          if isTTjets: fill_ttjets_histograms(vd, hists, var, vd[var][ijet], weight)
 
     
-def fill_cut_flow(cuts, cf_hist, lf = 1, tablewidth = 0):
+def fill_cut_flow(cuts, cf_hist, lf = 1, tablewidth = 0, bf = False):
     """
     cuts -- ordered dictionary of cuts in cut-flow. labels need to be saved in the cut-flow histogra
     cf_hist -- cut-flow histogram
@@ -285,9 +285,12 @@ def fill_cut_flow(cuts, cf_hist, lf = 1, tablewidth = 0):
         nr_evts = cf_hist.GetBinContent(bin_nr)
         print " & ",
 
-        print str( round( nr_evts, round_prec) ) + " $\pm$ " + str( round( cf_hist.GetBinError(bin_nr), round_prec ) ),
+        if not bf:
+            print str( round( nr_evts, round_prec) ) + " $\pm$ " + str( round( cf_hist.GetBinError(bin_nr), round_prec ) ),
+        else:
+            print "\\textbf{" + str( round( nr_evts, round_prec) ) + " $\pm$ " + str( round( cf_hist.GetBinError(bin_nr), round_prec ) ) + "}",
 
-def set_file_name(file_name_base, mctrig, topw, dosys=False):
+def set_file_name(file_name_base, mctrig, topw, noWeight, dosys=False):
     infile = file_name_base
     if not mctrig:
         infile = infile + "_notrig"
@@ -295,6 +298,8 @@ def set_file_name(file_name_base, mctrig, topw, dosys=False):
         infile = infile + "_notopw"
     if dosys:
         infile = infile + "_withSys"
+    if noWeight:
+        infile = infile + "_noWeight"
 
     infile = infile + ".root"
     return infile

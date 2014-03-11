@@ -13,6 +13,7 @@ parser.add_argument('--sel', dest="sel", choices=["pre","pre_2b"], default=False
 parser.add_argument('--notrig', dest="notrig", action="store_true", default=False, required=False) # dont apply trigger on MC sel
 parser.add_argument('--notopw', dest="notopw", action="store_true", default=False, required=False) # dont apply top pt reweight
 parser.add_argument('--doSys', dest="doSys", action="store_true", default=False, required=False)
+parser.add_argument('--noWeight', dest="noWeight", action="store_true", default=False, required=False)
                    
 args = parser.parse_args()
 mode = args.DL_or_SL
@@ -27,8 +28,8 @@ if args.DL_or_SL == "SL":
 ##indir = "test_trees/trees_2014_02_09_0-0-1_rec_std/"
 #indir = "test_trees/trees_2014_02_15_0-0-1_rec_std/"
 #indir = "test_trees/trees_2014_02_25_0-0-1_rec_std/" # syst set to 1
-#indir = "test_trees/trees_2014_02_26_0-0-1_rec_std_sysNew/"
-indir = "test_trees/trees_2014_02_26_0-0-1_rec_std_syst_singlerun/"
+#indir = "test_trees/trees_2014_03_11_0-0-1_rec_std/"
+indir = "test_trees/trees_2014_03_11_0-0-1_rec_std_oldV2/"
 
 usetrig = not args.notrig
 Lumi = 19.04
@@ -116,6 +117,9 @@ for proc, tree in t_all.iteritems():
                 weight = weight*toppt_weight
             if usetrig:
                 weight = weight*tr_weight
+
+        if args.noWeight:
+            weight = 1
         #-------------Select events---------------
         
         event_count(0, "all", cut_flow, proc, weight, vd, idx_sys) # cut-flow: all evts
@@ -278,6 +282,8 @@ if args.doSys:
     outfilename = outfilename + "_withSys"
 if args.is_test_run:
     outfilename = outfilename + "_test"
+if args.noWeight:
+    outfilename = outfilename + "_noWeight"
 
 outfilename = outfilename + ".root"
     
