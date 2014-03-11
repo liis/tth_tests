@@ -3,7 +3,11 @@
 INIT_SRMPATH="srm://stormfe1.pi.infn.it:8444/srm/managerv2?SFN=/cms" # initial location of copied files
 INFILELIST=$1
 RESUBMIT_TRANSFER=$2 #submit fail-list for transfer in the end (otherwise only saved as files)
+OUTPUT_FILE_DIR=$3 # destination directory for failed files
+
+#OUTPUT_FILE_DIR="TransfersForResubmit"
 RUN_AT_DEST=1 # When run at destination, can do ls instead of srmls
+
 
 #INFILELIST="VHbb_transfer/fileList_SingleElectronRun2012AAug06EdmV42.txt" #filelist with input filenames (including full paths) --> take as argument
 #RESUBMIT_TRANSFER=0 #for debug
@@ -13,13 +17,13 @@ DEST_PATH="/hdfs/cms/store/user/liis/VHbb_patTuples/"
 
 OUTDIR=`basename $INFILELIST}` #get after last '/' -- where output is stored at destination
 OUTDIR=${OUTDIR%.*} #drop .txt (drop after '.')
-OUTDIR=${OUTDIR#*_} #drop fileList_ (drop before first '_')
+#OUTDIR=${OUTDIR#*_} #drop fileList_ (drop before first '_')
 
 #echo OUTDIR = $OUTDIR 
 
 ######## initialize output file###########
-OUTPUT_FILES_DIR="TransfersForResubmit"
-fail_list="$OUTPUT_FILES_DIR/fail_list_"$OUTDIR".txt" #read dir for output files from the argument
+
+fail_list="$OUTPUT_FILE_DIR/fail_list_"$OUTDIR".txt" #read dir for output files from the argument
 if [ ! -f "$fail_list" ] ; then
     touch "$fail_list"
 else
