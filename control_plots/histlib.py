@@ -8,38 +8,57 @@ hist_variables = {
     "lead_electron_pt": (50, 0, 250),
     "lead_electron_rIso": (50, 0, 0.15),
 
-#    "trail_electron_eta":(50, -2.5, 2.5),
-#    "trail_electron_pt": (50, 0, 250),
-#    "trail_electron_rIso": (50, 0, 0.15),
+    "trail_electron_eta":(25, -2.5, 2.5),
+    "trail_electron_pt": (25, 0, 250),
+    "trail_electron_rIso": (50, 0, 0.15),
 
     "lead_muon_rIso": (50, 0, 0.15),
     "lead_muon_pt": (50, 0, 250),
     "lead_muon_eta":(50, -2.5, 2.5),
 
- #   "trail_muon_rIso": (50, 0, 0.15),
- #   "trail_muon_pt": (50, 0, 250),
- #   "trail_muon_eta":(50, -2.5, 2.5),
+    "trail_muon_rIso": (50, 0, 0.15),
+    "trail_muon_pt": (25, 0, 250),
+    "trail_muon_eta":(25, -2.5, 2.5),
 
     "lead_jet_pt": (50, 0, 500),
     "lead_jet_eta": (50, -3, 3),
     "lead_jet_phi": (50, -3.15, 3.15),
 
- #   "jet_pt": (50, 0, 250),
- #   "jet_eta": (200, -3, 3),
- #   "jet_phi": (50, -3.15, 3.15),
-
     "numJets": (12, 0, 12),
-#    "numJets_sel":(12, 0, 12),
     
     "numBTagM": (8, 0, 8),
-#    "numBTagM_sel":(8,0,8),
     
     "numBTagL":(8, 0, 8),
     "numBTagT": (8, 0, 8),
 
     "nPVs": (50, 0, 50),
 
+    "btag_LR_4j": ( 50, 0, 1),
+    "btag_LR_5j": ( 50, 0, 1),
+    "btag_LR_6j": ( 50, 0, 1),
+    "btag_LR_7j": ( 50, 0, 1),    
+
+    #----- count hists -----------
+#    "cut_flow": (35, 0, 35),
+    "jet_count": (7, 0 , 7),
+    "btag_count": (4, 0, 4),
+    "category_count": (4, 0, 4)
+
     }
+
+def initialize_hist_ranges( mode, hist_variables = hist_variables):
+    if mode == "DL":
+        hist_variables["jet_count"] = (4, 0, 4)
+        hist_variables["category_count"] = (3, 0, 3)
+        hist_variables["btag_LR_4j"] = (25, 0, 1)
+
+        hist_variables["lead_electron_eta"] = (25, -2.5, 2.5)
+        hist_variables["lead_electron_pt"] = (25, 0, 250)
+        hist_variables["lead_muon_eta"] = (25, -2.5, 2.5)
+        hist_variables["lead_muon_pt"] = (25, 0, 250)
+            
+    return hist_variables
+
 
 map_hist_variables = { # if histogram name is different from the tree entry name
 
@@ -187,20 +206,12 @@ def fill_ttjets_histograms( vd, hists, varname, var, syst, weight ):
     elif vd["nSimBs"][0] == 2:
         hists["ttjj" + syst][varname].Fill(var, weight)
 
-def fill_single_histogram(vd, hist, proc, var, syst, weight, isTTjets = False):
-    hist[proc + syst].Fill(var, weight)
-    if isTTjets:
-        if vd["nSimBs"][0] > 2 and vd["nMatchSimBs"][0] > 1:
-            hist["ttbb" + syst].Fill(var, weight)
-
-        elif vd["nSimBs"][0] > 2 and vd["nMatchSimBs"][0] < 2:
-            hist["ttb" + syst].Fill(var, weight)
-
-        elif vd["nSimBs"][0] == 2:
-            hist["ttjj" + syst].Fill(var, weight)
-        
-
-def fill_1D_histograms( vd, hists, sample, syst, weight, mode, isTTjets = False):
+def fill_single_histogram(vd, varname, var, hists, sample, syst, weight):
+    hists[sample + syst][varname].Fill(var, weight)
+    if sample == "TTJets":
+        fill_ttjets_histograms( vd, hists, varname, var, syst, weight)
+    
+def fill_1D_histograms( vd, hists, sample, syst, weight, mode, isTTjets = False): #FIXME!! this is bad implementation
     
     for var in hists[sample]: # loop over dictionary of histograms for a specific datasample
         try:
