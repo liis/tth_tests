@@ -127,7 +127,7 @@ tot_bkg = 0
 for proc in processes_SL:
     print proc,
     fill_cut_flow(cuts_SL, processes_SL[proc], lf, table_size)
-    fill_cut_flow(cuts_DL, processes_DL[proc], lf, table_size)
+    fill_cut_flow(cuts_DL, processes_DL[proc], lf, table_size, round_prec = 2)
 
     print "\\\\"
 

@@ -1,9 +1,9 @@
 import ROOT, sys
 
-from fill_jet_counts import fill_jet_count_histograms, fill_btag_count_histograms, fill_category_count_histograms
+from fill_jet_counts import fill_cut_flow, fill_jet_count_histograms, fill_btag_count_histograms, fill_category_count_histograms
 from tree_inputs import input_files
-from trlib import initialize_tree, var_list, pass_trigger_selection, pass_lepton_selection, pass_jet_selection, bjet_presel, event_count
-from histlib import hist_variables, initialize_hist_ranges, initialize_histograms, fill_1D_histograms, fill_lepton_histograms, fill_jet_histograms, fill_single_histogram, write_histograms_to_file
+from trlib import initialize_tree, var_list, pass_trigger_selection, pass_lepton_selection, pass_jet_selection, bjet_presel
+from histlib import hist_variables, initialize_hist_ranges, initialize_histograms, fill_1D_histograms, fill_lepton_histograms, fill_jet_histograms, fill_single_histogram, write_histograms_to_file, event_count
 
 import argparse
 parser = argparse.ArgumentParser()
@@ -30,7 +30,7 @@ if args.DL_or_SL == "SL":
 #indir = "test_trees/trees_2014_02_25_0-0-1_rec_std/" # syst set to 1
 #indir = "test_trees/trees_2014_03_11_0-0-1_rec_std/"
 #indir = "test_trees/trees_2014_03_11_0-0-1_rec_std_oldV2/"
-indir = "test_trees/trees_2014_03_11_0-0-1_rec_std_withFixes_FinalOnly/"
+indir = "test_trees/trees_2014_03_11_0-0-1_rec_std_withFixes_FinalOnly/" # missing cat 1,2
 
 usetrig = not args.notrig
 Lumi = 19.04
@@ -62,6 +62,12 @@ else:
 
 hists = {} #histograms for each sample and variable
 cut_flow = {}
+cut_flow_di_mu = {}
+cut_flow_di_ele = {}
+cut_flow_emu = {}
+cut_flow_smu = {}
+cut_flow_sele = {}
+
 #jet_count_hist = {}
 #btag_count_hist = {}
 #category_count_hist = {}
@@ -76,13 +82,36 @@ for proc, tree in t_all.iteritems():
     for isyst in do_syst:
         hists[proc + isyst] = initialize_histograms(proc, hist_variables, isyst) # dictionary of initialized histograms for each sample
         cut_flow[proc + isyst] = ROOT.TH1F("cut_flow_" + proc + isyst, "cut_flow_" + proc + isyst, 35, 0 , 35 )
+        cut_flow_di_mu[proc + isyst] = ROOT.TH1F("cut_flow_di_mu_" + proc + isyst, "cut_flow_" + proc + isyst, 35, 0 , 35 )
+        cut_flow_di_ele[proc + isyst] = ROOT.TH1F("cut_flow_di_ele_" + proc + isyst, "cut_flow_" + proc + isyst, 35, 0 , 35 )
+        cut_flow_emu[proc + isyst] = ROOT.TH1F("cut_flow_emu_" + proc + isyst, "cut_flow_" + proc + isyst, 35, 0 , 35 )
+        cut_flow_smu[proc + isyst] = ROOT.TH1F("cut_flow_smu_" + proc + isyst, "cut_flow_" + proc + isyst, 35, 0 , 35 )
+        cut_flow_sele[proc + isyst] = ROOT.TH1F("cut_flow_sele_" + proc + isyst, "cut_flow_" + proc + isyst, 35, 0 , 35 )
+
         cut_flow[proc + isyst].Sumw2()
+        cut_flow_di_mu[proc + isyst].Sumw2()
+        cut_flow_di_ele[proc + isyst].Sumw2()
+        cut_flow_emu[proc + isyst].Sumw2()
+        cut_flow_smu[proc + isyst].Sumw2()
+        cut_flow_sele[proc + isyst].Sumw2()
+        
         if proc == "TTJets": # initialize extra histograms for ttJets, separating by gen level decay
             isTTjets = True
             for sub_proc in ["ttbb", "ttb", "ttjj"]:
                 hists[sub_proc + isyst] = initialize_histograms(sub_proc, hist_variables, isyst)
                 cut_flow[sub_proc + isyst] = ROOT.TH1F("cut_flow_" + sub_proc + isyst, "cut_flow_" + sub_proc, 35, 0, 35)
+                cut_flow_di_mu[sub_proc + isyst] = ROOT.TH1F("cut_flow_di_mu_" + sub_proc + isyst, "cut_flow_" + proc + isyst, 35, 0 , 35 )
+                cut_flow_di_ele[sub_proc + isyst] = ROOT.TH1F("cut_flow_di_ele_" + sub_proc + isyst, "cut_flow_" + proc + isyst, 35, 0 , 35 )
+                cut_flow_emu[sub_proc + isyst] = ROOT.TH1F("cut_flow_emu_" + sub_proc + isyst, "cut_flow_" + proc + isyst, 35, 0 , 35 )
+                cut_flow_smu[sub_proc + isyst] = ROOT.TH1F("cut_flow_smu_" + sub_proc + isyst, "cut_flow_" + proc + isyst, 35, 0 , 35 )
+                cut_flow_sele[sub_proc + isyst] = ROOT.TH1F("cut_flow_sele_" + sub_proc + isyst, "cut_flow_" + proc + isyst, 35, 0 , 35 )
+
                 cut_flow[sub_proc + isyst].Sumw2()
+                cut_flow_di_mu[sub_proc + isyst].Sumw2()
+                cut_flow_di_ele[sub_proc + isyst].Sumw2()
+                cut_flow_emu[sub_proc + isyst].Sumw2()
+                cut_flow_smu[sub_proc + isyst].Sumw2()
+                cut_flow_sele[sub_proc + isyst].Sumw2()
     #------------------------------------------------------------------------------------
     vd = initialize_tree(tree, var_list) # dictionary of variables
 
@@ -123,25 +152,38 @@ for proc, tree in t_all.iteritems():
             weight = 1
         #-------------Select events---------------
 
-        fill_cut_flow(cut_flow_hists, proc, weight, vd, idx_sys = 0)
-#        event_count(0, "all", cut_flow, proc, weight, vd, idx_sys) # cut-flow: all evts
+        
+        event_count(0, "all", cut_flow, proc, weight, vd, idx_sys) # cut-flow: all evts
 
-        if proc[-7:] == "Mu_data"  and not( pass_trigger_selection(vd, mode, "mu") and ( (mode=="SL" and vd["Vtype"][0]==2) or (mode=="DL" and vd["Vtype"][0]==0)) ): continue #combined trigger and lepton selection
+        if proc[-7:] == "Mu_data"  and not( pass_trigger_selection(vd, mode, "mu") and ( (mode=="SL" and vd["Vtype"][0]==2) or (mode=="DL" and ( vd["Vtype"][0]==0 or vd["Vtype"][0]==4)) ) ): continue #combined trigger and lepton selection
         if proc[-7:] == "El_data" and not( pass_trigger_selection(vd, mode, "el") and ( (mode=="SL" and vd["Vtype"][0]==3) or (mode=="DL" and vd["Vtype"][0]==1)) ): continue
         if (proc[-7:] == "Mu_data" or proc[-7:] == "El_data") and idx_sys != 0: continue # Run nominal, skip systematic variations
 
-#        event_count(1, "trig", cut_flow, proc, weight, vd, idx_sys) # cut_flow: apply trigger for data FIXME
+        #        event_count(1, "trig", cut_flow, proc, weight, vd, idx_sys) # cut_flow: apply trigger for data FIXME
 
-        sel_lep = pass_lepton_selection(vd, mode) # count the number of good leptons and apply preselection
-        if not ( len(sel_lep) ): continue
-#        event_count(2, "SelLep", cut_flow, proc, weight, vd, idx_sys) # cut_flow: require one lepton
+#        if not ( len(sel_lep) ): continue
+        if not ( ( mode == "DL" and (vd["Vtype"][0] == 0 or vd["Vtype"][0] == 1 or vd["Vtype"][0] == 4))
+                 or ( mode == "SL" and (vd["type"][0] == 2 or vd["type"][0]==3)) ): continue #FIXME -- uncomment for control plots
+
+       #------------------- fill cutflow histos -------------------------------
+        fill_cut_flow(cut_flow, proc, weight, vd, mode, idx_sys=0)
+        if mode == "DL" and vd["Vtype"][0] == 0:
+            fill_cut_flow(cut_flow_di_mu, proc, weight, vd, mode, idx_sys=0)
+        if mode == "DL" and vd["Vtype"][0] == 1:
+            fill_cut_flow(cut_flow_di_ele, proc, weight, vd, mode, idx_sys=0)
+        if mode == "DL" and vd["Vtype"][0] == 4:
+            fill_cut_flow(cut_flow_emu, proc, weight, vd, mode, idx_sys=0)
+        if mode == "SL" and vd["Vtype"][0] == 2:
+            fill_cut_flow(cut_flow_smu, proc, weight, vd, mode, idx_sys=0)
+        if mode == "SL" and vd["Vtype"][0] == 3:
+            fill_cut_flow(cut_flow_sele, proc, weight, vd, mode, idx_sys=0)
+        
+        #-------------------jet count histograms - fill before preselection!---------------------
         sel_jet = pass_jet_selection(vd, mode, jet40=True)
-
-        #jet count histograms (fill before preselection!)
+        
         fill_jet_count_histograms(vd, hists, proc, isyst, weight, mode ) #FIXME put DL/SL dependent histogram ranges
         fill_btag_count_histograms(vd, hists, proc, isyst, weight )
         fill_category_count_histograms(vd, hists, proc, isyst, weight, mode )
-
         # btag-LR before preselection
         if vd["numJets"][0] == 4:
             fill_single_histogram(vd, "btag_LR_4j", vd["btag_LR"][0], hists, proc, isyst, weight)
@@ -153,94 +195,12 @@ for proc, tree in t_all.iteritems():
             fill_single_histogram(vd, "btag_LR_7j", vd["btag_LR"][0], hists, proc, isyst, weight)
 
 
-        if (mode == "SL" and vd["numJets"][0] >= 5 and vd["numBTagM"][0] >= 2) or (mode == "DL" and vd["numJets"][0] >= 2 and vd["numBTagM"][0] >= 2): # All-inclusive preselection #FIXME add dl >4jets plots put LR4 there
-#            fill_1D_histograms( vd, hists, proc, isyst, weight, mode, isTTjets )
-            fill_lepton_histograms( vd, hists, proc, isyst, weight, mode, sel_lep, isTTjets)
-            fill_jet_histograms(vd, hists, proc, isyst, weight, mode, isTTjets = isTTjets)
-        #---------------do cutfolw--------------------------
+        if (mode == "SL" and vd["numJets"][0] >= 5 and vd["numBTagM"][0] >= 2) or (mode == "DL" and vd["numJets"][0] >= 2 and vd["numBTagM"][0] >= 2): 
+#            fill_1D_histograms( vd, hists, proc, isyst, weight, mode, isTTjets ) 
+#            fill_lepton_histograms( vd, hists, proc, isyst, weight, mode, sel_lep, isTTjets)
+             fill_jet_histograms(vd, hists, proc, isyst, weight, mode, isTTjets = isTTjets)
 
-#        if vd["numJets"][0] >= 6 and vd["numBTagM"][0] == 2:
-#            event_count(3, "g6j2t", cut_flow, proc, weight, vd, idx_sys ) # cut_flow, preselection
-
-        if vd["numJets"][0] == 4  and vd["numBTagM"][0] == 3:
-            event_count(4, "4j3t",  cut_flow, proc,weight, vd, idx_sys)
-
-        if vd["numJets"][0] == 5 and vd["numBTagM"][0] == 3:
-            event_count(5, "5j3t", cut_flow, proc,weight, vd, idx_sys)
-
-        if vd["numJets"][0] >=6 and vd["numBTagM"][0] == 3:
-            event_count(6, "g6j3t", cut_flow, proc,weight, vd, idx_sys)
-
-        if vd["numJets"][0] == 4 and vd["numBTagM"][0] ==4:
-            event_count(7, "4j4t", cut_flow, proc,weight, vd, idx_sys)
-
-        if vd["numBTagM"][0] ==4:
-            event_count(8, "g4j4t", cut_flow, proc,weight, vd, idx_sys)
-
-        if vd["numJets"][0] ==5 and vd["numBTagM"][0] >=4:
-            event_count(9, "5jg4t", cut_flow, proc,weight, vd, idx_sys)
-
-        if vd["numJets"][0] >=6 and vd["numBTagM"][0] >=4:
-            event_count(10, "g6jg4t", cut_flow, proc,weight, vd, idx_sys)
-
-        #------lorenzo categories-----------
-
-        if vd["numJets"][0] ==6 and vd["numBTagM"][0] >=4: # cat 1, 2
-            event_count(11, "L6jg4t", cut_flow, proc,weight, vd, idx_sys)
-
-        if vd["numJets"][0] >= 7 and vd["numBTagM"][0] >= 4: # cat 5
-            event_count(24, "Lg7jg4t", cut_flow, proc, weight, vd, idx_sys)
-
-        if vd["numJets"][0] ==5 and vd["numBTagM"][0] >= 4: # cat 3, 4
-            event_count(12, "L5jg4t", cut_flow, proc,weight, vd, idx_sys)
-
-        if vd["numJets"][0] ==6 and vd["numBTagM"][0] ==4: # cat 1, 2
-            event_count(13, "L6j4t", cut_flow, proc,weight, vd, idx_sys)
-
-        if vd["numJets"][0] >= 7 and vd["numBTagM"][0] == 4: # cat 5
-            event_count(14, "Lg7j4t", cut_flow, proc, weight, vd, idx_sys)
-
-        if vd["numJets"][0] ==5 and vd["numBTagM"][0] == 4: # cat 3, 4
-            event_count(15, "L5j4t", cut_flow, proc,weight, vd, idx_sys)
-            
-        if vd["numBTagM"][0] >=4:
-            event_count(16, "g4t", cut_flow, proc,weight, vd, idx_sys)
-            
-        if vd["numBTagM"][0] ==3 and vd["numBTagL"][0]==4:
-            event_count(17, "3t1t", cut_flow, proc,weight, vd, idx_sys)
-            
-        #------according to event type --------
-        if vd["type"][0] == 0:
-            event_count(18, "cat1", cut_flow, proc, weight, vd, idx_sys)
-        if vd["type"][0] == 1:
-            event_count(19, "cat2", cut_flow, proc, weight, vd, idx_sys)
-        if vd["type"][0] == 2:
-            event_count(20, "cat3_4", cut_flow, proc, weight, vd, idx_sys)
-        if vd["type"][0] == 3:
-            event_count(21, "cat5", cut_flow, proc, weight,vd, idx_sys)
-        if vd["type"][0] == 6:
-            event_count(22, "cat6", cut_flow, proc, weight,vd, idx_sys)
-        if vd["type"][0] == 7:
-            event_count(23, "cat7", cut_flow, proc, weight,vd, idx_sys)
-
-        if vd["type"][0] == 2 and vd["flag_type2"][0] == 2:
-            event_count(24, "cat3", cut_flow, proc, weight, vd, idx_sys)
-        if vd["type"][0] ==2 and vd["flag_type2"][0] != 2:
-            event_count(25, "cat4", cut_flow, proc, weight, vd, idx_sys)
-                       
-        #------------additional-----------------
-        if vd["numJets"][0] ==3 and vd["numBTagM"][0] != 2:
-            event_count(26, "3j2t", cut_flow, proc, weight,vd, idx_sys)
-            
-        if vd["numJets"][0] >=4 and vd["numBTagM"][0]==2:
-            event_count(27, "g4j2t", cut_flow, proc, weight,vd, idx_sys)
-
-        if vd["numBTagM"][0]>=3:
-            event_count(28, "g3t", cut_flow, proc, weight,vd, idx_sys)
-
-        
-
-    print "--------- CUT FLOW ------------- "
+    print "--------- PRINT CUT FLOW ------------- "
     print "Nr tot = "+  str(cut_flow[proc].GetBinContent(1))
     print "Nr trig sel = " + str(cut_flow[proc].GetBinContent(2))
     print "Nr lep sel = " + str(cut_flow[proc].GetBinContent(3))
@@ -287,7 +247,7 @@ if args.noWeight:
 outfilename = outfilename + ".root"
     
 print "Write output to file: " + outfilename 
-write_histograms_to_file(outfilename, hists, [cut_flow], [pars])
+write_histograms_to_file(outfilename, hists, [cut_flow, cut_flow_di_mu, cut_flow_di_ele, cut_flow_emu, cut_flow_smu, cut_flow_sele], [pars])
 
         
         

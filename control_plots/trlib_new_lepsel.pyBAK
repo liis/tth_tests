@@ -2,7 +2,7 @@ import ROOT, sys
 from array import array
 import numpy as np
 
-lepton_vars_f = ["lepton_pt", "lepton_eta", "lepton_rIso", "lepton_charge", "lepton_dxy", "lepton_dz", "lepton_wp80", "lepton_wp95"]
+lepton_vars_f = ["lepton_pt", "lepton_eta", "lepton_rIso", "lepton_charge"]
 jet_vars_f = ["jet_pt", "jet_eta", "jet_phi", "jet_csv"]
 
 #----------------separate by type---------------------
@@ -110,7 +110,7 @@ def pass_lepton_selection( vd, mode ):
         if len(passlist) == 1 and len(looselist) == 0: # one good and no loose leptons
             pass_lep_sel = True
 
-    elif mode == "DL" and (vd["Vtype"][0]==0 or vd["Vtype"][0]==1):
+    elif mode == "DL" and (vd["Vtype"][0]==0 or vd["Vtype"][0]==1 or vd["Vtype"][0]==4):
         
         
         for ilep in range(n_lep):
@@ -188,3 +188,21 @@ def bjet_presel(vd, jet_list = [], WP = "M" ):
 
     return passlist
 
+def event_count(ncut, binlabel, cut_flow_hists, proc, weight, vd, idx_sys = 0):
+    """
+    idx_sys -- only fill nominal FIXME
+    """
+    if idx_sys == 0: #FIXME
+        cut_flow_hists[proc].GetXaxis().SetBinLabel(ncut+1, binlabel)
+        cut_flow_hists[proc].Fill(ncut,weight)
+    
+        if proc == "TTJets":
+            if vd["nSimBs"][0] > 2 and vd["nMatchSimBs"][0] > 1:
+                cut_flow_hists["ttbb"].GetXaxis().SetBinLabel(ncut+1, binlabel)
+                cut_flow_hists["ttbb"].Fill(ncut, weight)
+            elif vd["nSimBs"][0] > 2 and vd["nMatchSimBs"][0] < 2:
+                cut_flow_hists["ttb"].GetXaxis().SetBinLabel(ncut+1, binlabel)
+                cut_flow_hists["ttb"].Fill(ncut, weight)
+            elif vd["nSimBs"][0] == 2:
+                cut_flow_hists["ttjj"].GetXaxis().SetBinLabel(ncut+1, binlabel)
+                cut_flow_hists["ttjj"].Fill(ncut, weight)

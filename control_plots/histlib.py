@@ -10,13 +10,17 @@ hist_variables = {
 
     "trail_electron_eta":(25, -2.5, 2.5),
     "trail_electron_pt": (25, 0, 250),
-    "trail_electron_rIso": (50, 0, 0.15),
+    "trail_electron_rIso": (50, 0, 0.25),
+    "trail_electron_wp95": (2,0,2),
+    "trail_electron_wp80": (2,0,2),
+    "trail_electron_dxy": (25, 0, 0.05),
+    "trail_electron_dz": (100, 0, 1.1),
 
     "lead_muon_rIso": (50, 0, 0.15),
     "lead_muon_pt": (50, 0, 250),
     "lead_muon_eta":(50, -2.5, 2.5),
 
-    "trail_muon_rIso": (50, 0, 0.15),
+    "trail_muon_rIso": (50, 0, 0.25),
     "trail_muon_pt": (25, 0, 250),
     "trail_muon_eta":(25, -2.5, 2.5),
 
@@ -69,6 +73,10 @@ map_hist_variables = { # if histogram name is different from the tree entry name
     "trail_electron_pt": "lepton_pt",
     "trail_electron_rIso": "lepton_rIso",   
     "trail_electron_eta": "lepton_eta",
+    "trail_electron_wp80": "lepton_wp80",
+    "trail_electron_wp95": "lepton_wp95",
+    "trail_electron_dxy": "lepton_dxy",
+    "trail_electron_dz": "lepton_dz",
 
     "lead_muon_pt": "lepton_pt",
     "lead_muon_eta": "lepton_eta",
@@ -266,7 +274,7 @@ def fill_jet_histograms(vd, hists, sample, syst, weight, mode, jet_list = [], is
           #          if isTTjets: fill_ttjets_histograms(vd, hists, var, vd[var][ijet], weight)
 
     
-def fill_cut_flow(cuts, cf_hist, lf = 1, tablewidth = 0, bf = False):
+def fill_cut_flow(cuts, cf_hist, lf = 1, tablewidth = 0, bf = False, round_prec = 1):
     """
     cuts -- ordered dictionary of cuts in cut-flow. labels need to be saved in the cut-flow histogra
     cf_hist -- cut-flow histogram
@@ -277,7 +285,7 @@ def fill_cut_flow(cuts, cf_hist, lf = 1, tablewidth = 0, bf = False):
     cut_count = 0
     for cut in cuts:
         cut_count += 1
-        round_prec = 1 # rounding precision when printing
+#        round_prec = 1 # rounding precision when printing
         
         cf_hist.Scale(lf) # optionally normalize to different lumi value
 
@@ -337,3 +345,23 @@ def get_ratio(hist1, hist2, ratio_ytitle = ""):
                                                                              
     return hist_ratio
                                     
+def event_count(ncut, binlabel, cut_flow_hists, proc, weight, vd, idx_sys = 0):
+    """
+    idx_sys -- only fill nominal FIXME
+    """
+    if idx_sys == 0: #FIXME
+        cut_flow_hists[proc].GetXaxis().SetBinLabel(ncut+1, binlabel)
+        cut_flow_hists[proc].Fill(ncut,weight)
+        
+        if proc == "TTJets":
+            if vd["nSimBs"][0] > 2 and vd["nMatchSimBs"][0] > 1:
+                cut_flow_hists["ttbb"].GetXaxis().SetBinLabel(ncut+1, binlabel)
+                cut_flow_hists["ttbb"].Fill(ncut, weight)
+            elif vd["nSimBs"][0] > 2 and vd["nMatchSimBs"][0] < 2:
+                cut_flow_hists["ttb"].GetXaxis().SetBinLabel(ncut+1, binlabel)
+                cut_flow_hists["ttb"].Fill(ncut, weight)
+            elif vd["nSimBs"][0] == 2:
+                cut_flow_hists["ttjj"].GetXaxis().SetBinLabel(ncut+1, binlabel)
+                cut_flow_hists["ttjj"].Fill(ncut, weight)
+
+    
