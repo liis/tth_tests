@@ -7,10 +7,12 @@ import argparse
 parser = argparse.ArgumentParser()
 parser.add_argument('--notrig', dest="notrig", action="store_true", default=False, required=False) # dont apply trigger on MC sel
 parser.add_argument('--notopw', dest="notopw", action="store_true", default=False, required=False) # dont apply top pt weight
+parser.add_argument('--noWeight', dest="noWeight", action="store_true", default=False, required=False)
 args = parser.parse_args()
 
 mctrig = not args.notrig
 topw = not args.notopw
+noWeight = args.noWeight
 
 #def set_file_name(file_name_base, mctrig, topw):
 #    infile = file_name_base
@@ -22,11 +24,11 @@ topw = not args.notopw
 #    return infile
 
 if not mctrig:
-    infile_SL = set_file_name("histograms_presel_2b_SL", mctrig, topw)
-    infile_DL = set_file_name("histograms_presel_2b_DL", mctrig, topw)
+    infile_SL = set_file_name("histograms_presel_2b_SL", mctrig, topw, noWeight)
+    infile_DL = set_file_name("histograms_presel_2b_DL", mctrig, topw, noWeight)
 else:
-    infile_SL = set_file_name("histograms_presel_2b_SL", mctrig, topw)
-    infile_DL = set_file_name("histograms_presel_2b_DL", mctrig, topw)
+    infile_SL = set_file_name("histograms_presel_2b_SL", mctrig, topw, noWeight)
+    infile_DL = set_file_name("histograms_presel_2b_DL", mctrig, topw, noWeight)
 
 standalone = True
 
@@ -124,24 +126,35 @@ print '\\\ \\hline'
 tot_bkg = 0
 for proc in processes_SL:
     print proc,
-    fill_cut_flow(cuts_SL, processes_SL[proc], lf, table_size)
-    fill_cut_flow(cuts_DL, processes_DL[proc], lf, table_size)
+    fill_cut_flow(cuts_SL, processes_SL[proc], lf, table_size, round_prec = 2)
+    fill_cut_flow(cuts_DL, processes_DL[proc], lf, table_size, round_prec = 2)
 
     print "\\\\"
 
 print "\\hline"
 
 #----------- sum bkg --------------
-print "$\sum$ Bkg ",
-fill_cut_flow(cuts_SL, sumBkg_SL, lf, table_size)
-fill_cut_flow(cuts_DL, sumBkg_DL, lf, table_size)
+print "\\textbf{$\sum$ Bkg} ",
+fill_cut_flow(cuts_SL, sumBkg_SL, lf, table_size, bf = True)
+fill_cut_flow(cuts_DL, sumBkg_DL, lf, table_size, bf = True)
 print "\\\\"
 print "\\hline"
 
 #----------- data --------------------
-print "Data ",
-fill_cut_flow(cuts_SL, data_SL, lf, table_size)
-fill_cut_flow(cuts_DL, data_DL, lf, table_size)
+print "Data Mu ",
+fill_cut_flow(cuts_SL, data_mu_SL, lf, table_size)
+fill_cut_flow(cuts_DL, data_mu_DL, lf, table_size)
+print "\\\\"
+
+print "Data El ",
+fill_cut_flow(cuts_SL, data_el_SL, lf, table_size)
+fill_cut_flow(cuts_DL, data_el_DL, lf, table_size)
+print "\\\\"
+print "\\hline"
+
+print "\\textbf{Data} ",
+fill_cut_flow(cuts_SL, data_SL, lf, table_size, bf = True)
+fill_cut_flow(cuts_DL, data_DL, lf, table_size, bf = True)
 print "\\\\"
 print "\\hline"
 #-------------------------------------

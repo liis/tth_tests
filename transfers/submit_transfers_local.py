@@ -3,7 +3,7 @@ import re
 import os
 import sys
 sys.path.append('./')
-indir = "TransfersForResubmit/"
+indir = "TransfersForResubmit_mc/"
 #indir = "Filelists_data/"
 #infilelists_filename = indir + "/filelist_double_el_data.txt"
 

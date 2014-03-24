@@ -11,7 +11,7 @@ parser.add_argument('--notopw', dest="notopw", action="store_true", default=Fals
 args = parser.parse_args()
 
 sys = False
-mode = "SL"
+mode = "DL"
 mctrig = not args.notrig
 topw = not args.notopw
 
@@ -49,7 +49,7 @@ if mode == "SL":
     data_mu = f.Get("singleMu_data/cut_flow_singleMu_data") # get cut-flow of data
     data_el = f.Get("singleEl_data/cut_flow_singleEl_data")
 if mode == "DL":
-    danta_mu = f.Get("diMu_data/cut_flow_diMu_data") # get cut-flow of data
+    data_mu = f.Get("diMu_data/cut_flow_diMu_data") # get cut-flow of data
     data_el = f.Get("diEl_data/cut_flow_diEl_data")
 
 data = data_mu.Clone("data")
@@ -80,9 +80,9 @@ cuts_L_SL["Lg7j4t"] = "$\ge$7j 4t"
 #cuts_L_SL["Lg7jg4t"] = "$\ge$7j $\ge$4t"
 
 cuts_L_DL = dict()
-cuts_L_DL["4j2t"] = "4j 2t"
-cuts_L_DL["4j3t"] = "4j 3t" 
-cuts_L_DL["4j4t"] = "4j $\ge$4t"
+cuts_L_DL["g4j2t"] = "$\ge$4j 2t"
+cuts_L_DL["g4j3t"] = "$\ge$4j 3t" 
+cuts_L_DL["g4j4t"] = "$\ge$4j $\ge$4t"
 
 
 if mode == "SL":

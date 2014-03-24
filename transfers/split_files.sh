@@ -1,6 +1,6 @@
-FILELISTS_DIR="Filelists_data_el"
-#FILELISTS_DIR="TransfersForResubmit"
-LINES_PER_FILE=30
+#FILELISTS_DIR="Filelists_data_el"
+FILELISTS_DIR="TransfersForResubmit_mu"
+LINES_PER_FILE=100
 
 SPLIT_DIR=$FILELISTS_DIR"_split/"
 mkdir $SPLIT_DIR
