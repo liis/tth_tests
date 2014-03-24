@@ -27,7 +27,7 @@ def fill_cut_flow(cut_flow_hists, proc, weight, vd, mode, idx_sys = 0):
     if vd["numJets"][0] == 4 and vd["numBTagM"][0] ==4:
         event_count(8, "4j4t", cut_flow_hists, proc,weight, vd, idx_sys)
 
-    if vd["numBTagM"][0] ==4:
+    if vd["numJets"][0] >= 4 and vd["numBTagM"][0] >=4:
         event_count(9, "g4j4t", cut_flow_hists, proc,weight, vd, idx_sys)
 
     if vd["numJets"][0] ==5 and vd["numBTagM"][0] >=4:
@@ -62,15 +62,18 @@ def fill_cut_flow(cut_flow_hists, proc, weight, vd, mode, idx_sys = 0):
     if vd["numBTagM"][0] ==3 and vd["numBTagL"][0]==4:
         event_count(19, "3t1t", cut_flow_hists, proc,weight, vd, idx_sys)
 
+
+    if vd["numJets"][0] ==4 and vd["numBTagM"][0] ==3:
+        event_count(20, "4j3t", cut_flow_hists, proc,weight, vd, idx_sys)
     #--------------For DL---------------------
 #    if vd["numJets"][0] >=4 and vd["numBTagM"][0] == 1:
 #        event_count(20, "4j2t", cut_flow, proc, weight,vd, idx_sys)
 
-#    if vd["numJets"][0] >=4 and vd["numBTagM"][0]==2:
-#        event_count(21, "g4j2t", cut_flow, proc, weight,vd, idx_sys)
+    if vd["numJets"][0] >=4 and vd["numBTagM"][0]==2:
+        event_count(21, "g4j2t", cut_flow_hists, proc, weight,vd, idx_sys)
 
-#    if vd["numBTagM"][0]>=3:
-#        event_count(22, "g3t", cut_flow, proc, weight,vd, idx_sys)
+    if vd["numJets"][0] >=4 and  vd["numBTagM"][0]==3:
+        event_count(22, "g4j3t", cut_flow_hists, proc, weight,vd, idx_sys)
 
     #------according to event type --------
     if vd["type"][0] == 0:

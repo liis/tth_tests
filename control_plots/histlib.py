@@ -46,7 +46,9 @@ hist_variables = {
 #    "cut_flow": (35, 0, 35),
     "jet_count": (7, 0 , 7),
     "btag_count": (4, 0, 4),
-    "category_count": (4, 0, 4)
+    "category_count": (4, 0, 4),
+
+#    "gen_top_pt": (100, 0, 500),
 
     }
 
@@ -97,6 +99,8 @@ map_hist_variables = { # if histogram name is different from the tree entry name
     "btag_lr_6j": "btag_LR",
     "btag_lr_5j": "btag_LR",
     "btag_lr_4j": "btag_LR",
+
+#    "gen_top_pt": "p4T",
     }
 
 variable_names = {
@@ -108,17 +112,17 @@ variable_names = {
     "lead_electron_rIso": "Electron isolation",
     "lead_electron_pt": "Electron p_{T}",
     
-    #                "trail_electron_eta": "Electron #eta",
-    #                "trail_electron_rIso": "Electron isolation",
-    #                "trail_electron_pt": "Electron p_{T}",
+    "trail_electron_eta": "Electron #eta",
+    "trail_electron_rIso": "Electron isolation",
+    "trail_electron_pt": "Electron p_{T}",
     
     "lead_muon_pt": "Muon p_{T}",
     "lead_muon_rIso": "Muon isolation",
     "lead_muon_eta": "Muon #eta",
     
-    #               "trail_muon_pt": "Muon p_{T}",
-   #               "trail_muon_rIso": "Muon isolation",
-    #               "trail_muon_eta": "Muon #eta",
+    "trail_muon_pt": "Muon p_{T}",
+    "trail_muon_rIso": "Muon isolation",
+    "trail_muon_eta": "Muon #eta",
     
     #                  "jet_pt": "jet p_{T}",
     #                  "jet_eta": "jet #eta",
@@ -140,14 +144,17 @@ variable_names = {
     "nPVs": " # primary vertices",
     
     #           "btag_LR": "b-tagging LR",
-    "btag_lr_7j": "b-tagging LR (>= 7 jets)",
-    "btag_lr_6j": "b-tagging LR (6 jets)",
-    "btag_lr_5j": "b-tagging LR (5 jets)" ,
-    "btag_lr_4j": "b-tagging LR (4 jets)",
+    "btag_LR_7j": "b-tagging LR (>= 7 jets)",
+    "btag_LR_6j": "b-tagging LR (6 jets)",
+    "btag_LR_5j": "b-tagging LR (5 jets)" ,
+    "btag_LR_4j": "b-tagging LR (4 jets)",
 
     "jet_count": "Nr. of jets",
     "btag_count": "Nr. of b-tags (CSV medium)",
-    "cat_count": "Selection categories",
+    "category_count": "Selection categories",
+
+#    "gen_top_pt": "gen top p_{T}",
+    
     }
 
 colors = {"TTJets": ROOT.kBlue,
@@ -222,16 +229,17 @@ def fill_single_histogram(vd, varname, var, hists, sample, syst, weight):
 def fill_1D_histograms( vd, hists, sample, syst, weight, mode, isTTjets = False): #FIXME!! this is bad implementation
     
     for var in hists[sample]: # loop over dictionary of histograms for a specific datasample
-        try:
-            var_tree = var
-            var_size = len(vd[var])
-        except KeyError:
-            var_tree = map_hist_variables[var]
-            var_size = len(vd[var_tree])
-            
-        if var_size == 1:
-            hists[sample+syst][var].Fill(vd[var_tree][0], weight)
-            if isTTjets: fill_ttjets_histograms(vd, hists, var, vd[var_tree][0], syst, weight) 
+        if var == "MET_pt" or var == "MET_phi" or var == "nPVs":
+            try:
+                var_tree = var
+                var_size = len(vd[var])
+            except KeyError:
+                var_tree = map_hist_variables[var]
+                var_size = len(vd[var_tree])
+
+            if var_size == 1: 
+                hists[sample+syst][var].Fill(vd[var_tree][0], weight)
+                if isTTjets: fill_ttjets_histograms(vd, hists, var, vd[var_tree][0], syst, weight) 
 
 
 def fill_lepton_histograms(vd, hists, sample, syst, weight, mode, lepton_list = [], isTTjets = False):
@@ -297,6 +305,28 @@ def fill_cut_flow(cuts, cf_hist, lf = 1, tablewidth = 0, bf = False, round_prec 
             print str( round( nr_evts, round_prec) ) + " $\pm$ " + str( round( cf_hist.GetBinError(bin_nr), round_prec ) ),
         else:
             print "\\textbf{" + str( round( nr_evts, round_prec) ) + " $\pm$ " + str( round( cf_hist.GetBinError(bin_nr), round_prec ) ) + "}",
+
+
+def fill_cut_flow_bycut(cf_hist, cut, lf = 1, tablewidth = 0, bf = False, round_prec = 1):
+    """
+    cuts -- ordered dictionary of cuts in cut-flow. labels need to be saved in the cut-flow histogra
+    cf_hist -- cut-flow histogram
+    lf -- optional scale factor for the yields
+    """
+    if tablewidth == 0:
+        tablewidth = len(cuts)
+    
+    cf_hist.Scale(lf) # optionally normalize to different lumi value
+    
+    bin_nr = cf_hist.GetXaxis().FindBin(cut) # find bin by cut-label
+    nr_evts = cf_hist.GetBinContent(bin_nr)
+    print " & ",
+    
+    if not bf:
+        print str( round( nr_evts, round_prec) ) + " $\pm$ " + str( round( cf_hist.GetBinError(bin_nr), round_prec ) ),
+    else:
+        print "\\textbf{" + str( round( nr_evts, round_prec) ) + " $\pm$ " + str( round( cf_hist.GetBinError(bin_nr), round_prec ) ) + "}",
+
 
 def set_file_name(file_name_base, mctrig, topw, noWeight, dosys=False):
     infile = file_name_base

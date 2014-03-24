@@ -6,6 +6,7 @@ from trlib import initialize_tree, var_list, pass_trigger_selection, pass_lepton
 from histlib import hist_variables, initialize_hist_ranges, initialize_histograms, fill_1D_histograms, fill_lepton_histograms, fill_jet_histograms, fill_single_histogram, write_histograms_to_file, event_count
 
 import argparse
+
 parser = argparse.ArgumentParser()
 parser.add_argument('--mode', dest='DL_or_SL',  choices=["DL", "SL"], required=True, help="specify DL or SL analysis")
 parser.add_argument('--testRun', dest='is_test_run', action="store_true", default=False, required=False)
@@ -30,7 +31,10 @@ if args.DL_or_SL == "SL":
 #indir = "test_trees/trees_2014_02_25_0-0-1_rec_std/" # syst set to 1
 #indir = "test_trees/trees_2014_03_11_0-0-1_rec_std/"
 #indir = "test_trees/trees_2014_03_11_0-0-1_rec_std_oldV2/"
-indir = "test_trees/trees_2014_03_11_0-0-1_rec_std_withFixes_FinalOnly/" # missing cat 1,2
+#indir = "test_trees/trees_2014_03_11_0-0-1_rec_std_withFixes_FinalOnly/" 
+#indir = "test_trees/trees_2014_03_13_0-0-1_rec_std_fixed/"
+#indir = "test_trees/trees_2014_03_17_0-0-1_rec_std_ttbarWeight/"
+indir = "test_trees/trees_2014_03_19_0-0-1_rec_std/"
 
 usetrig = not args.notrig
 Lumi = 19.04
@@ -114,12 +118,13 @@ for proc, tree in t_all.iteritems():
                 cut_flow_sele[sub_proc + isyst].Sumw2()
     #------------------------------------------------------------------------------------
     vd = initialize_tree(tree, var_list) # dictionary of variables
-
+    # print vd
+    
     for i in range( tree.GetEntries() ):
         if i % report_every == 0:
             print "Event nr: " + str(i)
         if i == max_event and not i == -1: break
-                
+
         tree.LoadTree(i)
         tree.GetEntry(i)
         #-----------------Check systematic variation-----------------
@@ -134,15 +139,23 @@ for proc, tree in t_all.iteritems():
         isyst = do_syst[idx_sys] # name of syst uncertainty
         #-----------------------------------------------------------
         
+#        if proc == "TTJets":
+#            print "PDF weight up = " + str( vd["SCALEsyst"][2] )
+#            print "PDF weight down = " + str( vd["SCALEsyst"][3] )
+
         ev_weight = vd["weight"][0]
         tr_weight = vd["trigger"][0]
         pu_weight = vd["PUweight"][0]
         toppt_weight = vd["weightTopPt"][0]
-        
+
+        csv_weight = vd["weightCSV"][0] #corresponds to nominal
+#        csv_weight = 1
+
+
         if proc[-4:] == "data":
             weight = 1
         else:
-            weight = ev_weight*pu_weight*Lumi/12.1
+            weight = ev_weight*pu_weight*csv_weight*Lumi/12.1
             if not notopw:
                 weight = weight*toppt_weight
             if usetrig:
@@ -162,8 +175,7 @@ for proc, tree in t_all.iteritems():
         #        event_count(1, "trig", cut_flow, proc, weight, vd, idx_sys) # cut_flow: apply trigger for data FIXME
 
 #        if not ( len(sel_lep) ): continue
-        if not ( ( mode == "DL" and (vd["Vtype"][0] == 0 or vd["Vtype"][0] == 1 or vd["Vtype"][0] == 4))
-                 or ( mode == "SL" and (vd["type"][0] == 2 or vd["type"][0]==3)) ): continue #FIXME -- uncomment for control plots
+        if not ( ( mode == "DL" and (vd["Vtype"][0] == 0 or vd["Vtype"][0] == 1 or vd["Vtype"][0] == 4)) or ( mode == "SL" and (vd["Vtype"][0] == 2 or vd["Vtype"][0]==3)) ): continue  #lepton selection
 
        #------------------- fill cutflow histos -------------------------------
         fill_cut_flow(cut_flow, proc, weight, vd, mode, idx_sys=0)
@@ -196,9 +208,9 @@ for proc, tree in t_all.iteritems():
 
 
         if (mode == "SL" and vd["numJets"][0] >= 5 and vd["numBTagM"][0] >= 2) or (mode == "DL" and vd["numJets"][0] >= 2 and vd["numBTagM"][0] >= 2): 
-#            fill_1D_histograms( vd, hists, proc, isyst, weight, mode, isTTjets ) 
-#            fill_lepton_histograms( vd, hists, proc, isyst, weight, mode, sel_lep, isTTjets)
-             fill_jet_histograms(vd, hists, proc, isyst, weight, mode, isTTjets = isTTjets)
+            fill_1D_histograms( vd, hists, proc, isyst, weight, mode, isTTjets ) 
+            fill_lepton_histograms( vd, hists, proc, isyst, weight, mode, isTTjets = isTTjets) #FIXME, specify sel_lep again for sanity check
+            fill_jet_histograms(vd, hists, proc, isyst, weight, mode, isTTjets = isTTjets)
 
     print "--------- PRINT CUT FLOW ------------- "
     print "Nr tot = "+  str(cut_flow[proc].GetBinContent(1))

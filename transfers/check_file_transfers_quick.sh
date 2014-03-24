@@ -4,7 +4,7 @@ INIT_SRMPATH="srm://stormfe1.pi.infn.it:8444/srm/managerv2?SFN=/cms" # initial l
 INFILELIST=$1
 RUN_AT_DEST=1 # When run at destination, can do ls instead of srmls
 
-SUPERQUICK=1
+SUPERQUICK=0
 
 DEST_SRMPATH="srm://ganymede.hep.kbfi.ee:8888/srm/v2/server?SFN="
 DEST_PATH="/hdfs/cms/store/user/liis/VHbb_patTuples/"

@@ -2,8 +2,8 @@ import ROOT, sys
 
 from fill_jet_counts import fill_jet_count_histograms, fill_btag_count_histograms, fill_category_count_histograms
 from tree_inputs import input_files
-from trlib import initialize_tree, var_list, pass_trigger_selection, pass_lepton_selection, pass_jet_selection, bjet_presel, event_count
-from histlib import hist_variables, initialize_hist_ranges, initialize_histograms, fill_1D_histograms, fill_lepton_histograms, fill_jet_histograms, fill_single_histogram, write_histograms_to_file
+from trlib import initialize_tree, var_list, pass_trigger_selection, pass_lepton_selection, pass_jet_selection, bjet_presel
+from histlib import hist_variables, initialize_hist_ranges, initialize_histograms, fill_1D_histograms, fill_lepton_histograms, fill_jet_histograms, fill_single_histogram, write_histograms_to_file, event_count
 
 import argparse
 parser = argparse.ArgumentParser()
@@ -28,9 +28,9 @@ if args.DL_or_SL == "SL":
 ##indir = "test_trees/trees_2014_02_09_0-0-1_rec_std/"
 #indir = "test_trees/trees_2014_02_15_0-0-1_rec_std/"
 #indir = "test_trees/trees_2014_02_25_0-0-1_rec_std/" # syst set to 1
-#indir = "test_trees/trees_2014_03_11_0-0-1_rec_std/"
+indir = "test_trees/trees_2014_03_12_0-0-1_rec_std/"
 #indir = "test_trees/trees_2014_03_11_0-0-1_rec_std_oldV2/"
-indir = "test_trees/trees_2014_03_11_0-0-1_rec_std_withFixes_FinalOnly/"
+#indir = "test_trees/trees_2014_03_11_0-0-1_rec_std_withFixes_FinalOnly/"
 
 usetrig = not args.notrig
 Lumi = 19.04
@@ -94,6 +94,8 @@ for proc, tree in t_all.iteritems():
         tree.LoadTree(i)
         tree.GetEntry(i)
         #-----------------Check systematic variation-----------------
+
+
         idx_sys = vd["syst"][0] # index of syst uncertainty
 
         run_variation = False # Whether or not to run paricualr systematic variation
@@ -123,8 +125,8 @@ for proc, tree in t_all.iteritems():
             weight = 1
         #-------------Select events---------------
 
-        fill_cut_flow(cut_flow_hists, proc, weight, vd, idx_sys = 0)
-#        event_count(0, "all", cut_flow, proc, weight, vd, idx_sys) # cut-flow: all evts
+#        fill_cut_flow(cut_flow_hists, proc, weight, vd, idx_sys = 0)
+        event_count(0, "all", cut_flow, proc, weight, vd, idx_sys) # cut-flow: all evts
 
         if proc[-7:] == "Mu_data"  and not( pass_trigger_selection(vd, mode, "mu") and ( (mode=="SL" and vd["Vtype"][0]==2) or (mode=="DL" and vd["Vtype"][0]==0)) ): continue #combined trigger and lepton selection
         if proc[-7:] == "El_data" and not( pass_trigger_selection(vd, mode, "el") and ( (mode=="SL" and vd["Vtype"][0]==3) or (mode=="DL" and vd["Vtype"][0]==1)) ): continue
@@ -134,7 +136,7 @@ for proc, tree in t_all.iteritems():
 
         sel_lep = pass_lepton_selection(vd, mode) # count the number of good leptons and apply preselection
         if not ( len(sel_lep) ): continue
-#        event_count(2, "SelLep", cut_flow, proc, weight, vd, idx_sys) # cut_flow: require one lepton
+        event_count(2, "SelLep", cut_flow, proc, weight, vd, idx_sys) # cut_flow: require one lepton
         sel_jet = pass_jet_selection(vd, mode, jet40=True)
 
         #jet count histograms (fill before preselection!)
@@ -159,8 +161,8 @@ for proc, tree in t_all.iteritems():
             fill_jet_histograms(vd, hists, proc, isyst, weight, mode, isTTjets = isTTjets)
         #---------------do cutfolw--------------------------
 
-#        if vd["numJets"][0] >= 6 and vd["numBTagM"][0] == 2:
-#            event_count(3, "g6j2t", cut_flow, proc, weight, vd, idx_sys ) # cut_flow, preselection
+        if vd["numJets"][0] >= 6 and vd["numBTagM"][0] == 2:
+            event_count(3, "g6j2t", cut_flow, proc, weight, vd, idx_sys ) # cut_flow, preselection
 
         if vd["numJets"][0] == 4  and vd["numBTagM"][0] == 3:
             event_count(4, "4j3t",  cut_flow, proc,weight, vd, idx_sys)
