@@ -170,12 +170,12 @@ for hist in variable_names:
         signal.SetMinimum(0.01)
         data.SetMinimum(0.01)
     
-    h_sumMC.Draw("hist")
-    sum.Draw("histsame")
-    h_sumMC.Draw("histsame")
+    h_sumMC.Draw("hist","goff)
+    sum.Draw("histsame","goff")
+    h_sumMC.Draw("histsame","goff)
     mc["TTH125"].SetLineColor(ROOT.kBlack)
-    signal.Draw("histsame")
-    data.Draw("epsame")
+    signal.Draw("histsame","goff")
+    data.Draw("epsame", "goff")
 
     #---legend---
     legend1 = ROOT.TLegend(0.7, 0.78, 0.9, 0.89, "", "brNDC")
@@ -213,7 +213,7 @@ for hist in variable_names:
     #--------------
 
     hist_ratio = get_ratio(data, h_sumMC, "Data/MC")
-    hist_ratio.Draw("p0e1")
+    hist_ratio.Draw("p0e1", "goff")
     if args.doSys:
         hist_ratio_up = get_ratio(sys_up, h_sumMC)
         hist_ratio_down = get_ratio(sys_down, h_sumMC)
@@ -222,8 +222,8 @@ for hist in variable_names:
    #     gr_up.SetHistogram(hist_ratio_up)
    #     gr_up.Draw()
      
-        hist_ratio_up.Draw("histsame")
-        hist_ratio_down.Draw("histsame")
+        hist_ratio_up.Draw("histsame", "goff")
+        hist_ratio_down.Draw("histsame", "goff")
 
     c.cd()
 
