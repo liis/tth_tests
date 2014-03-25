@@ -34,7 +34,8 @@ if args.DL_or_SL == "SL":
 #indir = "test_trees/trees_2014_03_11_0-0-1_rec_std_withFixes_FinalOnly/" 
 #indir = "test_trees/trees_2014_03_13_0-0-1_rec_std_fixed/"
 #indir = "test_trees/trees_2014_03_17_0-0-1_rec_std_ttbarWeight/"
-indir = "test_trees/trees_2014_03_19_0-0-1_rec_std/"
+#indir = "test_trees/trees_2014_03_19_0-0-1_rec_std/"
+indir = "test_trees/trees_2014_03_25_0-0-1_rec_std/"
 
 usetrig = not args.notrig
 Lumi = 19.04
@@ -147,6 +148,7 @@ for proc, tree in t_all.iteritems():
         tr_weight = vd["trigger"][0]
         pu_weight = vd["PUweight"][0]
         toppt_weight = vd["weightTopPt"][0]
+        el_weight = vd["weightEle"][0]
 
         csv_weight = vd["weightCSV"][0] #corresponds to nominal
 #        csv_weight = 1
@@ -155,7 +157,7 @@ for proc, tree in t_all.iteritems():
         if proc[-4:] == "data":
             weight = 1
         else:
-            weight = ev_weight*pu_weight*csv_weight*Lumi/12.1
+            weight = ev_weight*pu_weight*csv_weight*el_weight*Lumi/12.1
             if not notopw:
                 weight = weight*toppt_weight
             if usetrig:
@@ -171,11 +173,16 @@ for proc, tree in t_all.iteritems():
         if proc[-7:] == "Mu_data"  and not( pass_trigger_selection(vd, mode, "mu") and ( (mode=="SL" and vd["Vtype"][0]==2) or (mode=="DL" and ( vd["Vtype"][0]==0 or vd["Vtype"][0]==4)) ) ): continue #combined trigger and lepton selection
         if proc[-7:] == "El_data" and not( pass_trigger_selection(vd, mode, "el") and ( (mode=="SL" and vd["Vtype"][0]==3) or (mode=="DL" and vd["Vtype"][0]==1)) ): continue
         if (proc[-7:] == "Mu_data" or proc[-7:] == "El_data") and idx_sys != 0: continue # Run nominal, skip systematic variations
-
         #        event_count(1, "trig", cut_flow, proc, weight, vd, idx_sys) # cut_flow: apply trigger for data FIXME
 
+        sel_lep = pass_lepton_selection(vd, mode)
 #        if not ( len(sel_lep) ): continue
         if not ( ( mode == "DL" and (vd["Vtype"][0] == 0 or vd["Vtype"][0] == 1 or vd["Vtype"][0] == 4)) or ( mode == "SL" and (vd["Vtype"][0] == 2 or vd["Vtype"][0]==3)) ): continue  #lepton selection
+
+        if vd["hJetAmong"] < 2: continue; # additional quality check (should be done at tree production level)
+
+#        if not vd["Vtype"][0] == 2: # single muons only FIXME!
+#            continue
 
        #------------------- fill cutflow histos -------------------------------
         fill_cut_flow(cut_flow, proc, weight, vd, mode, idx_sys=0)
@@ -209,7 +216,7 @@ for proc, tree in t_all.iteritems():
 
         if (mode == "SL" and vd["numJets"][0] >= 5 and vd["numBTagM"][0] >= 2) or (mode == "DL" and vd["numJets"][0] >= 2 and vd["numBTagM"][0] >= 2): 
             fill_1D_histograms( vd, hists, proc, isyst, weight, mode, isTTjets ) 
-            fill_lepton_histograms( vd, hists, proc, isyst, weight, mode, isTTjets = isTTjets) #FIXME, specify sel_lep again for sanity check
+            fill_lepton_histograms( vd, hists, proc, isyst, weight, mode, sel_lep, isTTjets = isTTjets) #FIXME, specify sel_lep again for sanity check
             fill_jet_histograms(vd, hists, proc, isyst, weight, mode, isTTjets = isTTjets)
 
     print "--------- PRINT CUT FLOW ------------- "

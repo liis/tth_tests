@@ -7,9 +7,9 @@ jet_vars_f = ["jet_pt", "jet_eta", "jet_phi", "jet_csv", "weightCSV"]
 ttbar_vars_f = ["SCALEsyst"]
 
 #----------------separate by type---------------------
-int_list = ["nLep", "numJets", "numBTagL", "numBTagM", "numBTagT", "nPVs", "nSimBs", "nMatchSimBs", "flag_type0", "type", "Vtype", "flag_type2"]
+int_list = ["nLep", "numJets", "numBTagL", "numBTagM", "numBTagT", "nPVs", "nSimBs", "nMatchSimBs", "flag_type0", "type", "Vtype", "flag_type2", "hJetAmong"]
 int_array_list = ["lepton_type", "syst"]
-float_list = ["weight", "trigger", "PUweight", "weightTopPt", "MET_pt", "MET_phi", "btag_LR"] 
+float_list = ["weight", "trigger", "PUweight", "weightTopPt", "MET_pt", "MET_phi", "btag_LR", "weightEle"] 
 
 float_array_list = lepton_vars_f  + jet_vars_f + [ "p4T" ] + ttbar_vars_f #lepton_vars_d + jet_vars_d + other stuff
 trigger = ["triggerFlags"]
@@ -106,22 +106,21 @@ def pass_lepton_selection( vd, mode ):
             lep_pt = vd["lepton_pt"][ilep]
             
             if (  lep_pt > 30 and vd["lepton_rIso"][ilep] < 0.12 ):
-                if abs( vd["lepton_type"][ilep] == 13 and lep_eta < 2.1 ): # if muon
+                if abs( vd["lepton_type"][ilep] ) == 13 and lep_eta < 2.1: # if good muon
                     passlist.append(ilep)
-                elif abs( vd["lepton_type"][ilep] == 11 and lep_eta < 2.5 and (lep_eta > 1.566 or lep_eta < 1.442)): 
+                elif abs( vd["lepton_type"][ilep] ) == 11 and lep_eta < 2.5 and (lep_eta > 1.566 or lep_eta < 1.442) and vd["lepton_wp80"][ilep] > 0.5: #if good electron
                     passlist.append(ilep)
 
             elif ( lep_pt > 20 and vd["lepton_rIso"][ilep] < 0.2 ):
-                if abs( vd["lepton_type"][ilep] == 13 and lep_eta < 2.4 ): # if muon 
+                if abs( vd["lepton_type"][ilep] ) == 13 and lep_eta < 2.4 : # if muon 
                     looselist.append(ilep)
-                if abs( vd["lepton_type"][ilep] == 11 and lep_eta < 2.5 and (lep_eta < 1.442 or lep_eta > 1.566) ): #if electron
+                if abs( vd["lepton_type"][ilep] ) == 11 and lep_eta < 2.5 and (lep_eta < 1.442 or lep_eta > 1.566) and vd["lepton_wp95"][ilep] > 0.5: #if loose electron
                     looselist.append(ilep)
 
         if len(passlist) == 1 and len(looselist) == 0: # one good and no loose leptons
             pass_lep_sel = True
 
-    elif mode == "DL" and (vd["Vtype"][0]==0 or vd["Vtype"][0]==1):
-        
+    elif mode == "DL" and (vd["Vtype"][0]==0 or vd["Vtype"][0]==1 or vd["Vtype"][0]==4):
         
         for ilep in range(n_lep):
             lep_eta = abs(vd["lepton_eta"][ilep])
@@ -129,9 +128,9 @@ def pass_lepton_selection( vd, mode ):
             lep_iso = vd["lepton_rIso"][ilep]
 
             if( lep_pt > 10 and lep_iso < 0.2): # loose requirement
-                if abs( vd["lepton_type"][ilep] == 13 and lep_eta < 2.3 ): # if muon 
+                if abs( vd["lepton_type"][ilep] ) == 13 and lep_eta < 2.3: # if muon 
                     passlist.append(ilep)
-                if abs( vd["lepton_type"][ilep] == 11 and lep_eta < 2.5 and (lep_eta < 1.442 or lep_eta > 1.566) ): # if electron
+                if abs( vd["lepton_type"][ilep] ) == 11 and lep_eta < 2.5 and (lep_eta < 1.442 or lep_eta > 1.566) and vd["lepton_wp95"][ilep] > 0.5: # if electron
                     passlist.append(ilep)
 
         

@@ -45,7 +45,7 @@ hist_variables = {
     #----- count hists -----------
 #    "cut_flow": (35, 0, 35),
     "jet_count": (7, 0 , 7),
-    "btag_count": (4, 0, 4),
+    "btag_count": (6, 0, 6),
     "category_count": (4, 0, 4),
 
 #    "gen_top_pt": (100, 0, 500),

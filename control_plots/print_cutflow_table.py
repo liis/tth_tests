@@ -12,7 +12,7 @@ parser.add_argument('--lep', dest="lep", default="all", required=False)
 args = parser.parse_args()
 
 sys = False
-mode = "DL"
+mode = "SL"
 mctrig = not args.notrig
 topw = not args.notopw
 
@@ -68,8 +68,11 @@ if mode == "DL":
     data_mu = f.Get("diMu_data/" + cut_flow_base + "_diMu_data") # get cut-flow of data
     data_el = f.Get("diEl_data/" + cut_flow_base + "_diEl_data")
 
-data = data_mu.Clone("data")
-data.Add(data_el)
+if args.lep == "ele":
+    data = data_el.Clone("data")
+else:
+    data = data_mu.Clone("data")
+    data.Add(data_el)
 
 
 cuts_ttHbl_SL = dict() # processes for labels in cut-flow histograms
