@@ -69,14 +69,14 @@ processes_DL["EWK"] = f_DL.Get("EWK/cut_flow_EWK")
 processes_DL["DiBoson"] = f_DL.Get("DiBoson/cut_flow_DiBoson")
 
 sumBkg_SL = processes_SL["ttjj"].Clone("sumBkg") # Get a cut-flow histogram for sum Bkg
-for proc, cf_hist in processes_SL.iteritems():
-    if not proc == "ttH125" and not proc=="ttjj":
-        sumBkg_SL.Add(cf_hist)
+#for proc, cf_hist in processes_SL.iteritems():
+#    if not proc == "ttH125" and not proc=="ttjj":
+#        sumBkg_SL.Add(cf_hist)
 
 sumBkg_DL = processes_DL["ttjj"].Clone("sumBkg") # Get a cut-flow histogram for sum Bkg
-for proc, cf_hist in processes_DL.iteritems():
-    if not proc == "ttH125" and not proc=="ttjj":
-                sumBkg_DL.Add(cf_hist)
+#for proc, cf_hist in processes_DL.iteritems():
+#    if not proc == "ttH125" and not proc=="ttjj":
+#        sumBkg_DL.Add(cf_hist)
 
 data_mu_SL = f_SL.Get("singleMu_data/cut_flow_singleMu_data") # get cut-flow of data
 data_el_SL = f_SL.Get("singleEl_data/cut_flow_singleEl_data")
