@@ -8,6 +8,7 @@ import argparse
 parser = argparse.ArgumentParser()
 parser.add_argument('--notrig', dest="notrig", action="store_true", default=False, required=False) # dont apply trigger on MC sel
 parser.add_argument('--notopw', dest="notopw", action="store_true", default=False, required=False) # dont apply top pt weight
+parser.add_argument('--lep', dest="lep", default="all", required=False)
 args = parser.parse_args()
 
 sys = False
@@ -29,16 +30,31 @@ hist_lumi = pars.GetBinContent(pars.GetXaxis().FindBin("Lumi") )
 lf = 1 #19.5/hist_lumi # scale lumi to new value if needed, default 1
 Lumi = hist_lumi*lf
 
+if args.lep == "mu":
+    if mode == "SL":
+        cut_flow_base = "cut_flow_smu"
+    elif mode == "DL":
+        cut_flow_base = "cut_flow_di_mu"
+elif args.lep == "ele":
+    if mode == "SL":
+        cut_flow_base = "cut_flow_sele"
+    elif mode == "DL":
+        cut_flow_base = "cut_flow_di_ele"
+else:
+    cut_flow_base = "cut_flow"
+
+print "reading cut flow from histograms: " + cut_flow_base
+
 from odict import OrderedDict as dict
 processes = dict()
-processes["ttH125"] = f.Get("ttH125/cut_flow_ttH125")
-processes["ttjj"] = f.Get("ttjj/cut_flow_ttjj")
-processes["ttb"] = f.Get("ttb/cut_flow_ttb")
-processes["ttbb"] = f.Get("ttbb/cut_flow_ttbb")
-processes["TTV"] = f.Get("TTV/cut_flow_TTV")
-processes["SingleT"] = f.Get("SingleT/cut_flow_SingleT")
-processes["EWK"] = f.Get("EWK/cut_flow_EWK")
-processes["DiBoson"] = f.Get("DiBoson/cut_flow_DiBoson")
+processes["ttH125"] = f.Get("ttH125/" + cut_flow_base + "_ttH125")
+processes["ttjj"] = f.Get("ttjj/" + cut_flow_base + "_ttjj") 
+processes["ttb"] = f.Get("ttb/" + cut_flow_base + "_ttb")
+processes["ttbb"] = f.Get("ttbb/" + cut_flow_base + "_ttbb")
+processes["TTV"] = f.Get("TTV/" + cut_flow_base + "_TTV")
+processes["SingleT"] = f.Get("SingleT/" + cut_flow_base + "_SingleT")
+processes["EWK"] = f.Get("EWK/" + cut_flow_base + "_EWK")
+processes["DiBoson"] = f.Get("DiBoson/" + cut_flow_base + "_DiBoson")
 
 sumBkg = processes["ttjj"].Clone("sumBkg") # Get a cut-flow histogram for sum Bkg
 for proc, cf_hist in processes.iteritems():
@@ -46,11 +62,11 @@ for proc, cf_hist in processes.iteritems():
         sumBkg.Add(cf_hist)
 
 if mode == "SL":
-    data_mu = f.Get("singleMu_data/cut_flow_singleMu_data") # get cut-flow of data
-    data_el = f.Get("singleEl_data/cut_flow_singleEl_data")
+    data_mu = f.Get("singleMu_data/" + cut_flow_base + "_singleMu_data") # get cut-flow of data
+    data_el = f.Get("singleEl_data/" + cut_flow_base + "_singleEl_data")
 if mode == "DL":
-    data_mu = f.Get("diMu_data/cut_flow_diMu_data") # get cut-flow of data
-    data_el = f.Get("diEl_data/cut_flow_diEl_data")
+    data_mu = f.Get("diMu_data/" + cut_flow_base + "_diMu_data") # get cut-flow of data
+    data_el = f.Get("diEl_data/" + cut_flow_base + "_diEl_data")
 
 data = data_mu.Clone("data")
 data.Add(data_el)
