@@ -1,98 +1,20 @@
 import ROOT, sys
 from histlib import event_count
 
-def fill_cut_flow(cut_flow_hists, proc, weight, vd, mode, idx_sys = 0):
-    """
-    fill cut flow histogram at selections of interest
-    cut_flow_hist -- dictionary of initialized cut_flow histograms for each process
-    """
 
-    event_count(2, "lep. sel.", cut_flow_hists, proc, weight, vd, idx_sys)
-
-    if vd["numJets"][0] >= 5 and vd["numBTagM"][0] >= 2: # SL preselection
-        event_count(3, "presel_SL", cut_flow_hists, proc, weight, vd, idx_sys ) 
-
-    if vd["numJets"][0] >=4 and vd["numBTagM"][0] >=2: # DL preselection
-        event_count(4, "presel_DL", cut_flow_hists, proc, weight, vd, idx_sys )
-
-    if vd["numJets"][0] >= 6 and vd["numBTagM"][0] == 2:
-        event_count(5, "g6j2t", cut_flow_hists, proc, weight, vd, idx_sys )
-
-    if vd["numJets"][0] == 5 and vd["numBTagM"][0] == 3:
-        event_count(6, "5j3t", cut_flow_hists, proc,weight, vd, idx_sys)
-        
-    if vd["numJets"][0] >=6 and vd["numBTagM"][0] == 3:
-        event_count(7, "g6j3t", cut_flow_hists, proc,weight, vd, idx_sys)
-
-    if vd["numJets"][0] == 4 and vd["numBTagM"][0] ==4:
-        event_count(8, "4j4t", cut_flow_hists, proc,weight, vd, idx_sys)
-
-    if vd["numJets"][0] >= 4 and vd["numBTagM"][0] >=4:
-        event_count(9, "g4j4t", cut_flow_hists, proc,weight, vd, idx_sys)
-
-    if vd["numJets"][0] ==5 and vd["numBTagM"][0] >=4:
-        event_count(10, "5jg4t", cut_flow_hists, proc,weight, vd, idx_sys)
-
-    if vd["numJets"][0] >=6 and vd["numBTagM"][0] >=4:
-        event_count(11, "g6jg4t", cut_flow_hists, proc,weight, vd, idx_sys)
-
-    #------lorenzo categories-----------
-
-    if vd["numJets"][0] ==6 and vd["numBTagM"][0] >=4: # cat 1, 2
-        event_count(12, "L6jg4t", cut_flow_hists, proc,weight, vd, idx_sys)
-
-    if vd["numJets"][0] >= 7 and vd["numBTagM"][0] >= 4: # cat 5
-        event_count(13, "Lg7jg4t", cut_flow_hists, proc, weight, vd, idx_sys)
-
-    if vd["numJets"][0] ==5 and vd["numBTagM"][0] >= 4: # cat 3, 4
-        event_count(14, "L5jg4t", cut_flow_hists, proc,weight, vd, idx_sys)
-
-    if vd["numJets"][0] ==6 and vd["numBTagM"][0] ==4: # cat 1, 2
-        event_count(15, "L6j4t", cut_flow_hists, proc,weight, vd, idx_sys)
-
-    if vd["numJets"][0] >= 7 and vd["numBTagM"][0] == 4: # cat 5
-        event_count(16, "Lg7j4t", cut_flow_hists, proc, weight, vd, idx_sys)
-
-    if vd["numJets"][0] ==5 and vd["numBTagM"][0] == 4: # cat 3, 4
-        event_count(17, "L5j4t", cut_flow_hists, proc,weight, vd, idx_sys)
-
-    if vd["numBTagM"][0] >=4:
-        event_count(18, "g4t", cut_flow_hists, proc,weight, vd, idx_sys)
-
-    if vd["numBTagM"][0] ==3 and vd["numBTagL"][0]==4:
-        event_count(19, "3t1t", cut_flow_hists, proc,weight, vd, idx_sys)
-
-
-    if vd["numJets"][0] ==4 and vd["numBTagM"][0] ==3:
-        event_count(20, "4j3t", cut_flow_hists, proc,weight, vd, idx_sys)
-    #--------------For DL---------------------
-#    if vd["numJets"][0] >=4 and vd["numBTagM"][0] == 1:
-#        event_count(20, "4j2t", cut_flow, proc, weight,vd, idx_sys)
-
-    if vd["numJets"][0] >=4 and vd["numBTagM"][0]==2:
-        event_count(21, "g4j2t", cut_flow_hists, proc, weight,vd, idx_sys)
-
-    if vd["numJets"][0] >=4 and  vd["numBTagM"][0]==3:
-        event_count(22, "g4j3t", cut_flow_hists, proc, weight,vd, idx_sys)
-
-    #------according to event type --------
-    if vd["type"][0] == 0:
-        event_count(23, "cat1", cut_flow_hists, proc, weight, vd, idx_sys)
-    if vd["type"][0] == 1:
-        event_count(24, "cat2", cut_flow_hists, proc, weight, vd, idx_sys)
-    if vd["type"][0] == 2:
-        event_count(25, "cat3_4", cut_flow_hists, proc, weight, vd, idx_sys)
-    if vd["type"][0] == 3:
-        event_count(26, "cat5", cut_flow_hists, proc, weight,vd, idx_sys)
-    if vd["type"][0] == 6:
-        event_count(27, "cat6", cut_flow_hists, proc, weight,vd, idx_sys)
-    if vd["type"][0] == 7:
-        event_count(28, "cat7", cut_flow_hists, proc, weight,vd, idx_sys)
-    
-    if vd["type"][0] == 2 and vd["flag_type2"][0] == 2:
-        event_count(29, "cat3", cut_flow_hists, proc, weight, vd, idx_sys)
-    if vd["type"][0] ==2 and vd["flag_type2"][0] != 2:
-        event_count(30, "cat4", cut_flow_hists, proc, weight, vd, idx_sys)
+def fill_cut_flow( cut_flow_name, vd, hists, proc, syst, weight, mode ): 
+    if mode == "SL":
+        if vd["numJets"][0] == 5:
+            hists[proc + syst][ cut_flow_name].GetXaxis().SetBinLabel(1, "SL cat. 1")
+            hists[proc + syst][ cut_flow_name].Fill(0, weight)
+            if proc[:6] == "TTJets":
+                fill_ttjets_histograms_singlevar(vd, hists, cut_flow_name, 0, "SL cat. 1", syst, weight)
+            
+        elif vd["numJets"][0] >= 6:
+            hists[proc + syst][ cut_flow_name].GetXaxis().SetBinLabel(2, "SL cat. 2")
+            hists[proc + syst][ cut_flow_name].Fill(1, weight)
+            if proc[:6] == "TTJets":
+                fill_ttjets_histograms_singlevar(vd, hists, cut_flow_name, 1, "SL cat. 2", syst, weight)
 
             
 def fill_ttjets_histograms_singlevar( vd, hists, histname, nbin, binlabel, syst, weight ):
@@ -235,29 +157,29 @@ def fill_btag_count_histograms(vd, hists, proc, syst, weight):
 def fill_category_count_histograms(vd, hists, proc, syst, weight, mode):
 
     if mode == "SL":
-        if vd["numJets"][0] >=5 and vd["numBTagM"][0] >=2:
-            hists[proc + syst]["category_count"].GetXaxis().SetBinLabel( 1, ">4j >1t")
+        if vd["numJets"][0] >=5 and vd["numBTagM"][0] >=4:
+            hists[proc + syst]["category_count"].GetXaxis().SetBinLabel( 1, "all")
             hists[proc + syst]["category_count"].Fill(0, weight)
             if proc[:6] == "TTJets":
-                fill_ttjets_histograms_singlevar(vd, hists, "category_count", 0, ">4j >1t", syst, weight)
+                fill_ttjets_histograms_singlevar(vd, hists, "category_count", 0, "all", syst, weight)
         
-        if vd["numJets"][0] ==5 and vd["numBTagM"][0] >=4:
-            hists[proc + syst]["category_count"].GetXaxis().SetBinLabel( 2, "5j >3t")
+        if vd["numJets"][0] >=6 and vd["numBTagM"][0] >=4:
+            hists[proc + syst]["category_count"].GetXaxis().SetBinLabel( 2, "SL cat. 1")
             hists[proc + syst]["category_count"].Fill(1, weight)
             if proc[:6] == "TTJets":
-                fill_ttjets_histograms_singlevar(vd, hists, "category_count", 1, ">5j >3t", syst, weight)
+                fill_ttjets_histograms_singlevar(vd, hists, "category_count", 1, "SL cat. 1", syst, weight)
         
-        if vd["numJets"][0] == 6 and vd["numBTagM"][0] >=4:
-            hists[proc + syst]["category_count"].GetXaxis().SetBinLabel( 3, "6j >3t")
+        if vd["numJets"][0] >= 6 and vd["numBTagM"][0] >=4:
+            hists[proc + syst]["category_count"].GetXaxis().SetBinLabel( 3, "SL cat. 2")
             hists[proc + syst]["category_count"].Fill(2, weight)
             if proc[:6] == "TTJets":
-                fill_ttjets_histograms_singlevar(vd, hists, "category_count", 2, "6j >3t", syst, weight)
+                fill_ttjets_histograms_singlevar(vd, hists, "category_count", 2, "SL cat. 2", syst, weight)
         
-        if vd["numJets"][0] == 7 and vd["numBTagM"][0] >=4:
-            hists[proc + syst]["category_count"].GetXaxis().SetBinLabel( 4, ">7j >3t")
+        if vd["numJets"][0] == 5 and vd["numBTagM"][0] >=4:
+            hists[proc + syst]["category_count"].GetXaxis().SetBinLabel( 4, "SL cat. 3")
             hists[proc + syst]["category_count"].Fill(3, weight)
             if proc[:6] == "TTJets":
-                fill_ttjets_histograms_singlevar(vd, hists, "category_count", 3, ">7j >3t", syst, weight)
+                fill_ttjets_histograms_singlevar(vd, hists, "category_count", 3, "SL cat. 3", syst, weight)
 
     if mode=="DL":
         if vd["numJets"][0] >=4 and vd["numBTagM"][0] >2:

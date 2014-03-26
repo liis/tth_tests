@@ -28,22 +28,23 @@ hist_variables = {
     "lead_jet_eta": (50, -3, 3),
     "lead_jet_phi": (50, -3.15, 3.15),
 
-    "numJets": (12, 0, 12),
+#    "numJets": (12, 0, 12),
     
-    "numBTagM": (8, 0, 8),
+#    "numBTagM": (8, 0, 8),
     
-    "numBTagL":(8, 0, 8),
-    "numBTagT": (8, 0, 8),
+#    "numBTagL":(8, 0, 8),
+#    "numBTagT": (8, 0, 8),
 
     "nPVs": (50, 0, 50),
 
     "btag_LR_4j": ( 50, 0, 1),
     "btag_LR_5j": ( 50, 0, 1),
     "btag_LR_6j": ( 50, 0, 1),
-    "btag_LR_7j": ( 50, 0, 1),    
+
+#    "btag_LR_7j": ( 50, 0, 1),    
 
     #----- count hists -----------
-#    "cut_flow": (35, 0, 35),
+    "cut_flow": (35, 0, 35),
     "jet_count": (7, 0 , 7),
     "btag_count": (6, 0, 6),
     "category_count": (4, 0, 4),
@@ -95,7 +96,7 @@ map_hist_variables = { # if histogram name is different from the tree entry name
 #    "numBTagM_sel": "numBTagM",
 #    "numJets_sel": "numJets",
 
-    "btag_lr_7j": "btag_LR",
+#    "btag_lr_7j": "btag_LR",
     "btag_lr_6j": "btag_LR",
     "btag_lr_5j": "btag_LR",
     "btag_lr_4j": "btag_LR",
@@ -144,10 +145,10 @@ variable_names = {
     "nPVs": " # primary vertices",
     
     #           "btag_LR": "b-tagging LR",
-    "btag_LR_7j": "b-tagging LR (>= 7 jets)",
-    "btag_LR_6j": "b-tagging LR (6 jets)",
+#    "btag_LR_7j": "b-tagging LR (>= 7 jets)",
+    "btag_LR_6j": "b-tagging LR (>=6 jets)",
     "btag_LR_5j": "b-tagging LR (5 jets)" ,
-    "btag_LR_4j": "b-tagging LR (4 jets)",
+    "btag_LR_4j": "b-tagging LR (>=4 jets)",
 
     "jet_count": "Nr. of jets",
     "btag_count": "Nr. of b-tags (CSV medium)",
@@ -264,8 +265,8 @@ def fill_jet_histograms(vd, hists, sample, syst, weight, mode, jet_list = [], is
     if len(jet_list) == 0:
         jet_list = range(vd["numJets"][0])
 
-    hists[sample + syst]["numJets"].Fill( vd["numJets"][0], weight )
-    if isTTjets: fill_ttjets_histograms(vd, hists, "numJets", vd["numJets"][0], syst, weight)
+#    hists[sample + syst]["numJets"].Fill( vd["numJets"][0], weight )
+#    if isTTjets: fill_ttjets_histograms(vd, hists, "numJets", vd["numJets"][0], syst, weight)
     
 #    hists[sample]["numJets_sel"].Fill( len(jet_list), weight )
 #    if isTTjets: fill_ttjets_histograms(vd, hists, "numJets_sel", len(jet_list), weight)

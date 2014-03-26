@@ -1,6 +1,7 @@
 #!/bin/bash
+voms-proxy-init -voms cms
 
-INFILELIST_DIR="Filelists_data_el"
+INFILELIST_DIR="Filelists_mc_additional"
 #INFILELIST_DIR="TransfersForResubmit_mc" # where to save output file lists
 OUTPUT_FILE_DIR="TransfersForResubmit_el" # where to save output file lists
 RUN_DATA_REPLICA=0 # whether or not submit data_replica.py to get missing files (otherwise save missing files in file)

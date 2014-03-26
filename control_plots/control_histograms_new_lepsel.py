@@ -15,6 +15,7 @@ parser.add_argument('--notrig', dest="notrig", action="store_true", default=Fals
 parser.add_argument('--notopw', dest="notopw", action="store_true", default=False, required=False) # dont apply top pt reweight
 parser.add_argument('--doSys', dest="doSys", action="store_true", default=False, required=False)
 parser.add_argument('--noWeight', dest="noWeight", action="store_true", default=False, required=False)
+parser.add_argument('--outdir', dest="outdir", default="./histograms_tests/")
                    
 args = parser.parse_args()
 mode = args.DL_or_SL
@@ -25,17 +26,12 @@ if args.DL_or_SL == "DL":
 
 if args.DL_or_SL == "SL":
     print "Starting single lepton analysis"
-
-##indir = "test_trees/trees_2014_02_09_0-0-1_rec_std/"
-#indir = "test_trees/trees_2014_02_15_0-0-1_rec_std/"
-#indir = "test_trees/trees_2014_02_25_0-0-1_rec_std/" # syst set to 1
-#indir = "test_trees/trees_2014_03_11_0-0-1_rec_std/"
-#indir = "test_trees/trees_2014_03_11_0-0-1_rec_std_oldV2/"
 #indir = "test_trees/trees_2014_03_11_0-0-1_rec_std_withFixes_FinalOnly/" 
 #indir = "test_trees/trees_2014_03_13_0-0-1_rec_std_fixed/"
 #indir = "test_trees/trees_2014_03_17_0-0-1_rec_std_ttbarWeight/"
 #indir = "test_trees/trees_2014_03_19_0-0-1_rec_std/"
-indir = "test_trees/trees_2014_03_25_0-0-1_rec_std/"
+#indir = "test_trees/trees_2014_03_25_0-0-1_rec_std/"
+indir = "test_trees/trees_2014_03_26_0-0-1_rec_std_sys/"
 
 usetrig = not args.notrig
 Lumi = 19.04
@@ -55,7 +51,7 @@ for sample in input_files:
             
 report_every = 2000
 if args.is_test_run:
-    max_event = 30000
+    max_event = 10000
 else:
     max_event = -1
 
@@ -86,14 +82,14 @@ for proc, tree in t_all.iteritems():
     isTTjets = False
     for isyst in do_syst:
         hists[proc + isyst] = initialize_histograms(proc, hist_variables, isyst) # dictionary of initialized histograms for each sample
-        cut_flow[proc + isyst] = ROOT.TH1F("cut_flow_" + proc + isyst, "cut_flow_" + proc + isyst, 35, 0 , 35 )
+#        cut_flow[proc + isyst] = ROOT.TH1F("cut_flow_" + proc + isyst, "cut_flow_" + proc + isyst, 35, 0 , 35 )
         cut_flow_di_mu[proc + isyst] = ROOT.TH1F("cut_flow_di_mu_" + proc + isyst, "cut_flow_" + proc + isyst, 35, 0 , 35 )
         cut_flow_di_ele[proc + isyst] = ROOT.TH1F("cut_flow_di_ele_" + proc + isyst, "cut_flow_" + proc + isyst, 35, 0 , 35 )
         cut_flow_emu[proc + isyst] = ROOT.TH1F("cut_flow_emu_" + proc + isyst, "cut_flow_" + proc + isyst, 35, 0 , 35 )
         cut_flow_smu[proc + isyst] = ROOT.TH1F("cut_flow_smu_" + proc + isyst, "cut_flow_" + proc + isyst, 35, 0 , 35 )
         cut_flow_sele[proc + isyst] = ROOT.TH1F("cut_flow_sele_" + proc + isyst, "cut_flow_" + proc + isyst, 35, 0 , 35 )
 
-        cut_flow[proc + isyst].Sumw2()
+ #       cut_flow[proc + isyst].Sumw2()
         cut_flow_di_mu[proc + isyst].Sumw2()
         cut_flow_di_ele[proc + isyst].Sumw2()
         cut_flow_emu[proc + isyst].Sumw2()
@@ -104,14 +100,14 @@ for proc, tree in t_all.iteritems():
             isTTjets = True
             for sub_proc in ["ttbb", "ttb", "ttjj"]:
                 hists[sub_proc + isyst] = initialize_histograms(sub_proc, hist_variables, isyst)
-                cut_flow[sub_proc + isyst] = ROOT.TH1F("cut_flow_" + sub_proc + isyst, "cut_flow_" + sub_proc, 35, 0, 35)
+  #              cut_flow[sub_proc + isyst] = ROOT.TH1F("cut_flow_" + sub_proc + isyst, "cut_flow_" + sub_proc, 35, 0, 35)
                 cut_flow_di_mu[sub_proc + isyst] = ROOT.TH1F("cut_flow_di_mu_" + sub_proc + isyst, "cut_flow_" + proc + isyst, 35, 0 , 35 )
                 cut_flow_di_ele[sub_proc + isyst] = ROOT.TH1F("cut_flow_di_ele_" + sub_proc + isyst, "cut_flow_" + proc + isyst, 35, 0 , 35 )
                 cut_flow_emu[sub_proc + isyst] = ROOT.TH1F("cut_flow_emu_" + sub_proc + isyst, "cut_flow_" + proc + isyst, 35, 0 , 35 )
                 cut_flow_smu[sub_proc + isyst] = ROOT.TH1F("cut_flow_smu_" + sub_proc + isyst, "cut_flow_" + proc + isyst, 35, 0 , 35 )
                 cut_flow_sele[sub_proc + isyst] = ROOT.TH1F("cut_flow_sele_" + sub_proc + isyst, "cut_flow_" + proc + isyst, 35, 0 , 35 )
-
-                cut_flow[sub_proc + isyst].Sumw2()
+                
+  #              cut_flow[sub_proc + isyst].Sumw2()
                 cut_flow_di_mu[sub_proc + isyst].Sumw2()
                 cut_flow_di_ele[sub_proc + isyst].Sumw2()
                 cut_flow_emu[sub_proc + isyst].Sumw2()
@@ -204,14 +200,14 @@ for proc, tree in t_all.iteritems():
         fill_btag_count_histograms(vd, hists, proc, isyst, weight )
         fill_category_count_histograms(vd, hists, proc, isyst, weight, mode )
         # btag-LR before preselection
-        if vd["numJets"][0] == 4:
+        if vd["numJets"][0] >= 4: #for dilepton
             fill_single_histogram(vd, "btag_LR_4j", vd["btag_LR"][0], hists, proc, isyst, weight)
         if vd["numJets"][0] == 5:
             fill_single_histogram(vd, "btag_LR_5j", vd["btag_LR"][0], hists, proc, isyst, weight)
-        if vd["numJets"][0] == 6:
+        if vd["numJets"][0] >= 6:
             fill_single_histogram(vd, "btag_LR_6j", vd["btag_LR"][0], hists, proc, isyst, weight)
-        if vd["numJets"][0] >= 7: 
-            fill_single_histogram(vd, "btag_LR_7j", vd["btag_LR"][0], hists, proc, isyst, weight)
+#        if vd["numJets"][0] >= 7: 
+#            fill_single_histogram(vd, "btag_LR_7j", vd["btag_LR"][0], hists, proc, isyst, weight)
 
 
         if (mode == "SL" and vd["numJets"][0] >= 5 and vd["numBTagM"][0] >= 2) or (mode == "DL" and vd["numJets"][0] >= 2 and vd["numBTagM"][0] >= 2): 
@@ -249,7 +245,7 @@ for proc, tree in t_all.iteritems():
         print "type 7: " + str(cut_flow[proc].GetBinContent(cut_flow[proc].GetXaxis().FindBin("cat7")) )
 
 sel = "presel_2b_"
-outdir = "./histograms/"
+outdir = args.outdir
 
 outfilename = outdir + "histograms_" + sel + mode
 if not usetrig:
@@ -266,7 +262,7 @@ if args.noWeight:
 outfilename = outfilename + ".root"
     
 print "Write output to file: " + outfilename 
-write_histograms_to_file(outfilename, hists, [cut_flow, cut_flow_di_mu, cut_flow_di_ele, cut_flow_emu, cut_flow_smu, cut_flow_sele], [pars])
+write_histograms_to_file(outfilename, hists, [ cut_flow_di_mu, cut_flow_di_ele, cut_flow_emu, cut_flow_smu, cut_flow_sele], [pars])
 
         
         

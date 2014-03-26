@@ -89,8 +89,6 @@ for hist in variable_names:
         mc["ttb"] = h.Get("ttb/" + hist_to_plot + "_ttb")
         mc["ttbb"] = h.Get("ttbb/" + hist_to_plot + "_ttbb")
     
-
-    
     for key in mc:
         print "Starting MC process: " + key
         if not (hist_to_plot[:3] == "num" or hist_to_plot[-5:] == "count"):
@@ -98,7 +96,6 @@ for hist in variable_names:
         mc[key].SetLineColor(colors[key])
         mc[key].SetFillColor(colors[key])
         mc[key].SetFillStyle(1001)
-
 
     signal = mc["TTH125"].Clone("signal")
     signal.SetLineColor(ROOT.kBlue-3)
@@ -164,18 +161,18 @@ for hist in variable_names:
     
     if hist == "jet_count" or hist == "btag_count" or hist == "cat_count":
         h_sumMC.SetMinimum(1)
-        h_sumMC.SetMaximum(150500)
+        h_sumMC.SetMaximum(3.6*ROOT.TMath.Max(h_sumMC.GetMaximum(), data.GetMaximum()) )
         sum.SetMinimum(0.01)
         mc["TTH125"].SetMinimum(0.01)
         signal.SetMinimum(0.01)
         data.SetMinimum(0.01)
     
-    h_sumMC.Draw("hist","goff)
-    sum.Draw("histsame","goff")
-    h_sumMC.Draw("histsame","goff)
+    h_sumMC.Draw("hist")
+    sum.Draw("histsame")
+    h_sumMC.Draw("histsame")
     mc["TTH125"].SetLineColor(ROOT.kBlack)
-    signal.Draw("histsame","goff")
-    data.Draw("epsame", "goff")
+    signal.Draw("histsame")
+    data.Draw("epsame")
 
     #---legend---
     legend1 = ROOT.TLegend(0.7, 0.78, 0.9, 0.89, "", "brNDC")
@@ -213,7 +210,7 @@ for hist in variable_names:
     #--------------
 
     hist_ratio = get_ratio(data, h_sumMC, "Data/MC")
-    hist_ratio.Draw("p0e1", "goff")
+    hist_ratio.Draw("p0e1")
     if args.doSys:
         hist_ratio_up = get_ratio(sys_up, h_sumMC)
         hist_ratio_down = get_ratio(sys_down, h_sumMC)
@@ -222,8 +219,8 @@ for hist in variable_names:
    #     gr_up.SetHistogram(hist_ratio_up)
    #     gr_up.Draw()
      
-        hist_ratio_up.Draw("histsame", "goff")
-        hist_ratio_down.Draw("histsame", "goff")
+        hist_ratio_up.Draw("histsame")
+        hist_ratio_down.Draw("histsame")
 
     c.cd()
 

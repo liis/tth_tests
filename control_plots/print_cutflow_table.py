@@ -165,6 +165,11 @@ if mode == "SL":
 elif mode == "DL":
     print "DL selection, ",
 print " L = " + str( round(Lumi, 2)) + " fb$^{-1}$",
+
+if args.lep == "ele":
+    print ", electrons",
+if args.lep == "mu":
+    print ", muons",
 if not mctrig:
     print " (no MC trigger applied) ",
 print "}"
