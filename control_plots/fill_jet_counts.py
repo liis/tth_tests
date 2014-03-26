@@ -3,20 +3,95 @@ from histlib import event_count
 
 
 def fill_cut_flow( cut_flow_name, vd, hists, proc, syst, weight, mode ): 
-    if mode == "SL":
-        if vd["numJets"][0] == 5:
-            hists[proc + syst][ cut_flow_name].GetXaxis().SetBinLabel(1, "SL cat. 1")
-            hists[proc + syst][ cut_flow_name].Fill(0, weight)
-            if proc[:6] == "TTJets":
-                fill_ttjets_histograms_singlevar(vd, hists, cut_flow_name, 0, "SL cat. 1", syst, weight)
+    if vd["numJets"][0] >= 5 and vd["numBTagM"][0] >= 2: # SL preselection
+        hists[proc + syst][ cut_flow_name].GetXaxis().SetBinLabel(3, "presel_SL")
+        hists[proc + syst][ cut_flow_name].Fill(2, weight)
+        if proc[:6] == "TTJets":
+            fill_ttjets_histograms_singlevar(vd, hists, cut_flow_name, 2, "presel_SL", syst, weight)
+
+    if vd["numJets"][0] >=4 and vd["numBTagM"][0] >=2: # DL preselection
+        hists[proc + syst][ cut_flow_name].GetXaxis().SetBinLabel(4, "presel_DL")
+        hists[proc + syst][ cut_flow_name].Fill(3, weight)
+        if proc[:6] == "TTJets":
+            fill_ttjets_histograms_singlevar(vd, hists, cut_flow_name, 3, "presel_DL", syst, weight)
             
-        elif vd["numJets"][0] >= 6:
-            hists[proc + syst][ cut_flow_name].GetXaxis().SetBinLabel(2, "SL cat. 2")
-            hists[proc + syst][ cut_flow_name].Fill(1, weight)
-            if proc[:6] == "TTJets":
-                fill_ttjets_histograms_singlevar(vd, hists, cut_flow_name, 1, "SL cat. 2", syst, weight)
+    if vd["numJets"][0] >=6 and vd["numBTagM"][0] >=2:
+        hists[proc + syst][ cut_flow_name].GetXaxis().SetBinLabel(5, "g6j2t")
+        hists[proc + syst][ cut_flow_name].Fill(4, weight)
+        if proc[:6] == "TTJets":
+            fill_ttjets_histograms_singlevar(vd, hists, cut_flow_name, 4, "g6j2t", syst, weight)
+
+    if vd["numJets"][0] ==4 and vd["numBTagM"][0] ==3:
+        hists[proc + syst][ cut_flow_name].GetXaxis().SetBinLabel(6, "4j3t")
+        hists[proc + syst][ cut_flow_name].Fill(5, weight)
+        if proc[:6] == "TTJets":
+            fill_ttjets_histograms_singlevar(vd, hists, cut_flow_name, 5, "4j3t", syst, weight)
+    
+    if vd["numJets"][0] ==5 and vd["numBTagM"][0] ==3:
+        hists[proc + syst][ cut_flow_name].GetXaxis().SetBinLabel(7, "5j3t")
+        hists[proc + syst][ cut_flow_name].Fill(6, weight)
+        if proc[:6] == "TTJets":
+            fill_ttjets_histograms_singlevar(vd, hists, cut_flow_name, 6, "5j3t", syst, weight)
+
+    if vd["numJets"][0] >= 6 and vd["numBTagM"][0] ==3:
+        hists[proc + syst][ cut_flow_name].GetXaxis().SetBinLabel(8, "g6j3t")
+        hists[proc + syst][ cut_flow_name].Fill(7, weight)
+        if proc[:6] == "TTJets":
+            fill_ttjets_histograms_singlevar(vd, hists, cut_flow_name, 7, "g6j3t", syst, weight)
+
+    if vd["numJets"][0] == 4 and vd["numBTagM"][0] ==4:
+        hists[proc + syst][ cut_flow_name].GetXaxis().SetBinLabel(9, "4j4t")
+        hists[proc + syst][ cut_flow_name].Fill(8, weight)
+        if proc[:6] == "TTJets":
+            fill_ttjets_histograms_singlevar(vd, hists, cut_flow_name, 8, "4j4t", syst, weight)
+            
+    if vd["numJets"][0] == 5 and vd["numBTagM"][0] >=4:
+        hists[proc + syst][ cut_flow_name].GetXaxis().SetBinLabel(10, "5jg4t")
+        hists[proc + syst][ cut_flow_name].Fill(9, weight)
+        if proc[:6] == "TTJets":
+            fill_ttjets_histograms_singlevar(vd, hists, cut_flow_name, 9, "5jg4t", syst, weight)
+
+    if vd["numJets"][0] >= 6 and vd["numBTagM"][0] >=4:
+        hists[proc + syst][ cut_flow_name].GetXaxis().SetBinLabel(11, "g6jg4t")
+        hists[proc + syst][ cut_flow_name].Fill(10, weight)
+        if proc[:6] == "TTJets":
+            fill_ttjets_histograms_singlevar(vd, hists, cut_flow_name, 10, "g6jg4t", syst, weight)
+
+
+    #-------- analysis categories SL --------------
+    if vd["numJets"][0] == 5:
+        hists[proc + syst][ cut_flow_name].GetXaxis().SetBinLabel(20, "SL cat. 1")
+        hists[proc + syst][ cut_flow_name].Fill(19, weight)
+        if proc[:6] == "TTJets":
+            fill_ttjets_histograms_singlevar(vd, hists, cut_flow_name, 19, "SL cat. 1", syst, weight)
+            
+    if vd["numJets"][0] >= 6:
+        hists[proc + syst][ cut_flow_name].GetXaxis().SetBinLabel(21, "SL cat. 2")
+        hists[proc + syst][ cut_flow_name].Fill(20, weight)
+        if proc[:6] == "TTJets":
+            fill_ttjets_histograms_singlevar(vd, hists, cut_flow_name, 20, "SL cat. 2", syst, weight)
 
             
+    #----------- control regions DL -------------------
+    if vd["numJets"][0] >= 4 and vd["numBTagM"][0] == 2:
+        hists[proc + syst][ cut_flow_name].GetXaxis().SetBinLabel(31, "g4j2t")
+        hists[proc + syst][ cut_flow_name].Fill(30, weight)
+        if proc[:6] == "TTJets":
+            fill_ttjets_histograms_singlevar(vd, hists, cut_flow_name, 30, "g4j2t", syst, weight)
+    
+    if vd["numJets"][0] >= 4 and vd["numBTagM"][0] == 3:
+        hists[proc + syst][ cut_flow_name].GetXaxis().SetBinLabel(32, "g4j3t")
+        hists[proc + syst][ cut_flow_name].Fill(31, weight)
+        if proc[:6] == "TTJets":
+            fill_ttjets_histograms_singlevar(vd, hists, cut_flow_name, 31, "g4j3t", syst, weight)
+            
+    if vd["numJets"][0] >= 4 and vd["numBTagM"][0] >=4 :
+        hists[proc + syst][ cut_flow_name].GetXaxis().SetBinLabel(33, "g4jg4t")
+        hists[proc + syst][ cut_flow_name].Fill(32, weight)
+        if proc[:6] == "TTJets":
+            fill_ttjets_histograms_singlevar(vd, hists, cut_flow_name, 32, "g4jg4t", syst, weight)
+
+
 def fill_ttjets_histograms_singlevar( vd, hists, histname, nbin, binlabel, syst, weight ):
     """
     Apply gen level filter to separate subprocesses of ttjj. Seva histograms separately

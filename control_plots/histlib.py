@@ -45,6 +45,12 @@ hist_variables = {
 
     #----- count hists -----------
     "cut_flow": (35, 0, 35),
+    "cut_flow_smu": (35, 0, 35),
+    "cut_flow_sele": (35, 0, 35),
+    "cut_flow_di_mu": (35, 0, 35),
+    "cut_flow_di_ele": (35, 0, 35),
+    "cut_flow_emu": (35, 0, 35),   
+
     "jet_count": (7, 0 , 7),
     "btag_count": (6, 0, 6),
     "category_count": (4, 0, 4),

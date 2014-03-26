@@ -62,16 +62,6 @@ else:
     do_syst = [""]
 
 hists = {} #histograms for each sample and variable
-cut_flow = {}
-cut_flow_di_mu = {}
-cut_flow_di_ele = {}
-cut_flow_emu = {}
-cut_flow_smu = {}
-cut_flow_sele = {}
-
-#jet_count_hist = {}
-#btag_count_hist = {}
-#category_count_hist = {}
 
 hist_variables = initialize_hist_ranges( mode, hist_variables )
 
@@ -82,40 +72,13 @@ for proc, tree in t_all.iteritems():
     isTTjets = False
     for isyst in do_syst:
         hists[proc + isyst] = initialize_histograms(proc, hist_variables, isyst) # dictionary of initialized histograms for each sample
-#        cut_flow[proc + isyst] = ROOT.TH1F("cut_flow_" + proc + isyst, "cut_flow_" + proc + isyst, 35, 0 , 35 )
-        cut_flow_di_mu[proc + isyst] = ROOT.TH1F("cut_flow_di_mu_" + proc + isyst, "cut_flow_" + proc + isyst, 35, 0 , 35 )
-        cut_flow_di_ele[proc + isyst] = ROOT.TH1F("cut_flow_di_ele_" + proc + isyst, "cut_flow_" + proc + isyst, 35, 0 , 35 )
-        cut_flow_emu[proc + isyst] = ROOT.TH1F("cut_flow_emu_" + proc + isyst, "cut_flow_" + proc + isyst, 35, 0 , 35 )
-        cut_flow_smu[proc + isyst] = ROOT.TH1F("cut_flow_smu_" + proc + isyst, "cut_flow_" + proc + isyst, 35, 0 , 35 )
-        cut_flow_sele[proc + isyst] = ROOT.TH1F("cut_flow_sele_" + proc + isyst, "cut_flow_" + proc + isyst, 35, 0 , 35 )
-
- #       cut_flow[proc + isyst].Sumw2()
-        cut_flow_di_mu[proc + isyst].Sumw2()
-        cut_flow_di_ele[proc + isyst].Sumw2()
-        cut_flow_emu[proc + isyst].Sumw2()
-        cut_flow_smu[proc + isyst].Sumw2()
-        cut_flow_sele[proc + isyst].Sumw2()
-        
         if proc == "TTJets": # initialize extra histograms for ttJets, separating by gen level decay
             isTTjets = True
             for sub_proc in ["ttbb", "ttb", "ttjj"]:
                 hists[sub_proc + isyst] = initialize_histograms(sub_proc, hist_variables, isyst)
-  #              cut_flow[sub_proc + isyst] = ROOT.TH1F("cut_flow_" + sub_proc + isyst, "cut_flow_" + sub_proc, 35, 0, 35)
-                cut_flow_di_mu[sub_proc + isyst] = ROOT.TH1F("cut_flow_di_mu_" + sub_proc + isyst, "cut_flow_" + proc + isyst, 35, 0 , 35 )
-                cut_flow_di_ele[sub_proc + isyst] = ROOT.TH1F("cut_flow_di_ele_" + sub_proc + isyst, "cut_flow_" + proc + isyst, 35, 0 , 35 )
-                cut_flow_emu[sub_proc + isyst] = ROOT.TH1F("cut_flow_emu_" + sub_proc + isyst, "cut_flow_" + proc + isyst, 35, 0 , 35 )
-                cut_flow_smu[sub_proc + isyst] = ROOT.TH1F("cut_flow_smu_" + sub_proc + isyst, "cut_flow_" + proc + isyst, 35, 0 , 35 )
-                cut_flow_sele[sub_proc + isyst] = ROOT.TH1F("cut_flow_sele_" + sub_proc + isyst, "cut_flow_" + proc + isyst, 35, 0 , 35 )
-                
-  #              cut_flow[sub_proc + isyst].Sumw2()
-                cut_flow_di_mu[sub_proc + isyst].Sumw2()
-                cut_flow_di_ele[sub_proc + isyst].Sumw2()
-                cut_flow_emu[sub_proc + isyst].Sumw2()
-                cut_flow_smu[sub_proc + isyst].Sumw2()
-                cut_flow_sele[sub_proc + isyst].Sumw2()
+
     #------------------------------------------------------------------------------------
     vd = initialize_tree(tree, var_list) # dictionary of variables
-    # print vd
     
     for i in range( tree.GetEntries() ):
         if i % report_every == 0:
@@ -164,7 +127,7 @@ for proc, tree in t_all.iteritems():
         #-------------Select events---------------
 
         
-        event_count(0, "all", cut_flow, proc, weight, vd, idx_sys) # cut-flow: all evts
+#        event_count(0, "all", cut_flow, proc, weight, vd, idx_sys) # cut-flow: all evts
 
         if proc[-7:] == "Mu_data"  and not( pass_trigger_selection(vd, mode, "mu") and ( (mode=="SL" and vd["Vtype"][0]==2) or (mode=="DL" and ( vd["Vtype"][0]==0 or vd["Vtype"][0]==4)) ) ): continue #combined trigger and lepton selection
         if proc[-7:] == "El_data" and not( pass_trigger_selection(vd, mode, "el") and ( (mode=="SL" and vd["Vtype"][0]==3) or (mode=="DL" and vd["Vtype"][0]==1)) ): continue
@@ -177,21 +140,18 @@ for proc, tree in t_all.iteritems():
 
         if vd["hJetAmong"] < 2: continue; # additional quality check (should be done at tree production level)
 
-#        if not vd["Vtype"][0] == 2: # single muons only FIXME!
-#            continue
-
        #------------------- fill cutflow histos -------------------------------
-        fill_cut_flow(cut_flow, proc, weight, vd, mode, idx_sys=0)
+        fill_cut_flow("cut_flow", vd, hists, proc, isyst, weight, mode)
         if mode == "DL" and vd["Vtype"][0] == 0:
-            fill_cut_flow(cut_flow_di_mu, proc, weight, vd, mode, idx_sys=0)
+            fill_cut_flow("cut_flow_di_mu", vd, hists, proc, isyst, weight, mode)
         if mode == "DL" and vd["Vtype"][0] == 1:
-            fill_cut_flow(cut_flow_di_ele, proc, weight, vd, mode, idx_sys=0)
+            fill_cut_flow("cut_flow_di_ele", vd, hists, proc, isyst, weight, mode)
         if mode == "DL" and vd["Vtype"][0] == 4:
-            fill_cut_flow(cut_flow_emu, proc, weight, vd, mode, idx_sys=0)
+            fill_cut_flow("cut_flow_emu", vd, hists, proc, isyst, weight, mode)
         if mode == "SL" and vd["Vtype"][0] == 2:
-            fill_cut_flow(cut_flow_smu, proc, weight, vd, mode, idx_sys=0)
+            fill_cut_flow("cut_flow_smu", vd, hists, proc, isyst, weight, mode)
         if mode == "SL" and vd["Vtype"][0] == 3:
-            fill_cut_flow(cut_flow_sele, proc, weight, vd, mode, idx_sys=0)
+            fill_cut_flow("cut_flow_sele", vd, hists, proc, isyst, weight, mode)
         
         #-------------------jet count histograms - fill before preselection!---------------------
         sel_jet = pass_jet_selection(vd, mode, jet40=True)
@@ -215,34 +175,34 @@ for proc, tree in t_all.iteritems():
             fill_lepton_histograms( vd, hists, proc, isyst, weight, mode, sel_lep, isTTjets = isTTjets) #FIXME, specify sel_lep again for sanity check
             fill_jet_histograms(vd, hists, proc, isyst, weight, mode, isTTjets = isTTjets)
 
-    print "--------- PRINT CUT FLOW ------------- "
-    print "Nr tot = "+  str(cut_flow[proc].GetBinContent(1))
-    print "Nr trig sel = " + str(cut_flow[proc].GetBinContent(2))
-    print "Nr lep sel = " + str(cut_flow[proc].GetBinContent(3))
+#    print "--------- PRINT CUT FLOW ------------- "
+#    print "Nr tot = "+  str(cut_flow[proc].GetBinContent(1))
+#    print "Nr trig sel = " + str(cut_flow[proc].GetBinContent(2))
+#    print "Nr lep sel = " + str(cut_flow[proc].GetBinContent(3))
 
-    if mode == "SL":
-        print ">=6 jets + 2 tags: " + str(cut_flow[proc].GetBinContent(4))
-        print "--------------------"
-        print ">=6 jets + 4 tags: " + str(cut_flow[proc].GetBinContent(cut_flow[proc].GetXaxis().FindBin("Lg7j4t")) )
-        print "6 jets + 4 tags: " + str(cut_flow[proc].GetBinContent(cut_flow[proc].GetXaxis().FindBin("L6j4t")) )
-        print "5 jets + 4 tags: " + str(cut_flow[proc].GetBinContent(cut_flow[proc].GetXaxis().FindBin("L5j4t")) )
+#    if mode == "SL":
+#        print ">=6 jets + 2 tags: " + str(cut_flow[proc].GetBinContent(4))
+#        print "--------------------"
+#        print ">=6 jets + 4 tags: " + str(cut_flow[proc].GetBinContent(cut_flow[proc].GetXaxis().FindBin("Lg7j4t")) )
+#        print "6 jets + 4 tags: " + str(cut_flow[proc].GetBinContent(cut_flow[proc].GetXaxis().FindBin("L6j4t")) )
+#        print "5 jets + 4 tags: " + str(cut_flow[proc].GetBinContent(cut_flow[proc].GetXaxis().FindBin("L5j4t")) )
 
-        print "------------------"
-        print ">=6 jets + >4 tags: " + str(cut_flow[proc].GetBinContent(cut_flow[proc].GetXaxis().FindBin("Lg7jg4t")))
-        print "6 jets + >4 tags: " + str(cut_flow[proc].GetBinContent(cut_flow[proc].GetXaxis().FindBin("L6jg4t")) )
-        print "5 jets + >4 tags: " + str(cut_flow[proc].GetBinContent(cut_flow[proc].GetXaxis().FindBin("L5jg4t")) )
+#        print "------------------"
+#        print ">=6 jets + >4 tags: " + str(cut_flow[proc].GetBinContent(cut_flow[proc].GetXaxis().FindBin("Lg7jg4t")))
+#        print "6 jets + >4 tags: " + str(cut_flow[proc].GetBinContent(cut_flow[proc].GetXaxis().FindBin("L6jg4t")) )
+#        print "5 jets + >4 tags: " + str(cut_flow[proc].GetBinContent(cut_flow[proc].GetXaxis().FindBin("L5jg4t")) )
 
-        print "------------------"
-        print "type 1: " + str(cut_flow[proc].GetBinContent(cut_flow[proc].GetXaxis().FindBin("cat1")) )
-        print "type 2: " + str(cut_flow[proc].GetBinContent(cut_flow[proc].GetXaxis().FindBin("cat2")) )
-        print "type 3/4: " + str(cut_flow[proc].GetBinContent(cut_flow[proc].GetXaxis().FindBin("cat3_4")) )
-        print "type 5: " + str(cut_flow[proc].GetBinContent(cut_flow[proc].GetXaxis().FindBin("cat5")) )
+#        print "------------------"
+#        print "type 1: " + str(cut_flow[proc].GetBinContent(cut_flow[proc].GetXaxis().FindBin("cat1")) )
+#        print "type 2: " + str(cut_flow[proc].GetBinContent(cut_flow[proc].GetXaxis().FindBin("cat2")) )
+#        print "type 3/4: " + str(cut_flow[proc].GetBinContent(cut_flow[proc].GetXaxis().FindBin("cat3_4")) )
+#        print "type 5: " + str(cut_flow[proc].GetBinContent(cut_flow[proc].GetXaxis().FindBin("cat5")) )
 
-    if mode == "DL":
-        print "g4j4t: " + str(cut_flow[proc].GetBinContent(cut_flow[proc].GetXaxis().FindBin("g4j4t")) )
-        print "3M1L: " + str(cut_flow[proc].GetBinContent(cut_flow[proc].GetXaxis().FindBin("3t1t")) )
-        print "type 6: " + str(cut_flow[proc].GetBinContent(cut_flow[proc].GetXaxis().FindBin("cat6")) )
-        print "type 7: " + str(cut_flow[proc].GetBinContent(cut_flow[proc].GetXaxis().FindBin("cat7")) )
+#    if mode == "DL":
+#        print "g4j4t: " + str(cut_flow[proc].GetBinContent(cut_flow[proc].GetXaxis().FindBin("g4j4t")) )
+#        print "3M1L: " + str(cut_flow[proc].GetBinContent(cut_flow[proc].GetXaxis().FindBin("3t1t")) )
+#        print "type 6: " + str(cut_flow[proc].GetBinContent(cut_flow[proc].GetXaxis().FindBin("cat6")) )
+#        print "type 7: " + str(cut_flow[proc].GetBinContent(cut_flow[proc].GetXaxis().FindBin("cat7")) )
 
 sel = "presel_2b_"
 outdir = args.outdir
@@ -262,7 +222,7 @@ if args.noWeight:
 outfilename = outfilename + ".root"
     
 print "Write output to file: " + outfilename 
-write_histograms_to_file(outfilename, hists, [ cut_flow_di_mu, cut_flow_di_ele, cut_flow_emu, cut_flow_smu, cut_flow_sele], [pars])
+write_histograms_to_file(outfilename, hists, [], [pars])
 
         
         

@@ -2,17 +2,18 @@ import sys
 import ROOT
 from histlib import fill_cut_flow, set_file_name
 
-indir = "histograms/"
+indir = "histograms_tests/"
 
 import argparse
 parser = argparse.ArgumentParser()
 parser.add_argument('--notrig', dest="notrig", action="store_true", default=False, required=False) # dont apply trigger on MC sel
 parser.add_argument('--notopw', dest="notopw", action="store_true", default=False, required=False) # dont apply top pt weight
+parser.add_argument('--mode', dest="mode", default="SL", required=False)
 parser.add_argument('--lep', dest="lep", default="all", required=False)
 args = parser.parse_args()
 
 sys = False
-mode = "SL"
+mode = args.mode
 mctrig = not args.notrig
 topw = not args.notopw
 
@@ -99,10 +100,12 @@ cuts_L_SL["Lg7j4t"] = "$\ge$7j 4t"
 #cuts_L_SL["Lg7jg4t"] = "$\ge$7j $\ge$4t"
 
 cuts_L_DL = dict()
+#cuts_L_DL["2j2t"] = "2j 2t"
+#cuts_L_DL["3j2t"] = "3j 3t" 
+#cuts_L_DL["3j3t"] = "3j 3t" 
 cuts_L_DL["g4j2t"] = "$\ge$4j 2t"
-cuts_L_DL["g4j3t"] = "$\ge$4j 3t" 
-cuts_L_DL["g4j4t"] = "$\ge$4j $\ge$4t"
-
+cuts_L_DL["g4j3t"] = "$\ge$4j 3t"
+cuts_L_DL["g4jg4t"] = "$\ge$4j $\ge$4t"
 
 if mode == "SL":
     cuts = cuts_ttHbl_SL
