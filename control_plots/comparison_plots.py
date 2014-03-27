@@ -29,12 +29,12 @@ signal_scale = 100
 if sel == "presel_2b":
     signal_scale = 50
 
-indir = "histograms_LRplot/"
+indir = "histograms_int/"
 
 if mode=="SL":
-    infile = set_file_name("histograms_presel_2b_SL", mctrig, topw, args.doSys)
+    infile = set_file_name("histograms_presel_2b_SL", mctrig=mctrig, topw=topw, dosys=args.doSys)
 if mode=="DL":
-    infile = set_file_name("histograms_presel_2b_DL", mctrig, topw, args.doSys)
+    infile = set_file_name("histograms_presel_2b_DL", mctrig=mctrig, topw=topw, dosys=args.doSys)
 
 print "opening input file:" + indir + infile
 
@@ -50,9 +50,9 @@ else:
 for hist in variable_names:
     hist_to_plot = hist
 
-#-----------------------------systematics--------------------------------
-    if args.doSys: #dictionary for sys variation of each process
-        sys_up = find_sum_sys(h, ["CSVup", "JECup", "JERup"], hist)
+#    if args.doSys: # get total up and down variation for drawing the systematic band
+#        sys_up = find_sum_sys(h, ["CSVup", "JECup", "JERup"], hist) 
+        
 
     print "Plotting histogram for variable: " + hist_to_plot
     
@@ -63,7 +63,6 @@ for hist in variable_names:
         data.Add(data_el)
         if not (hist_to_plot[:3] == "num" or hist_to_plot[-5:] == "count"):
             data.Rebin(nrebin)
-
 
     if mode=="DL":
         data_mu = h.Get("diMu_data/" + hist_to_plot + "_diMu_data")
@@ -98,7 +97,7 @@ for hist in variable_names:
         mc[key].SetFillStyle(1001)
 
     signal = mc["TTH125"].Clone("signal")
-    signal.SetLineColor(ROOT.kBlue-3)
+    signal.SetLineColor(ROOT.kRed-3)
     signal.SetLineWidth(2)
     signal.SetFillStyle(0)
     signal.Scale(signal_scale)
@@ -123,15 +122,14 @@ for hist in variable_names:
         sys_up = find_sum_sys(h, ["CSVup", "JECup", "JERup"], hist, nrebin)
         sys_down = find_sum_sys(h, ["CSVdown", "JECdown", "JERdown"], hist, nrebin)
 
-#        if not(hist_to_plot[:3] == "num" or hist_to_plot[-5:] == "count"):
-#            sys_down.Rebin(nrebin)
-#            sys_up.Rebin(nrebin)
+        #        if not(hist_to_plot[:3] == "num" or hist_to_plot[-5:] == "count"):
+        sys_down.Rebin(nrebin)
+        sys_up.Rebin(nrebin)
             
         sys_up.Add(h_sumMC) # add total MC systematic to sumMC
 
         sys_down.Scale(-1)
         sys_down.Add(h_sumMC)
-
     
     h_sumMC.SetTitle("")  
     h_sumMC.SetStats(False)
@@ -196,7 +194,7 @@ for hist in variable_names:
             legend2.AddEntry(lh, lname, "f")
             
     legend2.Draw()     
-
+    
     c.cd()
     #--------------
     
@@ -207,22 +205,25 @@ for hist in variable_names:
     p2.Draw()
     p2.cd()
 
-    #--------------
-
-    hist_ratio = get_ratio(data, h_sumMC, "Data/MC")
+                                        #--------------
+    hist_ratio = get_ratio(data, h_sumMC, ratio_ytitle="Data/MC")
     hist_ratio.Draw("p0e1")
-    if args.doSys:
-        hist_ratio_up = get_ratio(sys_up, h_sumMC)
-        hist_ratio_down = get_ratio(sys_down, h_sumMC)
 
-   #     gr_up = ROOT.TGraph(2);   
-   #     gr_up.SetHistogram(hist_ratio_up)
-   #     gr_up.Draw()
+    
+    if args.doSys:
+        hist_ratio_up = get_ratio(sys_up, h_sumMC, is_band = True)
+        hist_ratio_down = get_ratio(sys_down, h_sumMC, is_band = True )
+
+        #     gr_up = ROOT.TGraph(2);   # attempts for shaded area
+        #     gr_up.SetHistogram(hist_ratio_up)
+        #     gr_up.Draw()
      
         hist_ratio_up.Draw("histsame")
         hist_ratio_down.Draw("histsame")
-
+    
     c.cd()
+
+    
 
     latex = ROOT.TLatex()
     latex.SetNDC()
@@ -247,3 +248,4 @@ for hist in variable_names:
     c.SaveAs("out_stackplots/" + mode + "/" + hist + "_" + selstr +".pdf")
     c.SaveAs("out_stackplots/" + mode + "/" + hist + "_" + selstr + ".png")
     c.Close()   
+

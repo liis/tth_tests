@@ -346,7 +346,7 @@ def fill_cut_flow_bycut(cf_hist, cut, lf = 1, tablewidth = 0, bf = False, round_
         print "\\textbf{" + str( round( nr_evts, round_prec) ) + " $\pm$ " + str( round( cf_hist.GetBinError(bin_nr), round_prec ) ) + "}",
 
 
-def set_file_name(file_name_base, mctrig, topw, noWeight, dosys=False):
+def set_file_name(file_name_base, mctrig=True, topw=True, noWeight=False, dosys=False):
     infile = file_name_base
     if not mctrig:
         infile = infile + "_notrig"
@@ -360,7 +360,7 @@ def set_file_name(file_name_base, mctrig, topw, noWeight, dosys=False):
     infile = infile + ".root"
     return infile
 
-def get_ratio(hist1, hist2, ratio_ytitle = ""):
+def get_ratio(hist1, hist2, is_band = False, ratio_ytitle = ""):
     """
     hist1 -- numerator
     hist2 -- denominator
@@ -368,11 +368,20 @@ def get_ratio(hist1, hist2, ratio_ytitle = ""):
     hist_ratio = hist1.Clone()
     hist_ratio.Divide(hist2)
 
+    if is_band:
+        print "considering band histo"
+        for ibin in range(hist_ratio.GetNbinsX()+1):
+            if hist_ratio.GetBinContent(ibin+1) == 0:
+                hist_ratio.SetBinContent(ibin+1, 1)
+
     hist_ratio.SetStats(False)
     hist_ratio.SetMarkerStyle(20)
     hist_ratio.SetMarkerSize(0.35)
-    hist_ratio.SetMarkerColor(ROOT.kBlack)
-    hist_ratio.SetLineColor(ROOT.kBlack)
+    if is_band:
+        hist_ratio.SetLineColor(9) 
+    else:
+        hist_ratio.SetMarkerColor(ROOT.kBlack)
+        hist_ratio.SetLineColor(ROOT.kBlack)
     hist_ratio.SetMaximum(2)
     hist_ratio.SetMinimum(0.)
     
