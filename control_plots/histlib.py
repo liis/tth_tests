@@ -3,6 +3,7 @@ import ROOT, sys, re
 hist_variables = {
     "MET_pt": (50, 0 , 250),
     "MET_phi": (50, -3.15, 3.15),
+    "mV": (50, 0, 250),
 
     "lead_electron_eta":(50, -2.5, 2.5),
     "lead_electron_pt": (50, 0, 250),
@@ -113,7 +114,8 @@ map_hist_variables = { # if histogram name is different from the tree entry name
 variable_names = {
     "MET_pt": "MET",
     "MET_phi": "MET #phi",
-#                  "lepton_pt": "lepton p_{T}",
+
+    "mV": "m_{T} (W)",
     
     "lead_electron_eta": "Electron #eta",
     "lead_electron_rIso": "Electron isolation",
@@ -139,14 +141,14 @@ variable_names = {
     "lead_jet_eta": "leading jet #eta",
     "lead_jet_phi": "leading jet #phi",
     
-    "numJets": "Number of jets",
+#    "numJets": "Number of jets",
     #              "numJets_sel": "Number of sel. jets",
     
-    "numBTagM": "Number of b-tagged jets (Medium)",
+#    "numBTagM": "Number of b-tagged jets (Medium)",
     #             "numBTagM_sel": "Number of sel. b-tagged jets (Medium)",
     
-    "numBTagL": "Number of b-tagged jets (Loose)",
-    "numBTagT": "Number of b-tagged jets (Tight)",
+#    "numBTagL": "Number of b-tagged jets (Loose)",
+#    "numBTagT": "Number of b-tagged jets (Tight)",
     
     "nPVs": " # primary vertices",
     
@@ -163,6 +165,12 @@ variable_names = {
 #    "gen_top_pt": "gen top p_{T}",
     
     }
+
+def initialize_variable_names( variable_names, mode ):
+    if mode == "DL":
+        variable_names["mV"] = "Z mass"
+
+    return variable_names
 
 colors = {"TTJets": ROOT.kBlue,
           "ttbb": 16,
@@ -236,7 +244,7 @@ def fill_single_histogram(vd, varname, var, hists, sample, syst, weight):
 def fill_1D_histograms( vd, hists, sample, syst, weight, mode, isTTjets = False): #FIXME!! this is bad implementation
     
     for var in hists[sample]: # loop over dictionary of histograms for a specific datasample
-        if var == "MET_pt" or var == "MET_phi" or var == "nPVs":
+        if var == "MET_pt" or var == "MET_phi" or var == "nPVs" or var == "mV":
             try:
                 var_tree = var
                 var_size = len(vd[var])
@@ -268,8 +276,8 @@ def fill_lepton_histograms(vd, hists, sample, syst, weight, mode, lepton_list = 
 
 def fill_jet_histograms(vd, hists, sample, syst, weight, mode, jet_list = [], isTTjets = False):
     
-    if len(jet_list) == 0:
-        jet_list = range(vd["numJets"][0])
+#    if len(jet_list) == 0:
+#        jet_list = range(vd["numJets"][0])
 
 #    hists[sample + syst]["numJets"].Fill( vd["numJets"][0], weight )
 #    if isTTjets: fill_ttjets_histograms(vd, hists, "numJets", vd["numJets"][0], syst, weight)
@@ -289,7 +297,7 @@ def fill_jet_histograms(vd, hists, sample, syst, weight, mode, jet_list = [], is
           #          if isTTjets: fill_ttjets_histograms(vd, hists, var, vd[var][ijet], weight)
 
     
-def fill_cut_flow(cuts, cf_hist, lf = 1, tablewidth = 0, bf = False, round_prec = 1):
+def fill_cut_flow(cuts, cf_hist, weight_evt=1, lf = 1, tablewidth = 0, bf = False, round_prec = 1):
     """
     cuts -- ordered dictionary of cuts in cut-flow. labels need to be saved in the cut-flow histogra
     cf_hist -- cut-flow histogram
@@ -300,7 +308,6 @@ def fill_cut_flow(cuts, cf_hist, lf = 1, tablewidth = 0, bf = False, round_prec 
     cut_count = 0
     for cut in cuts:
         cut_count += 1
-#        round_prec = 1 # rounding precision when printing
         
         cf_hist.Scale(lf) # optionally normalize to different lumi value
 
@@ -308,11 +315,15 @@ def fill_cut_flow(cuts, cf_hist, lf = 1, tablewidth = 0, bf = False, round_prec 
         nr_evts = cf_hist.GetBinContent(bin_nr)
         print " & ",
 
-        if not bf:
-            print str( round( nr_evts, round_prec) ) + " $\pm$ " + str( round( cf_hist.GetBinError(bin_nr), round_prec ) ),
+        if nr_evts == 0:
+            tbl_str = str( round( nr_evts, round_prec) ) + " $\pm$ " + str( round( weight_evt, round_prec ) )
         else:
-            print "\\textbf{" + str( round( nr_evts, round_prec) ) + " $\pm$ " + str( round( cf_hist.GetBinError(bin_nr), round_prec ) ) + "}",
-
+            tbl_str = str( round( nr_evts, round_prec) ) + " $\pm$ " + str( round( cf_hist.GetBinError(bin_nr), round_prec ) )
+            
+        if not bf:
+            print tbl_str, 
+        else:
+            print "\\textbf{" + tbl_str + "}",
 
 def fill_cut_flow_bycut(cf_hist, cut, lf = 1, tablewidth = 0, bf = False, round_prec = 1):
     """

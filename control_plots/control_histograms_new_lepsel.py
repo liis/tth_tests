@@ -1,3 +1,4 @@
+
 import ROOT, sys
 
 from fill_jet_counts import fill_cut_flow, fill_jet_count_histograms, fill_btag_count_histograms, fill_category_count_histograms
@@ -31,7 +32,10 @@ if args.DL_or_SL == "SL":
 #indir = "test_trees/trees_2014_03_17_0-0-1_rec_std_ttbarWeight/"
 #indir = "test_trees/trees_2014_03_19_0-0-1_rec_std/"
 #indir = "test_trees/trees_2014_03_25_0-0-1_rec_std/"
-indir = "test_trees/trees_2014_03_26_0-0-1_rec_std_sys/"
+indir = "test_trees/trees_2014_03_27_0-0-1_rec_std_sys/"
+
+print "Reading input from " + indir
+print "Saving output to " + args.outdir
 
 usetrig = not args.notrig
 Lumi = 19.04
@@ -58,10 +62,13 @@ else:
 if args.doSys:
 #    do_syst = ["", "_CSVup"]
     do_syst = ["","_CSVup","_CSVdown", "_JECup", "_JECdown", "_JERup", "_JERdown"] #
+    print "Run systematic variations: " + str(do_syst)
 else:
     do_syst = [""]
+    print "Run nominal only"
 
 hists = {} #histograms for each sample and variable
+weights = {}
 
 hist_variables = initialize_hist_ranges( mode, hist_variables )
 
@@ -79,8 +86,16 @@ for proc, tree in t_all.iteritems():
 
     #------------------------------------------------------------------------------------
     vd = initialize_tree(tree, var_list) # dictionary of variables
-    
-    for i in range( tree.GetEntries() ):
+
+    weights[proc] = ROOT.TH1F("weights_" + proc, "weights" + proc, 1, 0, 1)
+    if proc == "TTJets":
+        for sub_proc in ["ttbb", "ttb", "ttjj"]:
+            weights[sub_proc] = ROOT.TH1F("weights_" + sub_proc, "weights" + sub_proc, 1, 0, 1)
+        
+    weightsum = 0;    
+
+    nr_evts = tree.GetEntries() 
+    for i in range( nr_evts ):
         if i % report_every == 0:
             print "Event nr: " + str(i)
         if i == max_event and not i == -1: break
@@ -104,6 +119,8 @@ for proc, tree in t_all.iteritems():
 #            print "PDF weight down = " + str( vd["SCALEsyst"][3] )
 
         ev_weight = vd["weight"][0]
+        weightsum += ev_weight
+        
         tr_weight = vd["trigger"][0]
         pu_weight = vd["PUweight"][0]
         toppt_weight = vd["weightTopPt"][0]
@@ -160,25 +177,40 @@ for proc, tree in t_all.iteritems():
         fill_btag_count_histograms(vd, hists, proc, isyst, weight )
         fill_category_count_histograms(vd, hists, proc, isyst, weight, mode )
         # btag-LR before preselection
-        if vd["numJets"][0] >= 4: #for dilepton
-            fill_single_histogram(vd, "btag_LR_4j", vd["btag_LR"][0], hists, proc, isyst, weight)
-        if vd["numJets"][0] == 5:
-            fill_single_histogram(vd, "btag_LR_5j", vd["btag_LR"][0], hists, proc, isyst, weight)
-        if vd["numJets"][0] >= 6:
-            fill_single_histogram(vd, "btag_LR_6j", vd["btag_LR"][0], hists, proc, isyst, weight)
-#        if vd["numJets"][0] >= 7: 
-#            fill_single_histogram(vd, "btag_LR_7j", vd["btag_LR"][0], hists, proc, isyst, weight)
+
+        if ( mode == "SL" and vd["MET"][0] > 30 ) or ( mode == "DL" and vd["mV"][0] > 15 ):
+            if vd["numJets"][0] >= 4: #for dilepton
+                fill_single_histogram(vd, "btag_LR_4j", vd["btag_LR"][0], hists, proc, isyst, weight)
+            if vd["numJets"][0] == 5:
+                fill_single_histogram(vd, "btag_LR_5j", vd["btag_LR"][0], hists, proc, isyst, weight)
+            if vd["numJets"][0] >= 6:
+                fill_single_histogram(vd, "btag_LR_6j", vd["btag_LR"][0], hists, proc, isyst, weight)
 
 
         if (mode == "SL" and vd["numJets"][0] >= 5 and vd["numBTagM"][0] >= 2) or (mode == "DL" and vd["numJets"][0] >= 2 and vd["numBTagM"][0] >= 2): 
             fill_1D_histograms( vd, hists, proc, isyst, weight, mode, isTTjets ) 
-            fill_lepton_histograms( vd, hists, proc, isyst, weight, mode, sel_lep, isTTjets = isTTjets) #FIXME, specify sel_lep again for sanity check
+            fill_lepton_histograms( vd, hists, proc, isyst, weight, mode, sel_lep, isTTjets = isTTjets) 
             fill_jet_histograms(vd, hists, proc, isyst, weight, mode, isTTjets = isTTjets)
 
-#    print "--------- PRINT CUT FLOW ------------- "
-#    print "Nr tot = "+  str(cut_flow[proc].GetBinContent(1))
-#    print "Nr trig sel = " + str(cut_flow[proc].GetBinContent(2))
-#    print "Nr lep sel = " + str(cut_flow[proc].GetBinContent(3))
+
+    if max_event <= 0:
+        proc_evts = nr_evts
+    else:
+        proc_evts = max_event
+    
+    print "weightsum =", weightsum
+    print "nr_evts = ", proc_evts
+    weights[proc].SetBinContent(1, weightsum/proc_evts)
+    if proc == "TTJets":
+        for sub_proc in ["ttbb", "ttb", "ttjj"]:
+            weights[sub_proc].SetBinContent(1, weightsum/proc_evts)
+
+    print "weight = " + str(weights[proc].GetBinContent(1))
+
+    print "--------- PRINT CUT FLOW ------------- "
+    print "Nr tot = "+  str(hists[proc]["cut_flow"].GetBinContent(1))
+    print "Nr trig sel = " + str(hists[proc]["cut_flow"].GetBinContent(2))
+    print "Nr lep sel = " + str(hists[proc]["cut_flow"].GetBinContent(3))
 
 #    if mode == "SL":
 #        print ">=6 jets + 2 tags: " + str(cut_flow[proc].GetBinContent(4))
@@ -222,7 +254,7 @@ if args.noWeight:
 outfilename = outfilename + ".root"
     
 print "Write output to file: " + outfilename 
-write_histograms_to_file(outfilename, hists, [], [pars])
+write_histograms_to_file(outfilename, hists, [weights], [pars])
 
         
         

@@ -1,13 +1,13 @@
 import ROOT, sys, os
 import tdrstyle
 tdrstyle.tdrstyle()
-from histlib import variable_names, colors, set_file_name, get_ratio
+from histlib import initialize_variable_names, variable_names, colors, set_file_name, get_ratio
 from systematics import find_sum_sys
 
 import argparse
 parser = argparse.ArgumentParser()
 parser.add_argument('--mode', dest='mode',  choices=["DL", "SL"], required=True, help="specify DL or SL analysis")
-parser.add_argument('--sel', dest='sel', choices=["presel","presel_2b"], required=True, help="Specify the preselection level" )
+parser.add_argument('--sel', dest='sel', default="presel_2b", required=False, help="Specify the preselection level" )
 parser.add_argument('--notrig', dest="notrig", action="store_true", default=False, required=False) # dont apply trigger on MC sel
 parser.add_argument('--notopw', dest="notopw", action="store_true", default=False, required=False) # dont apply toppt weight    
 parser.add_argument('--doSys', dest="doSys", action="store_true", default=False, required=False) # draw with systematics band
@@ -29,7 +29,7 @@ signal_scale = 100
 if sel == "presel_2b":
     signal_scale = 50
 
-indir = "histograms/"
+indir = "histograms_LRplot/"
 
 if mode=="SL":
     infile = set_file_name("histograms_presel_2b_SL", mctrig, topw, args.doSys)
@@ -140,7 +140,7 @@ for hist in variable_names:
     h_sumMC.SetMinimum(0.)
     h_sumMC.SetLineColor(ROOT.kBlack)
     h_sumMC.SetFillStyle(0)
-    h_sumMC.GetXaxis().SetTitle(variable_names[hist])
+    h_sumMC.GetXaxis().SetTitle( initialize_variable_names(variable_names, mode)[hist])
 
     data.SetMarkerColor(1)
     data.SetMarkerStyle(20)

@@ -2,7 +2,7 @@ import sys
 import ROOT
 from histlib import fill_cut_flow, set_file_name
 
-indir = "histograms_tests/"
+indir = "histograms_LRplot/"
 
 import argparse
 parser = argparse.ArgumentParser()
@@ -57,6 +57,10 @@ processes["SingleT"] = f.Get("SingleT/" + cut_flow_base + "_SingleT")
 processes["EWK"] = f.Get("EWK/" + cut_flow_base + "_EWK")
 processes["DiBoson"] = f.Get("DiBoson/" + cut_flow_base + "_DiBoson")
 
+evt_weight = {}
+for process in processes:
+    evt_weight[process] = (f.Get(process + "/weights_" + process) ).GetBinContent(1)
+    
 sumBkg = processes["ttjj"].Clone("sumBkg") # Get a cut-flow histogram for sum Bkg
 for proc, cf_hist in processes.iteritems():
     if not proc == "ttH125" and not proc=="ttjj":
@@ -142,7 +146,7 @@ print '\\\ \\hline'
 tot_bkg = 0
 for proc, proc_cf in processes.iteritems():
     print proc,
-    fill_cut_flow(cuts, proc_cf, lf)
+    fill_cut_flow(cuts, proc_cf, evt_weight[proc], lf)
     print "\\\\"
 print "\\hline"
 

@@ -7,9 +7,9 @@ jet_vars_f = ["jet_pt", "jet_eta", "jet_phi", "jet_csv", "weightCSV"]
 ttbar_vars_f = ["SCALEsyst"]
 
 #----------------separate by type---------------------
-int_list = ["nLep", "numJets", "numBTagL", "numBTagM", "numBTagT", "nPVs", "nSimBs", "nMatchSimBs", "flag_type0", "type", "Vtype", "flag_type2", "hJetAmong"]
+int_list = ["nLep", "numJets", "numBTagL", "numBTagM", "numBTagT", "nPVs", "nSimBs", "nMatchSimBs", "flag_type0", "type", "Vtype", "flag_type2", "hJetAmong", "flag_type3", "flag_type2"]
 int_array_list = ["lepton_type", "syst"]
-float_list = ["weight", "trigger", "PUweight", "weightTopPt", "MET_pt", "MET_phi", "btag_LR", "weightEle"] 
+float_list = ["weight", "trigger", "PUweight", "weightTopPt", "MET_pt", "MET_phi", "btag_LR", "weightEle", "mV"] 
 
 float_array_list = lepton_vars_f  + jet_vars_f + [ "p4T" ] + ttbar_vars_f #lepton_vars_d + jet_vars_d + other stuff
 trigger = ["triggerFlags"]
