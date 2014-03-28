@@ -56,6 +56,7 @@ hist_variables = {
     "btag_count": (6, 0, 6),
     "category_count": (4, 0, 4),
 
+    "weights": (1, 0, 1),
 #    "gen_top_pt": (100, 0, 500),
 
     }
@@ -325,7 +326,7 @@ def fill_cut_flow(cuts, cf_hist, weight_evt=1, lf = 1, tablewidth = 0, bf = Fals
         else:
             print "\\textbf{" + tbl_str + "}",
 
-def fill_cut_flow_bycut(cf_hist, cut, lf = 1, tablewidth = 0, bf = False, round_prec = 1):
+def fill_cut_flow_bycut(cf_hist, cut, weight_evt=1, lf = 1, tablewidth = 0, bf = False, round_prec = 1):
     """
     cuts -- ordered dictionary of cuts in cut-flow. labels need to be saved in the cut-flow histogra
     cf_hist -- cut-flow histogram
@@ -339,11 +340,16 @@ def fill_cut_flow_bycut(cf_hist, cut, lf = 1, tablewidth = 0, bf = False, round_
     bin_nr = cf_hist.GetXaxis().FindBin(cut) # find bin by cut-label
     nr_evts = cf_hist.GetBinContent(bin_nr)
     print " & ",
-    
-    if not bf:
-        print str( round( nr_evts, round_prec) ) + " $\pm$ " + str( round( cf_hist.GetBinError(bin_nr), round_prec ) ),
+
+    if nr_evts == 0:
+        tbl_str = str( round( nr_evts, round_prec) ) + " $\pm$ " + str( round( weight_evt, round_prec ) )
     else:
-        print "\\textbf{" + str( round( nr_evts, round_prec) ) + " $\pm$ " + str( round( cf_hist.GetBinError(bin_nr), round_prec ) ) + "}",
+        tbl_str = str( round( nr_evts, round_prec) ) + " $\pm$ " + str( round( cf_hist.GetBinError(bin_nr), round_prec ))
+
+    if not bf:
+        print tbl_str,
+    else:
+        print "\\textbf{" + tbl_str + "}",
 
 
 def set_file_name(file_name_base, mctrig=True, topw=True, noWeight=False, dosys=False):
@@ -421,4 +427,13 @@ def event_count(ncut, binlabel, cut_flow_hists, proc, weight, vd, idx_sys = 0):
                 cut_flow_hists["ttjj"].GetXaxis().SetBinLabel(ncut+1, binlabel)
                 cut_flow_hists["ttjj"].Fill(ncut, weight)
 
-    
+def get_evt_weight(f, processes):
+    """
+    f -- root file with weight histogram
+    processes -- list of MC processes to consider
+    return dictionary of evt-weight per process
+    """
+    evt_weight = {}
+    for process in processes:
+        evt_weight[process] = (f.Get(process + "/weights_" + process) ).GetBinContent(1)
+    return evt_weight

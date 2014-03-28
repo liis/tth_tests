@@ -33,7 +33,7 @@ indir = "test_trees/trees_2014_03_12_0-0-1_rec_std/"
 #indir = "test_trees/trees_2014_03_11_0-0-1_rec_std_withFixes_FinalOnly/"
 
 usetrig = not args.notrig
-Lumi = 19.04
+Lumi = 19.6
 
 pars = ROOT.TH1F("pars", "pars", 10, 0, 10)
 pars.SetBinContent(1, Lumi)

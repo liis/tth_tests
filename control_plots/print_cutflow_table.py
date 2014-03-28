@@ -1,6 +1,6 @@
 import sys
 import ROOT
-from histlib import fill_cut_flow, set_file_name
+from histlib import fill_cut_flow, set_file_name, get_evt_weight
 
 indir = "histograms_LRplot/"
 
@@ -57,9 +57,11 @@ processes["SingleT"] = f.Get("SingleT/" + cut_flow_base + "_SingleT")
 processes["EWK"] = f.Get("EWK/" + cut_flow_base + "_EWK")
 processes["DiBoson"] = f.Get("DiBoson/" + cut_flow_base + "_DiBoson")
 
-evt_weight = {}
-for process in processes:
-    evt_weight[process] = (f.Get(process + "/weights_" + process) ).GetBinContent(1)
+#evt_weight = {}
+#for process in processes:
+#    evt_weight[process] = (f.Get(process + "/weights_" + process) ).GetBinContent(1)
+
+evt_weight = get_evt_weight(f,processes)
     
 sumBkg = processes["ttjj"].Clone("sumBkg") # Get a cut-flow histogram for sum Bkg
 for proc, cf_hist in processes.iteritems():

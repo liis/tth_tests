@@ -29,7 +29,8 @@ signal_scale = 100
 if sel == "presel_2b":
     signal_scale = 50
 
-indir = "histograms_int/"
+indir = "histograms/"
+#indir = "histograms_int/"
 
 if mode=="SL":
     infile = set_file_name("histograms_presel_2b_SL", mctrig=mctrig, topw=topw, dosys=args.doSys)
@@ -148,7 +149,7 @@ for hist in variable_names:
     p1 = ROOT.TPad("p1", "p1", 0, 0.25, 1, 1)
     p1.SetBottomMargin(0)
 
-    if hist == "jet_count" or hist == "btag_count" or hist == "cat_count":
+    if hist == "jet_count" or hist == "btag_count" or hist == "cat_count": # Or Hist- == "btag_LR_5j" or hist == "btag_LR_6j" or hist == "btag_LR_4j":
         p1.SetLogy()    
     
     p1.Draw()
@@ -159,7 +160,7 @@ for hist in variable_names:
     
     if hist == "jet_count" or hist == "btag_count" or hist == "cat_count":
         h_sumMC.SetMinimum(1)
-        h_sumMC.SetMaximum(3.6*ROOT.TMath.Max(h_sumMC.GetMaximum(), data.GetMaximum()) )
+        h_sumMC.SetMaximum(5*ROOT.TMath.Max(h_sumMC.GetMaximum(), data.GetMaximum()) )
         sum.SetMinimum(0.01)
         mc["TTH125"].SetMinimum(0.01)
         signal.SetMinimum(0.01)
@@ -238,7 +239,7 @@ for hist in variable_names:
     if mode=="DL":
         cut = "2 lep. + " + cut
         
-    std_txt = "   #sqrt{s}=8 TeV, L=19.04 fb^{-1}"
+    std_txt = "   #sqrt{s}=8 TeV, L=19.6 fb^{-1}"
     
     textlabel = std_txt
 #    if topw:

@@ -2,7 +2,7 @@ import sys
 import ROOT
 from histlib import fill_cut_flow, set_file_name
 
-indir = "histograms/"
+indir = "histograms_196/"
 import argparse
 parser = argparse.ArgumentParser()
 parser.add_argument('--notrig', dest="notrig", action="store_true", default=False, required=False) # dont apply trigger on MC sel

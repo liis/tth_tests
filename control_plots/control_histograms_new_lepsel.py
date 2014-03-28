@@ -1,5 +1,5 @@
 
-import ROOT, sys
+mport ROOT, sys
 
 from fill_jet_counts import fill_cut_flow, fill_jet_count_histograms, fill_btag_count_histograms, fill_category_count_histograms
 from tree_inputs import input_files
@@ -33,6 +33,7 @@ if args.DL_or_SL == "SL":
 #indir = "test_trees/trees_2014_03_19_0-0-1_rec_std/"
 #indir = "test_trees/trees_2014_03_25_0-0-1_rec_std/"
 indir = "test_trees/trees_2014_03_27_0-0-1_rec_std_sys/"
+#indir = "test_trees/trees_2014_03_27_0-0-1_rec_std_final_sys_196/"
 
 print "Reading input from " + indir
 print "Saving output to " + args.outdir
@@ -68,7 +69,6 @@ else:
     print "Run nominal only"
 
 hists = {} #histograms for each sample and variable
-weights = {}
 
 hist_variables = initialize_hist_ranges( mode, hist_variables )
 
@@ -87,10 +87,10 @@ for proc, tree in t_all.iteritems():
     #------------------------------------------------------------------------------------
     vd = initialize_tree(tree, var_list) # dictionary of variables
 
-    weights[proc] = ROOT.TH1F("weights_" + proc, "weights" + proc, 1, 0, 1)
-    if proc == "TTJets":
-        for sub_proc in ["ttbb", "ttb", "ttjj"]:
-            weights[sub_proc] = ROOT.TH1F("weights_" + sub_proc, "weights" + sub_proc, 1, 0, 1)
+#    weights[proc] = ROOT.TH1F("weights_" + proc, "weights" + proc, 1, 0, 1)
+#    if proc == "TTJets":
+#        for sub_proc in ["ttbb", "ttb", "ttjj"]:
+#            weights[sub_proc] = ROOT.TH1F("weights_" + sub_proc, "weights" + sub_proc, 1, 0, 1)
         
     weightsum = 0;    
 
@@ -178,7 +178,7 @@ for proc, tree in t_all.iteritems():
         fill_category_count_histograms(vd, hists, proc, isyst, weight, mode )
         # btag-LR before preselection
 
-        if ( mode == "SL" and vd["MET"][0] > 30 ) or ( mode == "DL" and vd["mV"][0] > 15 ):
+        if ( mode == "SL" and vd["MET_pt"][0] > 30 ) or ( mode == "DL" and vd["mV"][0] > 15 ):
             if vd["numJets"][0] >= 4: #for dilepton
                 fill_single_histogram(vd, "btag_LR_4j", vd["btag_LR"][0], hists, proc, isyst, weight)
             if vd["numJets"][0] == 5:
@@ -200,12 +200,12 @@ for proc, tree in t_all.iteritems():
     
     print "weightsum =", weightsum
     print "nr_evts = ", proc_evts
-    weights[proc].SetBinContent(1, weightsum/proc_evts)
+    hists[proc]["weights"].SetBinContent(1, weightsum/proc_evts)
     if proc == "TTJets":
         for sub_proc in ["ttbb", "ttb", "ttjj"]:
-            weights[sub_proc].SetBinContent(1, weightsum/proc_evts)
+            hists[sub_proc]["weights"].SetBinContent(1, weightsum/proc_evts)
 
-    print "weight = " + str(weights[proc].GetBinContent(1))
+    print "weight = " + str(hists[proc]["weights"].GetBinContent(1))
 
     print "--------- PRINT CUT FLOW ------------- "
     print "Nr tot = "+  str(hists[proc]["cut_flow"].GetBinContent(1))
@@ -254,7 +254,7 @@ if args.noWeight:
 outfilename = outfilename + ".root"
     
 print "Write output to file: " + outfilename 
-write_histograms_to_file(outfilename, hists, [weights], [pars])
+write_histograms_to_file(outfilename, hists, [], [pars])
 
         
         

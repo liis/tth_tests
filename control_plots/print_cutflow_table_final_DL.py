@@ -2,7 +2,7 @@ import sys
 import ROOT
 from histlib import fill_cut_flow, fill_cut_flow_bycut, set_file_name
 
-indir = "histograms/"
+indir = "histograms_test/"
 import argparse
 parser = argparse.ArgumentParser()
 parser.add_argument('--notrig', dest="notrig", action="store_true", default=False, required=False) # dont apply trigger on MC sel
@@ -84,8 +84,8 @@ data_EM = f_DL.Get("diMu_data/cut_flow_emu_diMu_data") # get cut-flow of data
 
 
 cuts_DL = dict()
-cuts_DL["cat6"] = "Cat. 6"
-cuts_DL["cat7"] = "Cat. 7"
+cuts_DL["DL1_tight"] = "DL"
+#cuts_DL["cat7"] = "Cat. 7"
 
 table_size = len(cuts_DL)
 
@@ -145,8 +145,10 @@ for cut in cuts_DL:
     fill_cut_flow_bycut(data_EM, cut, lf, table_size, bf = True)
 print "\\\\"
 print "\\hline"
-#-------------------------------------
+#--------------Total---------------------
 
+
+#---------------------------------------
 print """
         \end{tabular}
 """        
