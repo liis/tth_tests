@@ -3,7 +3,7 @@ import ROOT, sys, re
 hist_variables = {
     "MET_pt": (50, 0 , 250),
     "MET_phi": (50, -3.15, 3.15),
-    "mV": (50, 0, 250),
+#    "mV": (50, 0, 250),
 
     "lead_electron_eta":(50, -2.5, 2.5),
     "lead_electron_pt": (50, 0, 250),
@@ -116,7 +116,7 @@ variable_names = {
     "MET_pt": "MET",
     "MET_phi": "MET #phi",
 
-    "mV": "m_{T} (W)",
+ #   "mV": "m_{T} (W)",
     
     "lead_electron_eta": "Electron #eta",
     "lead_electron_rIso": "Electron isolation",
@@ -168,8 +168,8 @@ variable_names = {
     }
 
 def initialize_variable_names( variable_names, mode ):
-    if mode == "DL":
-        variable_names["mV"] = "Z mass"
+#    if mode == "DL":
+#        variable_names["mV"] = "Z mass"
 
     return variable_names
 
