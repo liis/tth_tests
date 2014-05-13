@@ -1,6 +1,6 @@
 #!/bin/bash
 
-INFILELIST_DIR="Filelists_data_el"
+INFILELIST_DIR="Filelists_mc_additional"
 #INFILELIST_DIR="TransfersForResubmit_mc" # where to save output file lists
 OUTPUT_FILE_DIR="TransfersForResubmit_el" # where to save output file lists
 RUN_DATA_REPLICA=0 # whether or not submit data_replica.py to get missing files (otherwise save missing files in file)
@@ -8,7 +8,7 @@ SUBMIT_TO_BATCH=1
 
 
 if [ RUN_DATA_REPLICA == 1 ] ; then
-    PYTHONHOME="/usr/lib/python2.6" #not needed if you avoid cmsenv 
+    PYTHONHOME="/usr/lib/python2.6" #not needed if you avoid cmsenv before submitting the script
 fi
 
 voms-proxy-init -voms cms

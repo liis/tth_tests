@@ -3,9 +3,19 @@ import re
 import os
 import sys
 sys.path.append('./')
-#indir = "TransfersForResubmit_el_split/"
-indir = "Filelists_data_mu/"
+
+transfer_ntuples = False
+do_split = True
+
+if transfer_ntuples:
+    indir = "Filelists_ntuples/"
+else:
+    indir = "Filelists_qcd/"
+
+if do_split:
+    indir = indir[:-1] + "_split/"
 #infilelists_filename = indir + "/filelist_double_el_data.txt"
+#indir = "TransfersForResubmit_el_split/"
 
 infilelists_filename = indir + "to_run.txt"
 lists = open(infilelists_filename, 'r')
@@ -16,11 +26,13 @@ while True: # read line by line
     if not infilelist: break
     if re.search("skip", infilelist) != None: continue
 
-#    outdir = infilelist.split("_part_")[0]
-#    ext =  (infilelist.split("_part_")[1]).split(".txt")[0]
-    outdir = infilelist.split(".txt")[0]
-#    outdir = (infilelist.split("fileList_")[1]).split(".txt")[0]
-    ext = ""
+    if do_split:
+        outdir = infilelist.split("_part_")[0]
+        ext = (infilelist.split("_part_")[1]).split(".txt")[0]
+    else:
+        outdir = infilelist.split(".txt")[0]
+        ext = ""
+        
 #    outdir = (infilelist.split("fail_list_")[1]).split(".txt")[0]
 #    outdir = (infilelist.split("fail_list_")[1]).split("_part_")[0]
 
@@ -31,9 +43,12 @@ while True: # read line by line
     f = open(scriptname, 'w')
     f.write('#!/bin/bash\n\n')
     f.write('\n\n')
-    f.write('data_replica.py --delete --from-site T2_IT_Pisa --to-site T2_EE_Estonia ' + indir+"/"+ infilelist + ' /store/user/liis/VHbb_patTuples/' + outdir)
+    if not transfer_ntuples:
+        f.write('data_replica.py --delete --from-site T2_IT_Pisa --to-site T2_EE_Estonia ' + indir+"/"+ infilelist + ' /store/user/liis/VHbb_patTuples/' + outdir)
+        #    f.write('data_replica.py --delete --from-site T3_CH_PSI --to-site T2_EE_Estonia ' + indir+"/"+ infilelist + ' /store/user/liis/VHbb_patTuples/' + outdir)
+    else:
+        f.write('data_replica.py --delete --from-site T2_EE_Estonia --to-site T3_CH_PSI ' + indir+"/"+ infilelist + ' /store/user/liis/TTH_Ntuples_allHadTrig')
     
-#    f.write('python data_replica.py --delete --from-site T2_IT_Pisa --to-site T2_EE_Estonia ' + indir+"/"+ infilelist + ' /store/user/liis/VHbb_patTuples/' + outdir) #for EE
     f.write('\n\n')
     f.close()
     os.system('chmod +x ' + scriptname)
