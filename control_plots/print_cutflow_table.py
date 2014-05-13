@@ -1,18 +1,19 @@
 import sys
 import ROOT
-from histlib import fill_cut_flow, set_file_name
+from histlib import fill_cut_flow, set_file_name, get_evt_weight
 
-indir = "histograms/"
+indir = "histograms_LRplot/"
 
 import argparse
 parser = argparse.ArgumentParser()
 parser.add_argument('--notrig', dest="notrig", action="store_true", default=False, required=False) # dont apply trigger on MC sel
 parser.add_argument('--notopw', dest="notopw", action="store_true", default=False, required=False) # dont apply top pt weight
+parser.add_argument('--mode', dest="mode", default="SL", required=False)
 parser.add_argument('--lep', dest="lep", default="all", required=False)
 args = parser.parse_args()
 
 sys = False
-mode = "SL"
+mode = args.mode
 mctrig = not args.notrig
 topw = not args.notopw
 
@@ -56,6 +57,12 @@ processes["SingleT"] = f.Get("SingleT/" + cut_flow_base + "_SingleT")
 processes["EWK"] = f.Get("EWK/" + cut_flow_base + "_EWK")
 processes["DiBoson"] = f.Get("DiBoson/" + cut_flow_base + "_DiBoson")
 
+#evt_weight = {}
+#for process in processes:
+#    evt_weight[process] = (f.Get(process + "/weights_" + process) ).GetBinContent(1)
+
+evt_weight = get_evt_weight(f,processes)
+    
 sumBkg = processes["ttjj"].Clone("sumBkg") # Get a cut-flow histogram for sum Bkg
 for proc, cf_hist in processes.iteritems():
     if not proc == "ttH125" and not proc=="ttjj":
@@ -99,10 +106,12 @@ cuts_L_SL["Lg7j4t"] = "$\ge$7j 4t"
 #cuts_L_SL["Lg7jg4t"] = "$\ge$7j $\ge$4t"
 
 cuts_L_DL = dict()
+#cuts_L_DL["2j2t"] = "2j 2t"
+#cuts_L_DL["3j2t"] = "3j 3t" 
+#cuts_L_DL["3j3t"] = "3j 3t" 
 cuts_L_DL["g4j2t"] = "$\ge$4j 2t"
-cuts_L_DL["g4j3t"] = "$\ge$4j 3t" 
-cuts_L_DL["g4j4t"] = "$\ge$4j $\ge$4t"
-
+cuts_L_DL["g4j3t"] = "$\ge$4j 3t"
+cuts_L_DL["g4jg4t"] = "$\ge$4j $\ge$4t"
 
 if mode == "SL":
     cuts = cuts_ttHbl_SL
@@ -139,7 +148,7 @@ print '\\\ \\hline'
 tot_bkg = 0
 for proc, proc_cf in processes.iteritems():
     print proc,
-    fill_cut_flow(cuts, proc_cf, lf)
+    fill_cut_flow(cuts, proc_cf, evt_weight[proc], lf)
     print "\\\\"
 print "\\hline"
 
@@ -165,6 +174,11 @@ if mode == "SL":
 elif mode == "DL":
     print "DL selection, ",
 print " L = " + str( round(Lumi, 2)) + " fb$^{-1}$",
+
+if args.lep == "ele":
+    print ", electrons",
+if args.lep == "mu":
+    print ", muons",
 if not mctrig:
     print " (no MC trigger applied) ",
 print "}"

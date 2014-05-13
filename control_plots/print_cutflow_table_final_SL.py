@@ -1,13 +1,15 @@
 import sys
 import ROOT
-from histlib import fill_cut_flow, fill_cut_flow_bycut, set_file_name
+from histlib import fill_cut_flow, fill_cut_flow_bycut, set_file_name, get_evt_weight
 
-indir = "histograms/"
+indir = "histograms_196/"
 import argparse
 parser = argparse.ArgumentParser()
 parser.add_argument('--notrig', dest="notrig", action="store_true", default=False, required=False) # dont apply trigger on MC sel
 parser.add_argument('--notopw', dest="notopw", action="store_true", default=False, required=False) # dont apply top pt weight
 parser.add_argument('--noWeight', dest="noWeight", action="store_true", default=False, required=False)
+parser.add_argument('--reg', dest='reg', required=True) # tight, loose
+parser.add_argument('--doSys', dest="doSys", action="store_true", default=False, required=False) # draw with systematics band
 args = parser.parse_args()
 
 mctrig = not args.notrig
@@ -15,9 +17,9 @@ topw = not args.notopw
 noWeight = args.noWeight
 
 if not mctrig:
-    infile_SL = set_file_name("histograms_presel_2b_SL", mctrig, topw, noWeight)
+    infile_SL = set_file_name("histograms_presel_2b_SL", mctrig, topw, noWeight, dosys=args.doSys)
 else:
-    infile_SL = set_file_name("histograms_presel_2b_SL", mctrig, topw, noWeight)
+    infile_SL = set_file_name("histograms_presel_2b_SL", mctrig, topw, noWeight, dosys=args.doSys)
 
 standalone = True
 
@@ -26,8 +28,10 @@ f_SL = ROOT.TFile(indir + infile_SL)
 pars_SL = f_SL.Get("pars") # read lumi normalization of mc histograms
 hist_lumi_SL = pars_SL.GetBinContent(pars_SL.GetXaxis().FindBin("Lumi") )
 
-lf = 1 #19.5/hist_lumi # scale lumi to new value if needed, default 1
+#lf = 19.6/hist_lumi_SL # scale lumi to new value if needed, default 1
+lf=1
 Lumi = hist_lumi_SL*lf
+
 
 from odict import OrderedDict as dict
 processes_SM = dict()
@@ -47,6 +51,7 @@ for proc, cf_hist in processes_SM.iteritems():
 
 data_SM = f_SL.Get("singleMu_data/cut_flow_smu_singleMu_data") # get cut-flow of data
 
+evt_weight = get_evt_weight(f_SL,processes_SM)
 
 processes_SE = dict()
 processes_SE["ttH125"] = f_SL.Get("ttH125/cut_flow_sele_ttH125")
@@ -63,17 +68,22 @@ for proc, cf_hist in processes_SE.iteritems():
     if not proc == "ttH125" and not proc=="ttjj":
         sumBkg_SE.Add(cf_hist)
         
-
 data_SE = f_SL.Get("singleEl_data/cut_flow_sele_singleEl_data")
 
 #data_SL = data_mu_SL.Clone("data_SL")
 #data_SL.Add(data_el_SL)
 
 cuts_SL = dict()
-cuts_SL["cat1"] = "Cat. 1"
-cuts_SL["cat2"] = "Cat. 2"
-cuts_SL["cat3_4"] = "Cat. 3/4"
-cuts_SL["cat5"] = "Cat. 5"
+
+if args.reg == "tight":
+    cuts_SL["SL1_tight"] = "SL cat. 1 (HP)"
+    cuts_SL["SL2_tight"] = "SL cat. 2 (HP)"
+    cuts_SL["SL3_tight"] = "SL cat. 3 (HP)"
+
+if args.reg == "loose":
+    cuts_SL["SL1_loose"] = "SL cat. 1 (LP)"
+    cuts_SL["SL2_loose"] = "SL cat. 2 (LP)"
+    cuts_SL["SL3_loose"] = "SL cat. 3 (LP)"
 
 
 table_size = len(cuts_SL)
@@ -107,8 +117,8 @@ for proc in processes_SM:
     print proc,
 
     for cut in cuts_SL:
-        fill_cut_flow_bycut( processes_SM[proc], cut, lf, table_size)
-        fill_cut_flow_bycut( processes_SE[proc], cut, lf, table_size)
+        fill_cut_flow_bycut( processes_SM[proc], cut, weight_evt=evt_weight[proc], lf=lf, tablewidth=table_size)
+        fill_cut_flow_bycut( processes_SE[proc], cut, weight_evt=evt_weight[proc], lf=lf, tablewidth=table_size)
 
     print "\\\\"
 
@@ -118,16 +128,16 @@ print "\\hline"
 print "\\textbf{$\sum$ Bkg} ",
 
 for cut in cuts_SL:
-    fill_cut_flow_bycut(sumBkg_SM, cut, lf, table_size, bf = True)
-    fill_cut_flow_bycut(sumBkg_SE, cut, lf, table_size, bf = True)
+    fill_cut_flow_bycut(sumBkg_SM, cut, lf=lf, tablewidth=table_size, bf = True)
+    fill_cut_flow_bycut(sumBkg_SE, cut, lf=lf, tablewidth=table_size, bf = True)
 print "\\\\"
 print "\\hline"
 
 #----------- data --------------------
 print "\\textbf{Data} ",
 for cut in cuts_SL:
-    fill_cut_flow_bycut(data_SM, cut, lf, table_size, bf = True)
-    fill_cut_flow_bycut(data_SE, cut, lf, table_size, bf = True)
+    fill_cut_flow_bycut(data_SM, cut, lf=lf, tablewidth=table_size, bf = True)
+    fill_cut_flow_bycut(data_SE, cut, lf=lf, tablewidth=table_size, bf = True)
 print "\\\\"
 print "\\hline"
 #-------------------------------------

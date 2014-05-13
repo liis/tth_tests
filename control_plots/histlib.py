@@ -3,6 +3,7 @@ import ROOT, sys, re
 hist_variables = {
     "MET_pt": (50, 0 , 250),
     "MET_phi": (50, -3.15, 3.15),
+#    "mV": (50, 0, 250),
 
     "lead_electron_eta":(50, -2.5, 2.5),
     "lead_electron_pt": (50, 0, 250),
@@ -28,26 +29,34 @@ hist_variables = {
     "lead_jet_eta": (50, -3, 3),
     "lead_jet_phi": (50, -3.15, 3.15),
 
-    "numJets": (12, 0, 12),
+#    "numJets": (12, 0, 12),
     
-    "numBTagM": (8, 0, 8),
+#    "numBTagM": (8, 0, 8),
     
-    "numBTagL":(8, 0, 8),
-    "numBTagT": (8, 0, 8),
+#    "numBTagL":(8, 0, 8),
+#    "numBTagT": (8, 0, 8),
 
     "nPVs": (50, 0, 50),
 
     "btag_LR_4j": ( 50, 0, 1),
     "btag_LR_5j": ( 50, 0, 1),
     "btag_LR_6j": ( 50, 0, 1),
-    "btag_LR_7j": ( 50, 0, 1),    
+
+#    "btag_LR_7j": ( 50, 0, 1),    
 
     #----- count hists -----------
-#    "cut_flow": (35, 0, 35),
+    "cut_flow": (35, 0, 35),
+    "cut_flow_smu": (35, 0, 35),
+    "cut_flow_sele": (35, 0, 35),
+    "cut_flow_di_mu": (35, 0, 35),
+    "cut_flow_di_ele": (35, 0, 35),
+    "cut_flow_emu": (35, 0, 35),   
+
     "jet_count": (7, 0 , 7),
     "btag_count": (6, 0, 6),
     "category_count": (4, 0, 4),
 
+    "weights": (1, 0, 1),
 #    "gen_top_pt": (100, 0, 500),
 
     }
@@ -95,7 +104,7 @@ map_hist_variables = { # if histogram name is different from the tree entry name
 #    "numBTagM_sel": "numBTagM",
 #    "numJets_sel": "numJets",
 
-    "btag_lr_7j": "btag_LR",
+#    "btag_lr_7j": "btag_LR",
     "btag_lr_6j": "btag_LR",
     "btag_lr_5j": "btag_LR",
     "btag_lr_4j": "btag_LR",
@@ -106,7 +115,8 @@ map_hist_variables = { # if histogram name is different from the tree entry name
 variable_names = {
     "MET_pt": "MET",
     "MET_phi": "MET #phi",
-#                  "lepton_pt": "lepton p_{T}",
+
+ #   "mV": "m_{T} (W)",
     
     "lead_electron_eta": "Electron #eta",
     "lead_electron_rIso": "Electron isolation",
@@ -132,22 +142,22 @@ variable_names = {
     "lead_jet_eta": "leading jet #eta",
     "lead_jet_phi": "leading jet #phi",
     
-    "numJets": "Number of jets",
+#    "numJets": "Number of jets",
     #              "numJets_sel": "Number of sel. jets",
     
-    "numBTagM": "Number of b-tagged jets (Medium)",
+#    "numBTagM": "Number of b-tagged jets (Medium)",
     #             "numBTagM_sel": "Number of sel. b-tagged jets (Medium)",
     
-    "numBTagL": "Number of b-tagged jets (Loose)",
-    "numBTagT": "Number of b-tagged jets (Tight)",
+#    "numBTagL": "Number of b-tagged jets (Loose)",
+#    "numBTagT": "Number of b-tagged jets (Tight)",
     
     "nPVs": " # primary vertices",
     
     #           "btag_LR": "b-tagging LR",
-    "btag_LR_7j": "b-tagging LR (>= 7 jets)",
-    "btag_LR_6j": "b-tagging LR (6 jets)",
+#    "btag_LR_7j": "b-tagging LR (>= 7 jets)",
+    "btag_LR_6j": "b-tagging LR (>=6 jets)",
     "btag_LR_5j": "b-tagging LR (5 jets)" ,
-    "btag_LR_4j": "b-tagging LR (4 jets)",
+    "btag_LR_4j": "b-tagging LR (>=4 jets)",
 
     "jet_count": "Nr. of jets",
     "btag_count": "Nr. of b-tags (CSV medium)",
@@ -156,6 +166,12 @@ variable_names = {
 #    "gen_top_pt": "gen top p_{T}",
     
     }
+
+def initialize_variable_names( variable_names, mode ):
+#    if mode == "DL":
+#        variable_names["mV"] = "Z mass"
+
+    return variable_names
 
 colors = {"TTJets": ROOT.kBlue,
           "ttbb": 16,
@@ -229,7 +245,7 @@ def fill_single_histogram(vd, varname, var, hists, sample, syst, weight):
 def fill_1D_histograms( vd, hists, sample, syst, weight, mode, isTTjets = False): #FIXME!! this is bad implementation
     
     for var in hists[sample]: # loop over dictionary of histograms for a specific datasample
-        if var == "MET_pt" or var == "MET_phi" or var == "nPVs":
+        if var == "MET_pt" or var == "MET_phi" or var == "nPVs" or var == "mV":
             try:
                 var_tree = var
                 var_size = len(vd[var])
@@ -261,11 +277,11 @@ def fill_lepton_histograms(vd, hists, sample, syst, weight, mode, lepton_list = 
 
 def fill_jet_histograms(vd, hists, sample, syst, weight, mode, jet_list = [], isTTjets = False):
     
-    if len(jet_list) == 0:
-        jet_list = range(vd["numJets"][0])
+#    if len(jet_list) == 0:
+#        jet_list = range(vd["numJets"][0])
 
-    hists[sample + syst]["numJets"].Fill( vd["numJets"][0], weight )
-    if isTTjets: fill_ttjets_histograms(vd, hists, "numJets", vd["numJets"][0], syst, weight)
+#    hists[sample + syst]["numJets"].Fill( vd["numJets"][0], weight )
+#    if isTTjets: fill_ttjets_histograms(vd, hists, "numJets", vd["numJets"][0], syst, weight)
     
 #    hists[sample]["numJets_sel"].Fill( len(jet_list), weight )
 #    if isTTjets: fill_ttjets_histograms(vd, hists, "numJets_sel", len(jet_list), weight)
@@ -282,7 +298,7 @@ def fill_jet_histograms(vd, hists, sample, syst, weight, mode, jet_list = [], is
           #          if isTTjets: fill_ttjets_histograms(vd, hists, var, vd[var][ijet], weight)
 
     
-def fill_cut_flow(cuts, cf_hist, lf = 1, tablewidth = 0, bf = False, round_prec = 1):
+def fill_cut_flow(cuts, cf_hist, weight_evt=1, lf = 1, tablewidth = 0, bf = False, round_prec = 1):
     """
     cuts -- ordered dictionary of cuts in cut-flow. labels need to be saved in the cut-flow histogra
     cf_hist -- cut-flow histogram
@@ -293,7 +309,6 @@ def fill_cut_flow(cuts, cf_hist, lf = 1, tablewidth = 0, bf = False, round_prec 
     cut_count = 0
     for cut in cuts:
         cut_count += 1
-#        round_prec = 1 # rounding precision when printing
         
         cf_hist.Scale(lf) # optionally normalize to different lumi value
 
@@ -301,13 +316,17 @@ def fill_cut_flow(cuts, cf_hist, lf = 1, tablewidth = 0, bf = False, round_prec 
         nr_evts = cf_hist.GetBinContent(bin_nr)
         print " & ",
 
-        if not bf:
-            print str( round( nr_evts, round_prec) ) + " $\pm$ " + str( round( cf_hist.GetBinError(bin_nr), round_prec ) ),
+        if nr_evts == 0:
+            tbl_str = str( round( nr_evts, round_prec) ) + " $\pm$ " + str( round( weight_evt, round_prec ) )
         else:
-            print "\\textbf{" + str( round( nr_evts, round_prec) ) + " $\pm$ " + str( round( cf_hist.GetBinError(bin_nr), round_prec ) ) + "}",
+            tbl_str = str( round( nr_evts, round_prec) ) + " $\pm$ " + str( round( cf_hist.GetBinError(bin_nr), round_prec ) )
+            
+        if not bf:
+            print tbl_str, 
+        else:
+            print "\\textbf{" + tbl_str + "}",
 
-
-def fill_cut_flow_bycut(cf_hist, cut, lf = 1, tablewidth = 0, bf = False, round_prec = 1):
+def fill_cut_flow_bycut(cf_hist, cut, weight_evt=1, lf = 1, tablewidth = 0, bf = False, round_prec = 1):
     """
     cuts -- ordered dictionary of cuts in cut-flow. labels need to be saved in the cut-flow histogra
     cf_hist -- cut-flow histogram
@@ -321,14 +340,19 @@ def fill_cut_flow_bycut(cf_hist, cut, lf = 1, tablewidth = 0, bf = False, round_
     bin_nr = cf_hist.GetXaxis().FindBin(cut) # find bin by cut-label
     nr_evts = cf_hist.GetBinContent(bin_nr)
     print " & ",
-    
-    if not bf:
-        print str( round( nr_evts, round_prec) ) + " $\pm$ " + str( round( cf_hist.GetBinError(bin_nr), round_prec ) ),
+
+    if nr_evts == 0:
+        tbl_str = str( round( nr_evts, round_prec) ) + " $\pm$ " + str( round( weight_evt, round_prec ) )
     else:
-        print "\\textbf{" + str( round( nr_evts, round_prec) ) + " $\pm$ " + str( round( cf_hist.GetBinError(bin_nr), round_prec ) ) + "}",
+        tbl_str = str( round( nr_evts, round_prec) ) + " $\pm$ " + str( round( cf_hist.GetBinError(bin_nr), round_prec ))
+
+    if not bf:
+        print tbl_str,
+    else:
+        print "\\textbf{" + tbl_str + "}",
 
 
-def set_file_name(file_name_base, mctrig, topw, noWeight, dosys=False):
+def set_file_name(file_name_base, mctrig=True, topw=True, noWeight=False, dosys=False):
     infile = file_name_base
     if not mctrig:
         infile = infile + "_notrig"
@@ -342,7 +366,7 @@ def set_file_name(file_name_base, mctrig, topw, noWeight, dosys=False):
     infile = infile + ".root"
     return infile
 
-def get_ratio(hist1, hist2, ratio_ytitle = ""):
+def get_ratio(hist1, hist2, is_band = False, ratio_ytitle = ""):
     """
     hist1 -- numerator
     hist2 -- denominator
@@ -350,11 +374,20 @@ def get_ratio(hist1, hist2, ratio_ytitle = ""):
     hist_ratio = hist1.Clone()
     hist_ratio.Divide(hist2)
 
+    if is_band:
+        print "considering band histo"
+        for ibin in range(hist_ratio.GetNbinsX()+1):
+            if hist_ratio.GetBinContent(ibin+1) == 0:
+                hist_ratio.SetBinContent(ibin+1, 1)
+
     hist_ratio.SetStats(False)
     hist_ratio.SetMarkerStyle(20)
     hist_ratio.SetMarkerSize(0.35)
-    hist_ratio.SetMarkerColor(ROOT.kBlack)
-    hist_ratio.SetLineColor(ROOT.kBlack)
+    if is_band:
+        hist_ratio.SetLineColor(9) 
+    else:
+        hist_ratio.SetMarkerColor(ROOT.kBlack)
+        hist_ratio.SetLineColor(ROOT.kBlack)
     hist_ratio.SetMaximum(2)
     hist_ratio.SetMinimum(0.)
     
@@ -394,4 +427,13 @@ def event_count(ncut, binlabel, cut_flow_hists, proc, weight, vd, idx_sys = 0):
                 cut_flow_hists["ttjj"].GetXaxis().SetBinLabel(ncut+1, binlabel)
                 cut_flow_hists["ttjj"].Fill(ncut, weight)
 
-    
+def get_evt_weight(f, processes):
+    """
+    f -- root file with weight histogram
+    processes -- list of MC processes to consider
+    return dictionary of evt-weight per process
+    """
+    evt_weight = {}
+    for process in processes:
+        evt_weight[process] = (f.Get(process + "/weights_" + process) ).GetBinContent(1)
+    return evt_weight

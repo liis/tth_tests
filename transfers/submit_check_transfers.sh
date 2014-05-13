@@ -1,4 +1,5 @@
 #!/bin/bash
+voms-proxy-init -voms cms
 
 INFILELIST_DIR="Filelists_mc_additional"
 #INFILELIST_DIR="TransfersForResubmit_mc" # where to save output file lists
