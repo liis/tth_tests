@@ -5,12 +5,14 @@ import sys
 sys.path.append('./')
 
 transfer_ntuples = False
-do_split = True
+transfer_datasets = True
+do_split = False
+
 
 if transfer_ntuples:
     indir = "Filelists_ntuples/"
 else:
-    indir = "Filelists_qcd/"
+    indir = "Filelists_el_track/"
 
 if do_split:
     indir = indir[:-1] + "_split/"
@@ -43,11 +45,14 @@ while True: # read line by line
     f = open(scriptname, 'w')
     f.write('#!/bin/bash\n\n')
     f.write('\n\n')
-    if not transfer_ntuples:
+    if transfer_ntuples:
+         f.write('data_replica.py --delete --from-site T2_EE_Estonia --to-site T3_CH_PSI ' + indir+"/"+ infilelist + ' /store/user/liis/TTH_Ntuples_allHadTrig')
+    elif transfer_datasets:
+        f.write('data_replica.py --discovery --to-site T2_EE_Estonia ' + indir+"/"+infilelist + ' /store/user/liis/El_GSF_studies/' + outdir)
+    else:
         f.write('data_replica.py --delete --from-site T2_IT_Pisa --to-site T2_EE_Estonia ' + indir+"/"+ infilelist + ' /store/user/liis/VHbb_patTuples/' + outdir)
         #    f.write('data_replica.py --delete --from-site T3_CH_PSI --to-site T2_EE_Estonia ' + indir+"/"+ infilelist + ' /store/user/liis/VHbb_patTuples/' + outdir)
-    else:
-        f.write('data_replica.py --delete --from-site T2_EE_Estonia --to-site T3_CH_PSI ' + indir+"/"+ infilelist + ' /store/user/liis/TTH_Ntuples_allHadTrig')
+       
     
     f.write('\n\n')
     f.close()
